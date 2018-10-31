@@ -264,6 +264,7 @@ scrollbar.addListener(function (status) {
 					$('.hit').removeClass('hide');
 					$('.hit').attr('href',$(this).find('.content').find('a').attr('href'))
 				} else{
+					$('.hit').attr('href',$(this).find('.content').find('a').attr('href'))
 					$('.hit').addClass('hide');
 				}
 			} else{
