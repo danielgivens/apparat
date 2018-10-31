@@ -1,0 +1,207 @@
+#scene{
+	position:fixed;
+	top:0;
+	left:0;
+	width:100vw;
+	height:100vh;
+	z-index:10;
+	pointer-events:none;
+	opacity:1;
+	transition: opacity 3s ease;
+}
+.loading{
+	#scene{
+		opacity:0;
+	}
+}
+.scroll-content{
+	width:100vw!important;
+}
+.info-panel{
+	position:fixed;
+	top:0;
+	left:0;
+	width:100vw;
+	height:100vh;
+	z-index:1000;
+	color: black;
+	overflow:hidden;
+	top:-100vh;
+	pointer-events:none;
+	.info-toggle.btn{
+		text-align:center;
+		display:block;
+		//text-transform:uppercase;
+		line-height:1;
+		padding:$pad/1.5;
+		color: white;
+		cursor: pointer;
+		text-decoration: underline;
+	}
+	.container{
+		background:white;
+		min-height: 100vh;
+		padding:0 $pad ;
+		width: 100%;
+		> h1{
+			font-family: $terminal;
+			text-align: left;
+			padding:$pad*2 $pad 0;
+		}		
+	}
+	.grid{
+		/*display:flex;
+		flex-wrap: wrap;
+		flex-direction: column;
+		justify-content: flex-start;
+		align-items: stretch;
+		align-content: stretch;*/
+		column-count: 3;
+		width:100%;
+		padding-bottom: $pad*4;
+		> .layer{
+			//flex-basis:33.3%;
+			padding:$pad;
+			text-align:left;
+			-webkit-column-break-inside: avoid; /* Chrome, Safari */
+			page-break-inside: avoid;           /* Theoretically FF 20+ */
+			break-inside: avoid-column;         /* IE 11 */
+			display:table;
+			h1{
+				margin-bottom:.5rem;
+			}
+
+		}
+		.social{
+			.line-1{
+				display: none;
+			}
+		}
+	}
+	@include breakpoint(mobile){
+		.container > h1{
+			font-size: 150%;
+			padding:$pad*2 $pad/2 $pad;
+		}
+		.grid{
+			column-count: 1;
+			> .layer{
+				padding:$pad/2;
+			}
+		}
+	}	
+}
+.show-info{
+	nav.global{
+		opacity:0;
+	}
+	.info-panel{
+		top:0;
+		pointer-events:all;
+	}
+}
+.scroll{
+	position:absolute!important;
+	top:0;
+	left:0;
+	width:100vw;
+	height:100vh;
+	color: white;
+	z-index:100;
+	.vert{
+		opacity:0;
+	}
+	div.layer{
+		height:200vh;
+		display:flex;
+		align-items:center;
+		text-align:center;
+		&.show,
+		&.intro{
+			//cursor:pointer;
+		}
+		h1{
+			flex-basis: 100%;
+			width:100%;
+			font-family:'TerminalGrotesque';
+		}
+		.content{
+			display: none;
+		}
+		@include breakpoint(mobile){
+			//height:100vh;
+		}
+	}
+	.hit{
+		position: absolute;
+		margin-top: 50vh;
+		left:0;
+		width: 100%;
+		height: 66.6vh;
+		cursor: pointer;
+		z-index: 1000;
+		background: $transparent;
+		opacity: 0;
+		transform:translateY(-50%);
+		span{
+			display: none;
+		}
+		&.hide{
+			display: none;
+		}
+		
+	}
+}
+.no-webgl{
+	background-image: url(../images/background-tour-fallback.jpg);
+	background-attachment: fixed;
+	background-size:cover;
+	#scene{
+		display: none;
+	}
+	.hit{
+		display: none;
+	}
+	nav.global{
+		> div:nth-of-type(1){
+			text-align: left;
+			flex-basis: 50%;
+		}
+		> div:nth-of-type(3){
+			text-align: right;
+			flex-basis: 50%;
+		}
+		> div:nth-of-type(2){
+			display: none;
+		}
+	}
+	.scroll{
+		div.layer{
+		    height: 100vh;
+		    flex-wrap: wrap;
+		    align-content: center;
+			h1{
+				font-size: 2rem;
+			}
+			&.blank{
+				display: none;
+			}
+		}
+		.vert{
+			opacity:1;
+			.content{
+				display: block;
+				flex-basis: 100%;
+				width:100%;
+				text-align: center;
+				margin-top: $pad;
+				h1{
+					
+				}
+				a{
+					color:white;
+				}
+			}
+		}
+	}
+}

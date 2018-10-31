@@ -1,0 +1,29 @@
+@font-face {
+    font-family:"TerminalGrotesque";
+    src:url("../fonts/terminal-grotesque-webfont.woff2") format("woff2"),
+    url("../fonts/terminal-grotesque-webfont.woff") format("woff"),
+    url("../fonts/terminal-grotesque-webfont.otf") format("opentype");
+    font-style:normal;font-weight:400;
+}
+        
+@font-face {
+    font-family:"Anka Coder Narrow Regular";
+    src:url("../fonts/AnkaCoder-C75-r.woff2") format("woff2"),
+    url("../fonts/AnkaCoder-C75-r.woff") format("woff"),
+    url("../fonts/AnkaCoder-C75-r.otf") format("opentype");
+    font-style:normal;font-weight:400;
+}        
+$sans: 'Anka Coder Narrow Regular','Arial Narrow', sans-serif,monospace;
+$terminal: 'TerminalGrotesque','Arial Narrow', sans-serif,monospace;
+html {
+	font-family: $sans;
+	font-size: 100%;
+	line-height: 1.2;
+	font-weight: 400;
+	-webkit-font-smoothing: subpixel-antialiased;
+	font-variant-ligatures: common-ligatures;
+	font-size: 24px;
+	@include breakpoint(large){font-size: 20px;}
+	@include breakpoint(small){font-size: 18px;}
+	@include breakpoint(tablet){font-size: 16px;}
+}
