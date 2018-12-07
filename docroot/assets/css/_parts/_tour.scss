@@ -1,4 +1,4 @@
-#scene{
+.tour #scene{
 	position:fixed;
 	top:0;
 	left:0;
@@ -17,7 +17,7 @@
 .scroll-content{
 	width:100vw!important;
 }
-.info-panel{
+.tour .info-panel{
 	position:fixed;
 	top:0;
 	left:0;
@@ -91,7 +91,7 @@
 		}
 	}	
 }
-.show-info{
+.tour.show-info{
 	nav.global{
 		opacity:0;
 	}
@@ -152,7 +152,7 @@
 		
 	}
 }
-.no-webgl{
+.no-webgl .tour{
 	background-image: url(../images/background-tour-fallback.jpg);
 	background-attachment: fixed;
 	background-size:cover;

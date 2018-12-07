@@ -17,6 +17,14 @@ body {
 		//background: black;
 	}
 }
+#scene{
+	position: absolute;
+	top:0;
+	left:0;
+	width: 100vw!important;
+	height: 100vh!important;
+	cursor: pointer;
+}
 .scrollbar-track-x{display: none!important;}
 .hide-mobile{
 	@include breakpoint(mobile){
@@ -27,6 +35,12 @@ a{
 	&:hover{
 		text-decoration: none;
 	}
+}
+#test{
+	position: absolute;
+	bottom:$pad;
+	left:$pad;
+	z-index: 100000;
 }
 nav.global{
 	display:flex;
@@ -61,5 +75,118 @@ nav.global{
 			border-left: 1px solid white;
 			border-right: 1px solid white;
 		}
+	}
+}
+#messages{
+	/*position: absolute;
+	
+	z-index: 1000;
+	color: white;
+	text-align: center;
+	top: calc( #{$pad}*1.33 + 1px  + 1rem);
+	height: calc(100% - #{$pad}*1.33 - 1px  - 1rem);
+	//height:100%;
+	width: 100%;
+	//background: white;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	align-content:flex-end;
+	justify-content: center;
+	//mix-blend-mode:difference;
+	a{
+		color: black;
+	}
+	.message{
+		padding:0 $pad/1.5 $pad/1.5;
+		flex-basis: 100%;
+		align-self: flex-end;
+		align-content: space-evenly;
+		span{
+			text-align: left;
+		writing-mode: vertical-rl;
+		}
+
+	}*/
+/*	&.first{
+		top:calc(#{$pad}*1.33 + 1rem + 1px + #{$pad}*2);
+		left:$pad*4;
+	}
+	&.second{
+		top:calc(#{$pad}*1.33 + 1rem + 1px + #{$pad}*4);
+		right:$pad*3;
+	}
+	&.third{
+		bottom:calc(#{$pad}*1.33 + 1rem + 1px + #{$pad}*2);
+		left:$pad*4;
+	}
+	&.fourth{
+		bottom:calc(#{$pad}*1.33 + 1rem + 1px + #{$pad}*4);
+		right:$pad*3;
+	}	*/
+	/*&:after{
+		content:'';
+		position: absolute;
+		left:50%;
+		width: 1px;
+		//top: calc( #{$pad}*1.33 + 1px  + 1rem);
+		//height: calc(100% - #{$pad}*1.33 - 1px  - 1rem);
+		top:0;
+		height: 100%;
+		background: white;
+		//transform:translateX(-50%);
+	}
+	&:before{
+		content:'';
+		position: absolute;
+		left:0;
+		width: 100%;
+		top: calc(50% - #{$pad}/1.5 - 1px  - .5rem);
+		height: 1px;
+		
+		background: white;
+		//transform:translateX(-50%);
+	}*/
+}
+#cookies{
+	
+}
+.output{
+	display:none;
+	pointer-events: none;
+	position: absolute;
+	bottom:$pad/1.5;
+	left:$pad/1.5;
+	z-index: 1000;
+	color: white;
+	&#time{
+		bottom: auto;
+		top:$pad/1.5;
+	}
+	&#data{
+
+	}
+	&#loop{
+		left: auto;
+		right:$pad/1.5;
+		text-align: right;
+	}
+	&#coords{
+		text-align: right;
+		bottom: auto;
+		left: auto;
+		top:$pad/1.5;
+		right:$pad/1.5;
+	}	
+}
+.idle{
+	nav.global{
+		opacity: 0;
+	}
+	#messages{
+		display: none;
+	}
+	.output{
+		display: block;
 	}
 }

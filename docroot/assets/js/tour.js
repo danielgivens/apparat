@@ -1,202 +1,3 @@
-THREE.CopyShader = {
-
-	uniforms: {
-
-		"tDiffuse": { value: null },
-		"opacity":  { value: .90 }
-
-	},
-
-	vertexShader: [
-
-		"varying vec2 vUv;",
-
-		"void main() {",
-
-			"vUv = uv;",
-			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-
-		"}"
-
-	].join( "\n" ),
-
-	fragmentShader: [
-
-		"uniform float opacity;",
-
-		"uniform sampler2D tDiffuse;",
-
-		"varying vec2 vUv;",
-
-		"void main() {",
-
-			"vec4 texel = texture2D( tDiffuse, vUv );",
-			"gl_FragColor = opacity * texel;",
-
-		"}"
-
-	].join( "\n" )
-
-};
-/**
- * @author alteredq / http://alteredqualia.com/
- */
-/**
- * @author felixturner / http://airtight.cc/
- *
- * RGB Shift Shader
- * Shifts red and blue channels from center in opposite directions
- * Ported from http://kriss.cx/tom/2009/05/rgb-shift/
- * by Tom Butterworth / http://kriss.cx/tom/
- *
- * amount: shift distance (1 is width of input)
- * angle: shift angle in radians
- */
-
-THREE.DigitalGlitch = {
-
-	uniforms: {
-
-		"tDiffuse":		{ value: null },//diffuse texture
-		"tDisp":		{ value: null },//displacement texture for digital glitch squares
-		"byp":			{ value: 0 },//apply the glitch ?
-		"amount":		{ value: 0.0008 },
-		"angle":		{ value: 0 },
-		"seed":			{ value: 0.02 },
-		"seed_x":		{ value: 0.02 },//-1,1
-		"seed_y":		{ value: 0.02 },//-1,1
-		"distortion_x":	{ value: 2.5 },
-		"distortion_y":	{ value: 2.6 },
-		"col_s":		{ value: 0.15 }
-	},
-
-	vertexShader: [
-
-		"varying vec2 vUv;",
-		"void main() {",
-			"vUv = uv;",
-			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-		"}"
-	].join( "\n" ),
-
-	fragmentShader: [
-		"uniform int byp;",//should we apply the glitch ?
-		
-		"uniform sampler2D tDiffuse;",
-		"uniform sampler2D tDisp;",
-		
-		"uniform float amount;",
-		"uniform float angle;",
-		"uniform float seed;",
-		"uniform float seed_x;",
-		"uniform float seed_y;",
-		"uniform float distortion_x;",
-		"uniform float distortion_y;",
-		"uniform float col_s;",
-			
-		"varying vec2 vUv;",
-		
-		
-		"float rand(vec2 co){",
-			"return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);",
-		"}",
-				
-		"void main() {",
-			"if(byp<1) {",
-				"vec2 p = vUv;",
-				"float xs = floor(gl_FragCoord.x / 0.25);",
-				"float ys = floor(gl_FragCoord.y / 0.25);",
-				//based on staffantans glitch shader for unity https://github.com/staffantan/unityglitch
-				"vec4 normal = texture2D (tDisp, p*seed*seed);",
-				"if(p.y<distortion_x+col_s && p.y>distortion_x-col_s*seed) {",
-					"if(seed_x>0.){",
-						"p.y = 1. - (p.y + distortion_y);",
-					"}",
-					"else {",
-						"p.y = distortion_y;",
-					"}",
-				"}",
-				"if(p.x<distortion_y+col_s && p.x>distortion_y-col_s*seed) {",
-					"if(seed_y>0.){",
-						"p.x=distortion_x;",
-					"}",
-					"else {",
-						"p.x = 1. - (p.x + distortion_x);",
-					"}",
-				"}",
-				"p.x+=normal.x*seed_x*(seed/5.);",
-				"p.y+=normal.y*seed_y*(seed/5.);",
-				//base from RGB shift shader
-				"vec2 offset = amount * vec2( cos(angle), sin(angle));",
-				"vec4 cr = texture2D(tDiffuse, p);",
-				"vec4 cga = texture2D(tDiffuse, p);",
-				"vec4 cb = texture2D(tDiffuse, p);",
-				"gl_FragColor = vec4(cr.r, cga.g, cb.b, cga.a);",
-				//add noise
-				"vec4 snow = 100.*amount*vec4(rand(vec2(xs * seed,ys * seed*5.))*0.0);",
-				"gl_FragColor = gl_FragColor+ snow;",
-			"}",
-			"else {",
-				"gl_FragColor=texture2D (tDiffuse, vUv);",
-			"}",
-		"}"
-
-	].join( "\n" )
-
-};
-
-THREE.AfterimageShader = {
-
-	uniforms: {
-
-		"damp": { value: 0.96 },
-		"tOld": { value: null },
-		"tNew": { value: null }
-
-	},
-
-	vertexShader: [
-
-		"varying vec2 vUv;",
-
-		"void main() {",
-
-			"vUv = uv;",
-			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-
-		"}"
-
-	].join( "\n" ),
-
-	fragmentShader: [
-
-		"uniform float damp;",
-
-		"uniform sampler2D tOld;",
-		"uniform sampler2D tNew;",
-
-		"varying vec2 vUv;",
-		
-		"vec4 when_gt( vec4 x, float y ) {",
-
-			"return max( sign( x - y ), 0.0 );",
-
-		"}",
-
-		"void main() {",
-
-			"vec4 texelOld = texture2D( tOld, vUv );",
-			"vec4 texelNew = texture2D( tNew, vUv );",
-			
-			"texelOld *= damp * when_gt( texelOld, 0.05 );",
-
-			"gl_FragColor = max(texelNew, texelOld);",
-
-		"}"
-
-	].join( "\n" )
-
-};
 function webglAvailable() {
     try {
         var canvas = document.createElement("canvas");
@@ -235,8 +36,8 @@ prevH = 0;
 prevW = 0;
 var objects = [];
 var vector = new THREE.Vector3();
-var ww = window.innerWidth,
-    wh = window.innerHeight;
+var ww = $(document).width(),
+    wh = $(document).height();
 var ww2 = ww * 0.5,
     wh2 = wh * 0.5;
 document.body.classList.add("loading");
@@ -403,7 +204,7 @@ function Tunnel(font) {
 	$('.layer').each(function(){
 		string1 = $(this).find('h1').find('.line-1').html();
 		string2 = $(this).find('h1').find('.line-2').html();
-		console.log(string1);
+		//console.log(string1);
 		/*var pos = string.lastIndexOf(' - ');
 			
 		string = string.substring(0,pos)+'\n'+string.substring(pos+1);
@@ -512,8 +313,8 @@ Tunnel.prototype.handleEvents = function() {
 };
 
 Tunnel.prototype.onResize = function() {
-	ww = window.innerWidth;
-	wh = window.innerHeight;
+	ww = $(document).width();
+	wh = $(document).height();
 	ww2 = ww * 0.5;
 	wh2 = wh * 0.5;
 	$scH = $('.scroll .scroll-content').height();
@@ -627,7 +428,17 @@ if(webglAvailable()){
 	loader.load(randbg, function(texture){
 		var font = fontLoader.load( '/assets/fonts/Terminal%20Grotesque_Regular.json', function ( font ) {
 			window.tunnelTexture = texture;
-			window.tunnel = new Tunnel(font);		
+			ww = $(document).width();
+			wh = $(document).height();
+			ww2 = ww * 0.5;
+			wh2 = wh * 0.5;
+			$scH = $('.scroll .scroll-content').height();
+			factor = $('.layer').eq(0).outerHeight()/wh;
+			setTimeout(function(){
+				window.tunnel = new Tunnel(font);	
+				this.onResize;	
+				
+			},300);
 		},
 		function ( xhr ) {
 			//console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
