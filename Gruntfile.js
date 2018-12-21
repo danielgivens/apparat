@@ -49,16 +49,16 @@ module.exports = function(grunt) {
 					'docroot/assets/js/vendor/EffectComposer.js',
 					'docroot/assets/js/vendor/RenderPass.js',
 					'docroot/assets/js/vendor/ShaderPass.js',
-					'docroot/assets/js/vendor/ColorifyShader.js',
-					'docroot/assets/js/vendor/CopyShader.js',
-					'docroot/assets/js/vendor/ShaderGodRays.js',
 					'docroot/assets/js/vendor/perlin.js',
 					'docroot/assets/js/vendor/GlitchPass.js',
-					'docroot/assets/js/vendor/lettering.js',
 					'docroot/assets/js/vendor/MaskPass.js',
-					'docroot/assets/js/vendor/StaticShader.js',
+					'docroot/assets/js/vendor/THREE.MeshLine.js',
 					'docroot/assets/js/vendor/AfterimagePass.js',
-					'docroot/assets/js/vendor/passes.js',
+					'docroot/assets/js/vendor/ShaderGodRays.js',
+					'docroot/assets/js/vendor/RGBShiftShader.js',
+					'docroot/assets/js/vendor/BadTVShader.js',
+					'docroot/assets/js/vendor/ColorifyShader.js',
+					'docroot/assets/js/vendor/custom.js',
 		            //'docroot/assets/js/vendor/Maf.js',
 		            //'docroot/assets/js/vendor/THREE.MeshLine.js',
 					//'docroot/assets/js/vendor/threex.geometricglowmesh.js',
@@ -79,5 +79,5 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-contrib-sass');
     grunt.registerTask('work', ['watch']);
-    grunt.registerTask('build', ['sass','uglify']);
+    grunt.registerTask('build', ['sass','uglify:libs']);
 };

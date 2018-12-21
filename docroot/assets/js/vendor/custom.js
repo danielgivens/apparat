@@ -144,7 +144,6 @@ THREE.DigitalGlitch = {
 	].join( "\n" )
 
 };
-
 THREE.AfterimageShader = {
 
 	uniforms: {
@@ -197,137 +196,221 @@ THREE.AfterimageShader = {
 	].join( "\n" )
 
 };
+/**
+ * @author Felix Turner / www.airtight.cc / @felixturner
+ *
+ * Static effect. Additively blended digital noise.
+ *
+ * amount - amount of noise to add (0 - 1)
+ * size - size of noise grains (pixels)
+ *
+ * The MIT License
+ * 
+ * Copyright (c) 2014 Felix Turner
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ * 
+ */
 
-  THREE.HorizontalBlurShader = {
+THREE.StaticShader = {
 
-    uniforms: {
+	uniforms: {
 
-      "tDiffuse": {
-        value: null
-      },
-      "h": {
-        value: 1.0 / 256.0
-      },
-      "mouse": {
-        value: new THREE.Vector2()
-      },
-      "ratio": {
-        value: window.innerWidth / window.innerHeight
-      }
-    },
+		"tDiffuse": { type: "t", value: null },
+		"time":     { type: "f", value: 0.0 },
+		"amount":   { type: "f", value: 0.5 },
+		"size":     { type: "f", value: 4.0 }
+	},
 
- 	vertexShader: [
+	vertexShader: [
 
-		" varying vec2 vUv;",
+	"varying vec2 vUv;",
 
-		"void main() {",
+	"void main() {",
 
-			"vUv = uv;",
-			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+		"vUv = uv;",
+		"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
 
-		"}"
+	"}"
 
-	].join( "\n" ),
+	].join("\n"),
 
- 	fragmentShader: [
-		"uniform sampler2D tDiffuse;",
-		"uniform float h;",
-		"uniform vec2 mouse;",
-		"uniform float ratio;",
-		"varying vec2 vUv;",
+	fragmentShader: [
 
-	  "void main() {",
-      "vec2 uv = vUv;",
-      "uv = -1. + 2. * uv;",
-      "uv -= mouse;",
-      "uv.x *= ratio;",
-      "if ( length(uv) > 0.2 ) {",
-        "gl_FragColor = texture2D(tDiffuse, vUv);",
-     " } ",
-     " else{",
+	"uniform sampler2D tDiffuse;",
+	"uniform float time;",
+	"uniform float amount;",
+	"uniform float size;",
 
-        "vec4 sum = vec4( 0.0 );",
+	"varying vec2 vUv;",
 
-        "sum += texture2D( tDiffuse, vec2( vUv.x - 4.0 * h, vUv.y ) ) * 0.051;",
-        "sum += texture2D( tDiffuse, vec2( vUv.x - 3.0 * h, vUv.y ) ) * 0.0918;",
-        "sum += texture2D( tDiffuse, vec2( vUv.x - 2.0 * h, vUv.y ) ) * 0.12245;",
-        "sum += texture2D( tDiffuse, vec2( vUv.x - 1.0 * h, vUv.y ) ) * 0.1531;",
-        "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y ) ) * 0.1633;",
-        "sum += texture2D( tDiffuse, vec2( vUv.x + 1.0 * h, vUv.y ) ) * 0.1531;",
-        "sum += texture2D( tDiffuse, vec2( vUv.x + 2.0 * h, vUv.y ) ) * 0.12245;",
-        "sum += texture2D( tDiffuse, vec2( vUv.x + 3.0 * h, vUv.y ) ) * 0.0918;",
-        "sum += texture2D( tDiffuse, vec2( vUv.x + 4.0 * h, vUv.y ) ) * 0.051;",
+	"float rand(vec2 co){",
+		"return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);",
+	"}",
 
-        "gl_FragColor = sum;",
-      "}",
+	"void main() {",
+		"vec2 p = vUv;",
+		"vec4 color = texture2D(tDiffuse, p);",
+		"float xs = floor(gl_FragCoord.x / size);",
+		"float ys = floor(gl_FragCoord.y / size);",
+		"vec4 snow = vec4(rand(vec2(xs * time,ys * time))*amount);",
 
-		"}"
-	].join( "\n" )
-		
-  };
- 
-  THREE.VerticalBlurShader = {
+		//"gl_FragColor = color + amount * ( snow - color );", //interpolate
 
-    uniforms: {
+		"gl_FragColor = color+ snow;", //additive
 
-      "tDiffuse": {
-        value: null
-      },
-      "v": {
-        value: 1.0 / 256.0
-      },
-      "mouse": {
-        value: new THREE.Vector2()
-      },
-      "ratio": {
-        value: window.innerWidth / window.innerHeight
-      }
+	"}"
 
-    },
+	].join("\n")
 
-    vertexShader: [
-    	"varying vec2 vUv;",
-    
-		"void main() {",
-			"vUv = uv;",
-			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-    	"}"
-	].join( "\n" ),
-    fragmentShader: [
+};
 
-		"uniform sampler2D tDiffuse;",
-		"uniform float v;",
-		"uniform vec2 mouse;",
-		"uniform float ratio;",
-		"varying vec2 vUv;",
+THREE.HorizontalBlurShader = {
 
-	  "void main() {",
-      "vec2 uv = vUv;",
-      "uv = -1. + 2. * uv;",
-      "uv -= mouse;",
-      "uv.x *= ratio;",
-      "if ( length(uv) > 0.2 ) {",
-        "gl_FragColor = texture2D(tDiffuse, vUv);",
-      "}",
-      "else{",
-        "vec4 sum = vec4( 0.0 );",
+uniforms: {
 
-        "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y - 4.0 * v ) ) * 0.051;",
-        "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y - 3.0 * v ) ) * 0.0918;",
-        "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y - 2.0 * v ) ) * 0.12245;",
-        "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y - 1.0 * v ) ) * 0.1531;",
-        "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y ) ) * 0.1633;",
-        "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y + 1.0 * v ) ) * 0.1531;",
-        "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y + 2.0 * v ) ) * 0.12245;",
-        "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y + 3.0 * v ) ) * 0.0918;",
-        "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y + 4.0 * v ) ) * 0.051;",
+  "tDiffuse": {
+    value: null
+  },
+  "h": {
+    value: 1.0 / 256.0
+  },
+  "mouse": {
+    value: new THREE.Vector2()
+  },
+  "ratio": {
+    value: window.innerWidth / window.innerHeight
+  }
+},
 
-        "gl_FragColor = sum;",
-      "}",
+	vertexShader: [
 
-		"}"
-	].join( "\n" )
-  };
+	" varying vec2 vUv;",
+
+	"void main() {",
+
+		"vUv = uv;",
+		"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+
+	"}"
+
+].join( "\n" ),
+
+	fragmentShader: [
+	"uniform sampler2D tDiffuse;",
+	"uniform float h;",
+	"uniform vec2 mouse;",
+	"uniform float ratio;",
+	"varying vec2 vUv;",
+
+  "void main() {",
+  "vec2 uv = vUv;",
+  "uv = -1. + 2. * uv;",
+  "uv -= mouse;",
+  "uv.x *= ratio;",
+  "if ( length(uv) > 0.2 ) {",
+    "gl_FragColor = texture2D(tDiffuse, vUv);",
+ " } ",
+ " else{",
+
+    "vec4 sum = vec4( 0.0 );",
+
+    "sum += texture2D( tDiffuse, vec2( vUv.x - 4.0 * h, vUv.y ) ) * 0.051;",
+    "sum += texture2D( tDiffuse, vec2( vUv.x - 3.0 * h, vUv.y ) ) * 0.0918;",
+    "sum += texture2D( tDiffuse, vec2( vUv.x - 2.0 * h, vUv.y ) ) * 0.12245;",
+    "sum += texture2D( tDiffuse, vec2( vUv.x - 1.0 * h, vUv.y ) ) * 0.1531;",
+    "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y ) ) * 0.1633;",
+    "sum += texture2D( tDiffuse, vec2( vUv.x + 1.0 * h, vUv.y ) ) * 0.1531;",
+    "sum += texture2D( tDiffuse, vec2( vUv.x + 2.0 * h, vUv.y ) ) * 0.12245;",
+    "sum += texture2D( tDiffuse, vec2( vUv.x + 3.0 * h, vUv.y ) ) * 0.0918;",
+    "sum += texture2D( tDiffuse, vec2( vUv.x + 4.0 * h, vUv.y ) ) * 0.051;",
+
+    "gl_FragColor = sum;",
+  "}",
+
+	"}"
+].join( "\n" )
+	
+};
+
+THREE.VerticalBlurShader = {
+
+uniforms: {
+
+  "tDiffuse": {
+    value: null
+  },
+  "v": {
+    value: 1.0 / 256.0
+  },
+  "mouse": {
+    value: new THREE.Vector2()
+  },
+  "ratio": {
+    value: window.innerWidth / window.innerHeight
+  }
+
+},
+
+vertexShader: [
+	"varying vec2 vUv;",
+
+	"void main() {",
+		"vUv = uv;",
+		"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+	"}"
+].join( "\n" ),
+fragmentShader: [
+
+	"uniform sampler2D tDiffuse;",
+	"uniform float v;",
+	"uniform vec2 mouse;",
+	"uniform float ratio;",
+	"varying vec2 vUv;",
+
+  "void main() {",
+  "vec2 uv = vUv;",
+  "uv = -1. + 2. * uv;",
+  "uv -= mouse;",
+  "uv.x *= ratio;",
+  "if ( length(uv) > 0.2 ) {",
+    "gl_FragColor = texture2D(tDiffuse, vUv);",
+  "}",
+  "else{",
+    "vec4 sum = vec4( 0.0 );",
+
+    "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y - 4.0 * v ) ) * 0.051;",
+    "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y - 3.0 * v ) ) * 0.0918;",
+    "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y - 2.0 * v ) ) * 0.12245;",
+    "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y - 1.0 * v ) ) * 0.1531;",
+    "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y ) ) * 0.1633;",
+    "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y + 1.0 * v ) ) * 0.1531;",
+    "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y + 2.0 * v ) ) * 0.12245;",
+    "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y + 3.0 * v ) ) * 0.0918;",
+    "sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y + 4.0 * v ) ) * 0.051;",
+
+    "gl_FragColor = sum;",
+  "}",
+
+	"}"
+].join( "\n" )
+};
  THREE.VolumetericLightShader = {
   uniforms: {
     tDiffuse: {value:null},
