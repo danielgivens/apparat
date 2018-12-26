@@ -1,61 +1,3 @@
-var composer;
-var analyser, dataArray;
-var audioData = [];
-var shaderTime = 0;
-var fftSize = 512;
-var glitchPass;
-var afterimagePass;
-var renderPass, copyPass;
-var rgbParams, rgbPass;	
-var filmParams, filmPass;	
-var renderPass, copyPass;
-var scene;
-var camera;
-var material;
-var sound;
-var renderer;
-var portalMesh;
-var portal;
-var mouseTimer;
-var textMesh;
-var $portal;
-var idleTimer;
-var $pointLight;
-var pointLight;
-var $buff;
-var listener;
-var audioLoader;
-var dataArray;
-$drawMe = false;
-var textureContext;
-ready3 = false;
-playing = false;
-ready = false;
-ready2 = false;
-holding = false;
-font2 = undefined;
-mX = 0;
-mY = 0;
-b = 0;
-d = 0;
-wifreframeBallColor = 0;
-switchBG = 0;
-switchColor = 0;
-rate = 0;
-time = 0;
-offset = {
-	upper : 0,
-	lower : 0
-};
-var timeOutput = '00:00:00:00';
-var group = new THREE.Group();
-var noise2 = new SimplexNoise();
-var simplex = new SimplexNoise();
-var manager = new THREE.LoadingManager();
-var loader = new THREE.TextureLoader(manager);
-var backgroundsLoaded = false;
-var backgrounds = [];
-var loadedBackgrounds = [];
 backgrounds = [
 	'/assets/images/app.jpg',
 	'/assets/images/test-4.jpg',
@@ -67,22 +9,15 @@ backgrounds = [
 	'/assets/images/texture-tour-8.jpg',
 	'/assets/images/texture-tour-10.jpg',
 ];
-var removeableItems = [];
-var textTextures = [];
-var loadedText = [];
 textTextures = [
 	'/assets/images/type-texture.png'
 ];
 snips = [
 	'/assets/audio/loop-1.mp3',
-	'/assets/audio/loop-2.mp3',
 	'/assets/audio/loop-3.mp3',
 	'/assets/audio/loop-4.mp3',
-	'/assets/audio/loop-5.mp3',
 	'/assets/audio/loop-6.mp3',
-	'/assets/audio/loop-7.mp3',
 	'/assets/audio/loop-8.mp3',
-	'/assets/audio/loop-9.mp3',
 	'/assets/audio/loop-10.mp3'	
 ];
 groups = [
@@ -92,6 +27,7 @@ groups = [
 	'group4',
 	'group5',
 	'group6',
+	'group7',
 ];
 group1 = new THREE.Group();
 group2 = new THREE.Group();
@@ -99,22 +35,26 @@ group3 = new THREE.Group();
 group4 = new THREE.Group();
 group5 = new THREE.Group();
 group6 = new THREE.Group();
-var occlusionComposer, occlusionRenderTarget, occlusionBox, lightSphere,
-      volumetericLightShaderUniforms,
-      DEFAULT_LAYER = 0,
-      OCCLUSION_LAYER = 1,
-      renderScale = 0.5,
-      angle = 0,
-      sphere_mesh;
+group7 = new THREE.Group();
 colors = [
 	0xffd064,
 	0xfb248b,
 	0x01d765
 ];
-showGroup = 'none';
-$g = 1;
-$first = true;
-var $track;
+var scene, switcher, mouse, upperAvgFr, upperMaxFr, lowerAvgFr, lowerMaxFr, upperAvg, upperMax, lowerAvg, lowerMax, overallAvg, deadline, $buff, loopTimer, listener, $track, textureContext, sphere_mesh,ambientLight, volumetericLightShaderUniforms, audioLoader, videoTexture, occlusionComposer, occlusionRenderTarget, occlusionBox, lightSphere, dartaArray, pointLight, $pointLight, idleTimer, $portal, textMesh, mouseTimer, portalMesh, portalrenderer, sound, camera, material, composer, analyser, dataArray, glitchPass, afterimagePass, renderPass, copyPass, rgbParams, rgbPass, filmParams, filmPass, renderPass, copyPass;
+var DEFAULT_LAYER = 0, OCCLUSION_LAYER = 1, renderScale = 0.5, angle = 0, audioData = [], shaderTime = 0, fftSize = 512, $drawMe = false, ready3 = false, playing = false, ready = false, ready2 = false, holding = false, font2 = undefined, startX = window.innerWidth/2, startY = window.innerHeight/2, backgroundsLoaded = false, loadedBackgrounds = [],removeableItems = [], loadedText = [], mX = 0, mY = 0, b = 0, d = 0, $r = 0, $switch = true, oldMax = 0, shaderTime = 0, start = Date.now(), wifreframeBallColor = 0, switchBG = 0, switchColor = 0, rate = 0, time = 0, offset = { upper : 0,lower : 0}, showGroup = 'none', $g = 1, $first = true; timeOutput = '00:00:00:00';
+var noise2 = new SimplexNoise(), simplex = new SimplexNoise(), manager = new THREE.LoadingManager(), loader = new THREE.TextureLoader(manager);
+var loadChecker = setInterval(function(){
+	if(backgroundsLoaded){clearInterval(loadChecker);}
+},100);
+
+init();
+
+function init(){
+	setupScene();
+	loadBackgrounds(backgrounds[0]);
+	setupTicker();
+}
 function randGroup(){
 	ready3 = false;
 	//rand = Math.floor(Math.random() * groups.length) + 1;
@@ -139,133 +79,113 @@ function randGroup(){
 	$first = false;
 		
 }
-
-/* main setup */
-scene = new THREE.Scene();	
-fogColor = new THREE.Color(0x000000);
-scene.background = fogColor;
-scene.fog = new THREE.Fog(fogColor, 0.0025, 60);
-var res = window.innerWidth / window.innerHeight;
-camera = new THREE.PerspectiveCamera(45, res, 0.1, 2000);
-camera.position.x = 0;
-camera.position.y = 0;
-camera.layers.set(DEFAULT_LAYER);
-camera.position.z = 10;
-camera.lookAt( scene.position);
-var ambientLight = new THREE.AmbientLight(0xffffff);
-ambientLight.intensity = .6;
-
-scene.add(ambientLight);
-var spotLight = new THREE.SpotLight( 0xffffff );
-spotLight.position.set( 0, 0, 10 );
-
-spotLight.castShadow = true;
-spotLight.intensity = 1;
-spotLight.shadow.mapSize.width = 1024;
-spotLight.shadow.mapSize.height = 1024;
-
-spotLight.shadow.camera.near = 1;
-spotLight.shadow.camera.far = 2000;
-spotLight.shadow.camera.fov = 45;
-spotLight.name = 'mainSpot';
-scene.add( spotLight );
-$mainSpot = scene.getObjectByName('mainSpot');
-scene.add(group1);		
-scene.add(group2);		
-scene.add(group3);		
-scene.add(group4);		
-scene.add(group5);		
-scene.add(group6);
-
-renderer = new THREE.WebGLRenderer({ 
-    antialias: true,
-	alpha: false 
-});
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFShadowMap;
-renderer.setSize(window.innerWidth, window.innerHeight);
-pixelRatio = 1;
-
-
-occlusionRenderTarget = new THREE.WebGLRenderTarget( window.innerWidth, window.innerHeight);
-occlusionComposer = new THREE.EffectComposer( renderer, occlusionRenderTarget);
-occlusionComposer.addPass( new THREE.RenderPass( scene, camera ) );
-
-pass = new THREE.ShaderPass( THREE.VolumetericLightShader );
-pass.needsSwap = false;
-occlusionComposer.addPass( pass );
-
-volumetericLightShaderUniforms = pass.uniforms;
-volumetericLightShaderUniforms.exposure.value = 0;
-volumetericLightShaderUniforms.decay.value = 0.9;
-volumetericLightShaderUniforms.density.value = 0.8;
-volumetericLightShaderUniforms.weight.value = 0.9;
-volumetericLightShaderUniforms.samples.value = 100;
-
-composer = new THREE.EffectComposer(this.renderer);
-composer.setSize( window.innerWidth * pixelRatio, window.innerHeight * pixelRatio );
-composer.addPass( new THREE.RenderPass( this.scene, this.camera ) );
-
-colorify = new THREE.ShaderPass(THREE.ColorifyShader)
-colorify.uniforms['opacity'].value = 0;
-colorify.uniforms['color'].value.setRGB(1, 1, 1);
-colorify.renderToScreen = false;
-composer.addPass( colorify );
-
-badTVPass = new THREE.ShaderPass( THREE.BadTVShader );
-badTVPass.renderToScreen = false;
-
-badTVPass.uniforms[ 'distortion' ].value = 0;
-badTVPass.uniforms[ 'distortion2' ].value = 0;
-badTVPass.uniforms[ 'speed' ].value = 0;
-badTVPass.uniforms[ 'rollSpeed' ].value = 0;
-
-composer.addPass( badTVPass );
-
-pass = new THREE.ShaderPass( THREE.AdditiveBlendingShader );
-pass.uniforms.tAdd.value = occlusionRenderTarget.texture;
-composer.addPass( pass );
-glitchPass = new THREE.GlitchPass();
-glitchPass.renderToScreen = false;
-composer.addPass( glitchPass );
-
-
-
-pass.renderToScreen = false;
-
-staticPass = new THREE.ShaderPass( THREE.StaticShader );
-
-staticPass.uniforms[ 'amount' ].value = .2;
-staticPass.uniforms[ 'size' ].value = 1;		
-staticPass.renderToScreen = false;
-composer.addPass( staticPass );
+function setupScene(){
+	scene = new THREE.Scene();	
+	fogColor = new THREE.Color(0x000000);
+	scene.background = fogColor;
+	scene.fog = new THREE.Fog(fogColor, 0.0025, 60);
+	res = window.innerWidth / window.innerHeight;
+	camera = new THREE.PerspectiveCamera(45, res, 0.1, 2000);
+	camera.position.x = 0;
+	camera.position.y = 0;
+	camera.layers.set(DEFAULT_LAYER);
+	camera.position.z = 10;
+	camera.lookAt( scene.position);
+	ambientLight = new THREE.AmbientLight(0xffffff);
+	ambientLight.intensity = .6;
 	
-afterimagePass = new THREE.AfterimagePass();
-afterimagePass.renderToScreen = true;
-composer.addPass( afterimagePass );
+	scene.add(ambientLight);
+	spotLight = new THREE.SpotLight( 0xffffff );
+	spotLight.position.set( 0, 0, 10 );
+	
+	spotLight.castShadow = true;
+	spotLight.intensity = 1;
+	spotLight.shadow.mapSize.width = 1024;
+	spotLight.shadow.mapSize.height = 1024;
+	
+	spotLight.shadow.camera.near = 1;
+	spotLight.shadow.camera.far = 2000;
+	spotLight.shadow.camera.fov = 45;
+	spotLight.name = 'mainSpot';
+	scene.add( spotLight );
+	$mainSpot = scene.getObjectByName('mainSpot');
+	scene.add(group1);		
+	scene.add(group2);		
+	scene.add(group3);		
+	scene.add(group4);		
+	scene.add(group5);		
+	scene.add(group6);
+	scene.add(group7);
+	
+	renderer = new THREE.WebGLRenderer({ 
+	    antialias: true,
+		alpha: false 
+	});
+	renderer.shadowMap.enabled = true;
+	renderer.shadowMap.type = THREE.PCFShadowMap;
+	renderer.setSize(window.innerWidth, window.innerHeight);
+	pixelRatio = 1;
+	
+	
+	occlusionRenderTarget = new THREE.WebGLRenderTarget( window.innerWidth, window.innerHeight);
+	occlusionComposer = new THREE.EffectComposer( renderer, occlusionRenderTarget);
+	occlusionComposer.addPass( new THREE.RenderPass( scene, camera ) );
+	
+	pass = new THREE.ShaderPass( THREE.VolumetericLightShader );
+	pass.needsSwap = false;
+	occlusionComposer.addPass( pass );
+	
+	volumetericLightShaderUniforms = pass.uniforms;
+	volumetericLightShaderUniforms.exposure.value = 0;
+	volumetericLightShaderUniforms.decay.value = 0.9;
+	volumetericLightShaderUniforms.density.value = 0.8;
+	volumetericLightShaderUniforms.weight.value = 0.9;
+	volumetericLightShaderUniforms.samples.value = 100;
+	
+	composer = new THREE.EffectComposer(this.renderer);
+	composer.setSize( window.innerWidth * pixelRatio, window.innerHeight * pixelRatio );
+	composer.addPass( new THREE.RenderPass( this.scene, this.camera ) );
+	
+	colorify = new THREE.ShaderPass(THREE.ColorifyShader)
+	colorify.uniforms['opacity'].value = 0;
+	colorify.uniforms['color'].value.setRGB(1, 1, 1);
+	colorify.renderToScreen = false;
+	composer.addPass( colorify );
+	
+	badTVPass = new THREE.ShaderPass( THREE.BadTVShader );
+	badTVPass.renderToScreen = false;
+	
+	badTVPass.uniforms[ 'distortion' ].value = 0;
+	badTVPass.uniforms[ 'distortion2' ].value = 0;
+	badTVPass.uniforms[ 'speed' ].value = 0;
+	badTVPass.uniforms[ 'rollSpeed' ].value = 0;
+	
+	composer.addPass( badTVPass );
+	
+	pass = new THREE.ShaderPass( THREE.AdditiveBlendingShader );
+	pass.uniforms.tAdd.value = occlusionRenderTarget.texture;
+	composer.addPass( pass );
+	glitchPass = new THREE.GlitchPass();
+	glitchPass.renderToScreen = false;
+	composer.addPass( glitchPass );
 
-/*var hblur = new THREE.ShaderPass(THREE.HorizontalBlurShader);
-composer.addPass(hblur);
-hblur.uniforms.h.value = 0;
-hblur.renderToScreen = false;
-var vblur = new THREE.ShaderPass(THREE.VerticalBlurShader);
-vblur.renderToScreen = true;
-vblur.uniforms.v.value = 0;
-composer.addPass(vblur);*/
-var mouse = new THREE.Vector2();
-
-document.body.appendChild(renderer.domElement);
-window.addEventListener("resize", onWindowResize);
-
-
-//loadTextTextures(textTextures[0]);
-loadBackgrounds(backgrounds[0]);
-var loadChecker = setInterval(function(){
-	if(backgroundsLoaded){
-		clearInterval(loadChecker);
-
-	}
-},100);
+	pass.renderToScreen = false;
+	
+	staticPass = new THREE.ShaderPass( THREE.StaticShader );
+	
+	staticPass.uniforms[ 'amount' ].value = .2;
+	staticPass.uniforms[ 'size' ].value = 1;		
+	staticPass.renderToScreen = false;
+	composer.addPass( staticPass );
+		
+	afterimagePass = new THREE.AfterimagePass();
+	afterimagePass.renderToScreen = true;
+	composer.addPass( afterimagePass );
+	
+	mouse = new THREE.Vector2();
+	
+	document.body.appendChild(renderer.domElement);
+}
 function loadBackgrounds(bg){
 	var loader = new THREE.TextureLoader(manager)
 	loader.load(bg, function (object) {
@@ -301,32 +221,34 @@ function loadTextTextures(bg){
 		}
 	});
 }
-/* ticker stuff */
-ticker = new THREE.Group();
-var countDown = 'LP_5';
-var deadline = "2019-03-12T12:00:00+00:00";
-var fontLoader = new THREE.FontLoader();
-var font = fontLoader.load( '/assets/fonts/Terminal Grotesque_Regular.json', function ( response ) {
-    font2 = response;
-	updateClock();
-	var timeinterval = setInterval(updateClock, 1000);
-	ready = true;
-    draw();
-});	
-
-/*$('.message span').lettering();
-$o = 0;
-$('.message span').each(function(){
-	$(this).find('span').each(function(){
-		if($(this).html() != ' '){
-			$(this).attr('data-original',$(this).html());
-		} else{
-			$(this).addClass('space');
-		}
-	});
-});*/
-var textMesh;
-scene.add(ticker);
+function setupTicker(){
+	/* ticker stuff */
+	ticker = new THREE.Group();
+	var countDown = 'LP_5';
+	deadline = "2019-03-12T12:00:00+00:00";
+	var fontLoader = new THREE.FontLoader();
+	var font = fontLoader.load( '/assets/fonts/Terminal Grotesque_Regular.json', function ( response ) {
+	    font2 = response;
+		updateClock();
+		var timeinterval = setInterval(updateClock, 1000);
+		ready = true;
+	    draw();
+	});	
+	
+	/*$('.message span').lettering();
+	$o = 0;
+	$('.message span').each(function(){
+		$(this).find('span').each(function(){
+			if($(this).html() != ' '){
+				$(this).attr('data-original',$(this).html());
+			} else{
+				$(this).addClass('space');
+			}
+		});
+	});*/
+	var textMesh;
+	scene.add(ticker);	
+}
 function getTimeRemaining(endtime) {
   var t = Date.parse(endtime) - Date.parse(new Date());
   var seconds = Math.floor((t / 1000) % 60);
@@ -377,7 +299,6 @@ function createText(){
 	textMesh.name = 'textMesh';
 	
 }
-$r = 0;
 function handleGroup(){
 	if(showGroup != 'none'){
 	    if(showGroup === 'group1'){
@@ -392,6 +313,8 @@ function handleGroup(){
 		    group = group5;
 	    } else if(showGroup === 'group6'){
 		    group = group6;
+	    } else if(showGroup === 'group7'){
+		    group = group7;
 	    }
 		//console.log('theres a group');
 		removeableItems.forEach(function(v,i) {
@@ -469,7 +392,6 @@ function handleGroup(){
 	});		
 }
 function loadLoop(){
-	//console.log('loading loop');
 	if(playing){
 		TweenMax.to(sound, .2, {setPlaybackRate:.7,setVolume:0, onComplete: function(){
 			sound.pause();
@@ -478,8 +400,6 @@ function loadLoop(){
 	} else{
 		handleGroup();
 	}
-		
-
 }
 function createGroup(g){
 	//console.log('creategroup:'+g);
@@ -511,8 +431,8 @@ function createGroup(g){
 				time: { type: "f", value: 0 },
 				weight: { type: "f", value: 0.2 }
 			},
-			vertexShader: $('#noise-v').html(),
-			fragmentShader: $('#noise-f').html()
+			vertexShader: noiseVertex,
+			fragmentShader: noiseFragment
 	
 		} );
 	
@@ -675,16 +595,20 @@ function createGroup(g){
 	}
 	if(g === 'group5'){
 		ratio = window.innerWidth / window.innerHeight;
-		sizes = 2 * ratio;
+		sizes = 10 * ratio;
 		//var size = 20;
 		//var divisions = size*12;
 		group5.position.z = 100;
-		var randColor = colors[Math.floor(Math.random() * colors.length)];
 
 		canvasTexture = document.createElement( 'canvas' );
-		canvasTexture.width = window.innerWidth;
-		canvasTexture.height = window.innerHeight;
+		canvasTexture.id = 'drawingCanvas';
+		canvasTexture.width = window.innerWidth/2;
+		canvasTexture.height = window.innerHeight/2;
+		document.body.appendChild(canvasTexture);
 		textureContext = canvasTexture.getContext( '2d' );
+		 textureContext.fillStyle = "black";
+textureContext.fillRect(0, 0, window.innerWidth/2, window.innerHeight/2);
+
 		/*var color1 = "white",color2="black";
 		var numberOfStripes = 2048/3;		
 		for (var i=0;i<numberOfStripes;i++){
@@ -702,103 +626,132 @@ function createGroup(g){
         $drawMe = true;
 		
 		var randBG1 = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+		$rand2 = Math.floor(Math.random() * loadedBackgrounds.length);
 		var randBG2 = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
-	
-		var geometry = new THREE.SphereBufferGeometry( sizes, 64, 64 );
-		var material = new THREE.MeshBasicMaterial( {color:  randColor, map: randBG1, wireframe: false, transparent: true, opacity: 1, alphaTest: .5} );
+		var randBG3 = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+
+		var cameraZ = camera.position.z;
+		var planeZ = 1.1;
+		var distance = cameraZ - planeZ;
+		var aspect = window.innerWidth / window.innerHeight;
+		var vFov = camera.fov * Math.PI / 180;
+		var planeHeightAtDistance = 2 * Math.tan(vFov / 2) * distance;
+		var planeWidthAtDistance = planeHeightAtDistance * aspect;	
+		videoTexture = new THREE.VideoTexture( $('#vidTexture')[0] );
+		videoTexture.minFilter = THREE.NearestFilter;
+		videoTexture.wrapS = THREE.ClampToEdgeWrapping;
+		videoTexture.wrapT = THREE.ClampToEdgeWrapping;
+
+		var geometry = new THREE.PlaneBufferGeometry( planeWidthAtDistance, planeHeightAtDistance, 64, 64 );
+		//var geometry = new THREE.SphereBufferGeometry( planeWidthAtDistance,64, 64 );
+		var material = new THREE.MeshBasicMaterial( {color:  0xffffff, map: videoTexture, wireframe: false, transparent: true, opacity: 1 } );
 		var alpha = new THREE.CanvasTexture( canvasTexture );
+		alpha.minFilter = THREE.NearestFilter;
+		//material.alphaMap.magFilter = THREE.NearestFilter;
+		material.alphaTest = 0.8;
+		alpha.wrapS = THREE.ClampToEdgeWrapping;
+		alpha.wrapT = THREE.ClampToEdgeWrapping;
+		alpha.repeat.y = 1;
+		alpha.repeat.x = 1;
+		//alpha.offset.y = -1;
+		//alpha.offset.x = 1;
 		material.alphaMap = alpha;
-		material.alphaMap.magFilter = THREE.NearestFilter;
-		material.alphaMap.wrapT = THREE.RepeatWrapping;
-		material.alphaMap.repeat.y = 1;
-		material.alphaMap.offset.y = -1;
-		material.alphaMap.needsUpdate = true;
+		alpha.needsUpdate = true;
+		
 		material.needsUpdate = true;
-		material.side = THREE.DoubleSide;
+		//material.side = THREE.BackSide;
 
 		var plane1 = new THREE.Mesh( geometry, material );
 		plane1.name = 'plane1';
+		//plane1.scale.x = -1;
+		plane1.position.z =planeZ;
+		plane1.castShadow = true;
+		plane1.receiveShadow = false;
+		var customDepthMaterial = new THREE.MeshDepthMaterial( {
+		
+		    depthPacking: THREE.RGBADepthPacking,
+		
+		    map: alpha, // or, alphaMap: myAlphaMap
+		
+		    alphaTest: 0.8
+		
+		} );
+		
+		plane1.customDepthMaterial = customDepthMaterial;
 		group5.add(plane1);
 		$plane1 = group5.getObjectByName('plane1');
 
-		
-		/*var gridHelper2 = new THREE.PolarGridHelper( size, 2, divisions*20, divisions*4, 0x000000, randColor );
-		gridHelper2.rotation.x = Math.PI * 1.5;
-		gridHelper2.name = 'grid2';
-		group5.add( gridHelper2 );
-		$grid2 = group5.getObjectByName('grid2');
-		var divisions = size;
+		var cameraZ = camera.position.z;
+		var planeZ = -5;
+		var distance = cameraZ - planeZ;
+		var aspect = window.innerWidth / window.innerHeight;
+		var vFov = camera.fov * Math.PI / 180;
+		var planeHeightAtDistance = 2 * Math.tan(vFov / 2) * distance;
+		var planeWidthAtDistance = planeHeightAtDistance * aspect;	
+		randBG2.wrapS = THREE.RepeatWrapping;
+		randBG2.wrapT = THREE.RepeatWrapping;
+		//randBG2.repeat.set( 1, 1 );
+		var geometry = new THREE.PlaneBufferGeometry( planeWidthAtDistance, planeWidthAtDistance, 64, 64 );
+				//var geometry = new THREE.SphereBufferGeometry( planeWidthAtDistance,64, 64 );
 		var randColor = colors[Math.floor(Math.random() * colors.length)];
-		removeableItems.push(gridHelper2);
 
-		var gridHelper3 = new THREE.PolarGridHelper( size, 2, divisions*22, divisions*4, 0x000000, randColor );
-		gridHelper3.rotation.x = Math.PI * 1.5;
-		gridHelper3.name = 'grid3';
-		group5.add( gridHelper3 );
-		$grid3 = group5.getObjectByName('grid3');
-		removeableItems.push(gridHelper3);*/
-		/*var randColor1 = colors[Math.floor(Math.random() * colors.length)];
-		var randColor2 = colors[Math.floor(Math.random() * colors.length)];
-		var randBG1 = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
-		var randBG2 = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
-		var geometry1 = new THREE.PlaneGeometry( sizes, sizes, 64, 64 );
-		var material1 = new THREE.MeshBasicMaterial( {color:  randColor2, wireframe: false, transparent: true, opacity: 1} );
-		var aM1 = new THREE.CanvasTexture( generateTexture() );
-		material1.alphaMap = aM1;
-		material1.alphaMap.magFilter = THREE.NearestFilter;
-		material1.alphaMap.wrapT = THREE.RepeatWrapping;
-		material1.alphaMap.repeat.y = 1;
-		material1.needsUpdate = true;
-		randBG1.magFilter = THREE.NearestFilter;
-		randBG1.wrapT = THREE.RepeatWrapping;
-		randBG1.wrapS = THREE.RepeatWrapping;
-		randBG1.repeat.set( 1, 1 );		
+var mat = new THREE.ShaderMaterial({
+		  uniforms:{
+			  col1 : {type:"c", value: new THREE.Color( randColor )},
+		      tex0: {type:"t", value: randBG2},
+		      tex1: {type:"t", value: randBG1},
+		      amt : {tyle:"f", value: .08}
+		  },
+		  color: randColor,
+		  vertexShader:`
+precision highp float;
+precision highp int;
+varying vec2 vUv;
+void main() {
+  vUv = uv;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
 
-		var plane1 = new THREE.Mesh( geometry1, material1 );
-		plane1.name = 'plane1';
-		group5.add(plane1);
-		$grid1 = group5.getObjectByName('plane1');
-		var geometry2 = new THREE.PlaneGeometry( sizes, sizes, 64, 64 );
-		var material2 = new THREE.MeshBasicMaterial( {color:  0x000000, wireframe: false, transparent: true, opacity: 1} );
-		var aM1 = new THREE.CanvasTexture( generateTexture3() );
-		material2.alphaMap = aM1;
-		material2.alphaMap.magFilter = THREE.NearestFilter;
-		material2.alphaMap.wrapT = THREE.RepeatWrapping;
-		material2.alphaMap.repeat.y = 1;
-		material2.needsUpdate = true;
-		randBG2.magFilter = THREE.NearestFilter;
-		randBG2.wrapT = THREE.RepeatWrapping;
-		randBG2.wrapS = THREE.RepeatWrapping;
-		randBG2.repeat.set( 1, 1 );		
+}
+`,
+		  fragmentShader: `
+precision mediump float;
+varying vec2 vUv;
+uniform vec3 col1;
+uniform sampler2D tex0;
+uniform sampler2D tex1;
+uniform float amt;
+void main() {
+  vec2 uv = vUv;
+  vec4 cam = texture2D(tex0, uv);
+  float avg = dot(cam.rgb, vec3(0.33333));
+  avg = avg * 2.0 - 1.0;
+  float disp = avg * amt;
+  vec4 pup = texture2D(tex1, uv + disp);
+  gl_FragColor = pup ;
+}
+`
+		});
 
-		var plane3 = new THREE.Mesh( geometry2, material2 );
-		plane3.name = 'plane3';
-		group5.add(plane3);
-		$grid3 = group5.getObjectByName('plane3');
-		
-		var geometry2 = new THREE.PlaneGeometry( sizes, sizes, 64, 64 );
-		var material2 = new THREE.MeshBasicMaterial( {color:  randColor1, wireframe: false, transparent: true, opacity: 1} );
-		var aM2 = new THREE.CanvasTexture( generateTexture2() );
-		material2.alphaMap = aM2;
-		material2.alphaMap.magFilter = THREE.NearestFilter;
-		material2.alphaMap.wrapT = THREE.RepeatWrapping;
-		material2.alphaMap.repeat.y = 1;
-		material2.needsUpdate = true;
-		randBG2.magFilter = THREE.NearestFilter;
-		randBG2.wrapT = THREE.RepeatWrapping;
-		randBG2.wrapS = THREE.RepeatWrapping;
-		randBG2.repeat.set( 1, 1 );		
 
-		var plane2 = new THREE.Mesh( geometry2, material2 );
-		//plane2.position.z = -1;
+		var material = new THREE.MeshBasicMaterial( {color:  0xffffff, map: randBG2, wireframe: false, transparent: true, opacity: 1} );
+		material.needsUpdate = true;
+		//material.side = THREE.DoubleSide;
+		//var data = getHeightData(backgrounds[$rand2], 1);
+		console.log(randBG2);
+		var plane2 = new THREE.Mesh( geometry, mat );
 		plane2.name = 'plane2';
+		/*for ( var i = 0; i<plane2.geometry.vertices.length; i++ ) {
+		     plane2.geometry.vertices[i].z = data[i];
+		}*/
+		
+		plane2.position.z = planeZ;
+		plane2.castShadow = false;
+		plane2.receiveShadow = true;
 		group5.add(plane2);
-		$grid2 = group5.getObjectByName('plane2');
+		$plane2 = group5.getObjectByName('plane2');
 
-		
 		removeableItems.push(plane1);
-		removeableItems.push(plane2);*/
-		
+		removeableItems.push(plane2);		
 		
 	}
 	if(g === 'group6'){
@@ -826,9 +779,8 @@ function createGroup(g){
 		      texture1: {value: randBG1},
 					texture2: {value: randBG2}
 		  },
-		  vertexShader:`
-	precision highp float;
-precision highp int;
+		  vertexShader:`precision highp float;
+		  precision highp int;
 		    varying vec2 vUv;
 		    void main() {
 		      vUv = uv;
@@ -860,9 +812,107 @@ precision highp int;
 		removeableItems.push(plane);		
 		$feedback = group6.getObjectByName('feedback');
 	}
+	if(g === 'group7'){
+		var randBG1 = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+		var cameraZ = camera.position.z;
+		var planeZ = 0;
+		var distance = cameraZ - planeZ;
+		var aspect = window.innerWidth / window.innerHeight;
+		var vFov = camera.fov * Math.PI / 180;
+		var planeHeightAtDistance = 2 * Math.tan(vFov / 2) * distance;
+		var planeWidthAtDistance = planeHeightAtDistance * aspect;	
+		var geometry = new THREE.PlaneBufferGeometry( planeWidthAtDistance, planeWidthAtDistance, 64, 64 );
+				//var geometry = new THREE.SphereBufferGeometry( planeWidthAtDistance,64, 64 );
+
+		var mat = new THREE.ShaderMaterial({
+		  uniforms:{
+			  mouseX: {type: 'f', value: [0.5] }  ,
+			  mouseY: {type: 'f', value: [0.5] }  ,
+			  amount: {type: 'f', value: [0.3] }  ,
+			  count: {type: 'f', value: [10.0] }  ,
+			  resolution : {type: "v2", value: new THREE.Vector2( window.innerWidth, window.innerWidth )},
+		      tex0: {type:"t", value: randBG1},
+		  },
+		  vertexShader:`
+			precision highp float;
+			precision highp int;
+		    varying vec2 vUv;
+		    void main() {
+		      vUv = uv;
+		      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+		    }
+		  `,
+		  fragmentShader: `
+			precision mediump float;
+			varying vec2 vUv;
+			uniform sampler2D tex0;
+			uniform vec2 resolution;
+			uniform float amount;
+			uniform float count;
+			uniform float mouseX;
+			uniform float mouseY;
+			
+			
+			void main() {
+				float amt = amount; // the amount of displacement, higher is more
+				float squares = count; // the number of squares to render vertically
+			
+			  float aspect = resolution.x / resolution.y;
+			  float offset = amt * mouseY;
+			  vec2 uv = vUv;
+			  uv.y =  uv.y + mouseY;
+			  vec2 tc = uv;
+			  uv -= 0.5;
+			  uv.x *= aspect ;
+			  vec2 tile = fract(uv * squares + 0.5) * amt;
+			  vec4 tex = texture2D(tex0, tc + tile - offset - mouseX);
+			  gl_FragColor = tex;
+			}
+			`
+		});
+		console.log(randBG2);
+		var plane2 = new THREE.Mesh( geometry, mat );
+		plane2.name = 'plane2';
+		plane2.position.z = planeZ;
+		plane2.castShadow = false;
+		plane2.receiveShadow = true;
+		group7.add(plane2);
+		removeableItems.push(plane2);
+		group7.position.z=100;
+		$plane2 = group7.getObjectByName('plane2');
+		
+	}
 	ready3 = true;
 }
-	
+function getHeightData(img,scale) {
+  
+ if (scale == undefined) scale=1;
+  
+    var canvas = document.createElement( 'canvas' );
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerWidth;
+    var context = canvas.getContext( '2d' );
+ 
+    var size = window.innerWidth * window.innerWidth;
+    var data = new Float32Array( size );
+ 
+    context.drawImage(img,0,0);
+ 
+    for ( var i = 0; i < size; i ++ ) {
+        data[i] = 0
+    }
+ 
+    var imgd = context.getImageData(0, 0, window.innerWidth, window.innerWidth);
+    var pix = imgd.data;
+ 
+    var j=0;
+    for (var i = 0; i<pix.length; i +=4) {
+        var all = pix[i]+pix[i+1]+pix[i+2];
+        data[j++] = all/(12*scale);
+    }
+     
+    return data;
+}
 function generateTexture() {
 	var canvas = document.createElement( 'canvas' );
 	canvas.width = 2048;
@@ -973,9 +1023,6 @@ function addPortal(){
 	group1.add(portalMesh);		
 	$portal = group1.getObjectByName('portalMesh');
 }
-$switch = true;
-var switcher;
-oldMax = 0;
 function makeWireframe(mesh, bassFr, treFr, ampl) {
     mesh.geometry.vertices.forEach(function (vertex, i) {
         var offset = mesh.geometry.parameters.radius;
@@ -993,68 +1040,46 @@ function makeWireframe(mesh, bassFr, treFr, ampl) {
 	//mesh.material.needsUpdate = true;
 
 }
-$('#messages .message > span').hover(function(){
-	$(this).addClass('hover');
-}, function(){
-	$(this).removeClass('hover');
-});
-shaderTime = 0;
-var start = Date.now();
 function draw() {
 	requestAnimationFrame(draw);
 	shaderTime += .01
-	if(holding){
-		if(ready2){
+	staticPass.uniforms[ 'time' ].value =  shaderTime;	
+	if(!holding){
+		TweenMax.to(badTVPass.uniforms[ 'distortion' ], .5, {value: 0});
+		TweenMax.to(badTVPass.uniforms[ 'speed' ], .5, {value: 0});
+		TweenMax.to(badTVPass.uniforms[ 'distortion2' ], .5, {value: 0});
+		TweenMax.to(ticker.position, .01, {delay: .5, z: 1});
+		staticPass.uniforms[ 'amount' ].value = 0.2
+		$switch = true;
+		oldMax = 0;
+	}
+	if(ready2){
+		if(holding && ready3){
 			playing = true;
 			analyser.getFrequencyData(dataArray);
-			//dataArray = [0,0,0,0];
-			var lowerHalfArray = dataArray.slice(0, (dataArray.length/2) - 1);
-			var upperHalfArray = dataArray.slice((dataArray.length/2) - 1, dataArray.length - 1);
-			var overallAvg = avg(dataArray);
-			var lowerMax = max(lowerHalfArray);
-			var lowerAvg = avg(lowerHalfArray);
-			var upperMax = max(upperHalfArray);
-			var upperAvg = avg(upperHalfArray);
-			var lowerMaxFr = lowerMax / lowerHalfArray.length;
-			var lowerAvgFr = lowerAvg / lowerHalfArray.length;
-			var upperMaxFr = upperMax / upperHalfArray.length;
-			var upperAvgFr = upperAvg / upperHalfArray.length;
-			//console.log(dataArray);
+			lowerHalfArray = dataArray.slice(0, (dataArray.length/2) - 1);
+			upperHalfArray = dataArray.slice((dataArray.length/2) - 1, dataArray.length - 1);
+			overallAvg = avg(dataArray);
+			lowerMax = max(lowerHalfArray);
+			lowerAvg = avg(lowerHalfArray);
+			upperMax = max(upperHalfArray);
+			upperAvg = avg(upperHalfArray);
+			lowerMaxFr = lowerMax / lowerHalfArray.length;
+			lowerAvgFr = lowerAvg / lowerHalfArray.length;
+			upperMaxFr = upperMax / upperHalfArray.length;
+			upperAvgFr = upperAvg / upperHalfArray.length;
 			TweenMax.to(ticker.position, 0, {z: 10});
 			if(!sound.isPlaying){
 				sound.play();
 			}
+			
 			TweenMax.to(sound, .2, { setPlaybackRate:1, setVolume:1});
 			$('.output#time').html(timeOutput);
 			$('.output#data').html(parseFloat(overallAvg).toFixed(4)+'<br />'+parseFloat(lowerAvg).toFixed(4))
 			$('.output#coords').html('['+mX+','+ mY+']')
 			$('.output#loop').html(parseFloat($loopLength)+'<br />'+parseFloat($loopDur).toFixed(2));
 			staticPass.uniforms[ 'amount' ].value = 0.05;
-			//$exploder.material.uniforms.farClipping.value = 4+overallAvg;
-			//$exploder.material.uniforms.nearClipping.value = 4-overallAvg/4;
-			//console.log(overallAvg)
-
-		} else {
-			TweenMax.to(badTVPass.uniforms[ 'distortion' ], .5, {value: 0});
-			TweenMax.to(badTVPass.uniforms[ 'speed' ], .5, {value: 0});
-			TweenMax.to(badTVPass.uniforms[ 'distortion2' ], .5, {value: 0});
-				
-		}
-	} else{
-		TweenMax.to(badTVPass.uniforms[ 'distortion' ], .5, {value: 0});
-		TweenMax.to(badTVPass.uniforms[ 'speed' ], .5, {value: 0});
-		TweenMax.to(badTVPass.uniforms[ 'distortion2' ], .5, {value: 0});
-		TweenMax.to(ticker.position, .01, {delay: .5, z: 1});
-		staticPass.uniforms[ 'amount' ].value = 0.2
-		$switch = false;
-oldMax = 0;
-	}
-
-
-	staticPass.uniforms[ 'time' ].value =  shaderTime;	
-	//hblur.uniforms.mouse.value.copy(mouse);
-	//vblur.uniforms.mouse.value.copy(mouse);
-	if(ready2){
+		} 
 		if(showGroup === 'group1'){
 			if(holding && ready3){
 				group1.position.z = 6;
@@ -1070,7 +1095,6 @@ oldMax = 0;
 				$portal.material.map.offset.y = (mY - (window.innerHeight/2))/window.innerHeight;
 				TweenMax.to($portal.position, 1, {z: overallAvg/30 * -.5, x: 0, y: 0});
 				//switchBG += overallAvg;
-				console.log(upperMaxFr +','+ oldMax);
 				if(upperMaxFr !== oldMax && $switch){
 					switchBG = 0;
 					var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
@@ -1092,8 +1116,6 @@ oldMax = 0;
 		if(showGroup === 'group2'){
 			if(holding && ready3){
 				TweenMax.to(group2.position, .2, {z: 0});
-				//hblur.uniforms.h.value = 2.0 / 512.0;
-				//vblur.uniforms.v.value = 2.0 / 512.0;
 				$plane1.rotation.z += ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*.015;
 				$plane2.rotation.z += ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*-.025;
 				$plane3.rotation.z -= ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*.025;
@@ -1107,17 +1129,11 @@ oldMax = 0;
 				rate += 0.005;
 				adjustMeshPlaneVertices(Math.max(1, 2-offset['upper']), Math.max(1, offset['lower']), rate);
 			} else{
-				//hblur.uniforms.h.value = 0;
-				//vblur.uniforms.v.value = 0;
+
 			}
-		} else{
-			//hblur.uniforms.h.value = 0;
-			//vblur.uniforms.v.value = 0;
-			rate = 0;
-		}
+		} 
 		if(showGroup === 'group3'){
 			if(holding && ready3){
-				afterimagePass.uniforms.damp.value = 0.85;
 				$mainSpot.intensity = 0.5;
 				TweenMax.to(group3.position, .2, {z: 0});
 				$pointLight.traverse(function(obj) {
@@ -1129,30 +1145,10 @@ oldMax = 0;
 				});
 				
 				$pointLight.rotation.y = ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*-2;				
-				$pointLight.rotation.x = ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*2;				
-				//$room.rotation.y = ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*-2;				
-				//$room.rotation.x = ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*2;				
-				//$pointLight.position.z = lowerAvg/200;				
-				//$pointLight.rotation.x += .005;
-				//$pointLight.rotation.y += .005;
+				$pointLight.rotation.x = ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*2;
+				$pointLight.position.z = 3 + ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*10	;			
 				$room.material.opacity = 1;
-				//.intensity = 1+ overallAvg/40;
 				TweenMax.to($pointLight, .8, {intensity: overallAvg/10});
-				var time = performance.now() * 0.001;
-				$pointLight.position.z = Math.sin( time * 0.25 ) * -4 +9;
-				//$pointLight.position.x = Math.sin( time * 0.17 ) * 3;
-				//$pointLight.position.y = Math.sin( time * 0.24 ) * 2;
-				//TweenMax.to($pointLight.position, 1, {z: 3+ overallAvg/30});
-				//$room.rotation.y += ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*.01;
-				//$room.rotation.z += ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*.01;
-				//$room.rotation.x += ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*.05;
-				switchColor += overallAvg;
-				//colorify.uniforms['opacity'].value = 1;
-				if(parseInt(switchColor) > 800){
-					switchColor = 0;
-					var randColor = colors[Math.floor(Math.random() * colors.length)];
-					colorify.uniforms['color'].value = new THREE.Color( randColor );
-				}
 			} else{
 				$mainSpot.intensity = 1;
 				ambientLight.intensity = .6;
@@ -1163,14 +1159,8 @@ oldMax = 0;
 						obj.material.opacity = 0;
 					}
 				})
-				colorify.uniforms['opacity'].value = 0;
-				afterimagePass.uniforms.damp.value = 0.96;
 			}
-		}  else{
-			$mainSpot.intensity = 1;
-			colorify.uniforms['opacity'].value = 0;
-			afterimagePass.uniforms.damp.value = 0.96;
-		}
+		} 
 		if(showGroup === 'group4'){
 			if(holding && ready3){
 				//afterimagePass.uniforms.damp.value = 0;
@@ -1216,90 +1206,41 @@ oldMax = 0;
 
 			}
 
-		} else{
-			volumetericLightShaderUniforms.exposure.value = 0;
 		}
 		if(showGroup === 'group5'){
 			if(holding && ready3){
-				afterimagePass.uniforms.damp.value = 0.8;
-				$plane1.rotation.x = ((mY - (window.innerHeight/2))/window.innerHeight)*-4;
-				$plane1.rotation.y = ((mX - (window.innerWidth/2))/window.innerWidth)*8;
-				//group5.position.z = 0;
-				//$grid1.position.z = ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*2;
-				//TweenMax.to($grid1.position, 1, {z: overallAvg/20});
-				//$grid1.rotation.y += ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*-.005;
-				//$grid1.position.x = ((mX - (window.innerWidth/2))/window.innerWidth * -5);
-				//$grid1.position.y = ((mY - (window.innerHeight/2))/window.innerHeight * -5);
-				//TweenMax.to($grid2.position, 1, {z: 0.5 + overallAvg/15});
-				//$grid1.rotation.z += ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*.05;
-				//$grid1.rotation.z += .001;
-				//$grid3.rotation.z -= .005;
-				//badTVPass.uniforms[ 'distortion' ].value = ((mX - (window.innerWidth/2))/window.innerWidth)*30;
-				//badTVPass.uniforms[ 'distortion2' ].value = ((mY - (window.innerHeight/2))/window.innerHeight)*10;
-				//$grid2.position.x =  ((mX - (window.innerWidth/2))/window.innerWidth * 8);
-				//$grid2.position.y = ((mY - (window.innerHeight/2))/window.innerHeight * -8);	
-				//$grid1.rotation.y = ((mX - (window.innerWidth/2))/window.innerWidth * 6);
-				//$grid2.rotation.y = ((mX - (window.innerWidth/2))/window.innerWidth * -6);
-
-				/*$grid3.position.x = ((mX - (window.innerWidth/2))/window.innerWidth * -6);
-				$grid3.position.y = ((mY - (window.innerHeight/2))/window.innerHeight * 6);	
-				
-				$grid3.rotation.y = ((mX - (window.innerWidth/2))/window.innerWidth * 6);*/
-				/*$grid1.traverse(function(obj) {
-				 if (obj.name && obj.name.includes('plane1')) {
-				  	//obj.material.alphaMap.offset.x -= ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*.005;
-				  	obj.material.alphaMap.offset.y += ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*.005;
-				  	obj.material.needsUpdate = true;
-				    //obj.material.alphaMap.offset.y = mY * 0.001;
-				    //obj.material.alphaMap.offset.x = mX * 0.001;
-				    //obj.material.alphaMap.offset.x = Math.sin( time * 0.002 ) * 7 + 5;
-				 }
-				 });*/
-				 group5.position.z = 0;
-				//TweenMax.to($grid3.position, 1, {z: 0 + overallAvg/30});
-				//TweenMax.to($grid2.position, 1, {z: 0 + overallAvg/20});
-				//colorify.uniforms['opacity'].value = overallAvg/100;
-			
+				videoTexture.needsUpdate = true;
+				if($('#vidTexture')[0].paused){
+					$('#vidTexture')[0].play();
+				}
+				TweenMax.to($plane2.material.uniforms.amt, 2, {value: overallAvg/800});
+				group5.position.z = 0;
 				if(upperMaxFr !== oldMax && $switch){
 					switchBG = 0;
 					var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
-					//$grid1.material.map = randBG;
-					//$grid1.material.needsUpdate = true;
+					$plane2.material.uniforms.tex1.value = randBG;
 					$switch = false;
 					oldMax = upperMaxFr;
-					console.log('switch');
 					if (switcher) window.clearTimeout(switcher);
 					switcher = window.setTimeout(function(){
 						$switch = true;
 					},500);
 				}		
-				//var randColor = colors[Math.floor(Math.random() * colors.length)];
-				//colorify.uniforms['color'].value = new THREE.Color( 0xffffff );
-
 			} else{
-				//badTVPass.uniforms[ 'distortion' ].value = 0;
-				//badTVPass.uniforms[ 'distortion2' ].value = 0;
-				afterimagePass.uniforms.damp.value = 0.96;
 				group5.position.z = 100;
-				//colorify.uniforms['opacity'].value = 0;
-				//afterimagePass.uniforms.damp.value = 0.96;
+				if(!$('#vidTexture')[0].paused){
+					$('#vidTexture')[0].pause();
+				}
 			}		
-		} else{
-			//afterimagePass.uniforms.damp.value = 0.96;		
-		}
+		} 
 		if(showGroup === 'group6'){
 			if(holding && ready3){
-				//staticPass.uniforms[ 'amount' ].value = 0.25;
-				TweenMax.to(badTVPass.uniforms[ 'distortion' ], 1, {value: overallAvg/10});
-				TweenMax.to(badTVPass.uniforms[ 'speed' ], 3, {value: overallAvg * -.0025});
-				TweenMax.to(badTVPass.uniforms[ 'distortion2' ], 2, {value: lowerAvg/250});
-				//badTVPass.uniforms[ 'distortion2' ].value = ((mX - (window.innerWidth/2))/window.innerWidth)*.8;
+				TweenMax.to(badTVPass.uniforms[ 'distortion' ], 1, {value: overallAvg/100});
+				TweenMax.to(badTVPass.uniforms[ 'speed' ], 3, {value: overallAvg/200 * -.025});
+				TweenMax.to(badTVPass.uniforms[ 'distortion2' ], 2, {value: overallAvg/150});
 				group6.position.z = 0;
-				glitchPass.uniforms.goWild = true;
-				//afterimagePass.uniforms.damp.value = 0.06;
-				var time = performance.now() * 0.001;
+				var time = performance.now() * 0.009;
 				badTVPass.uniforms[ 'time' ].value = time;
-				//TweenMax.to(badTVPass.uniforms[ 'rollSpeed' ], 1, {value:((mY - (window.innerHeight/2))/window.innerHeight)*-.5});
 				$feedback.material.uniforms.mx.value = (mX / window.innerWidth)*2 -1;
 				TweenMax.to($feedback.position, 2, {z: -5 - lowerAvg/20});
 				$feedback.material.uniforms.my.value = -(mY / window.innerHeight)*2 +1;
@@ -1314,9 +1255,30 @@ oldMax = 0;
 				TweenMax.to(badTVPass.uniforms[ 'distortion2' ], .5, {value: 0});
 				
 			}
-		} else{
-			
 		}	
+		if(showGroup === 'group7'){
+			if(holding && ready3){
+				group7.position.z=0;
+				$plane2.material.uniforms.mouseX.value = ((mX - (window.innerWidth/2))/window.innerWidth);
+				$plane2.material.uniforms.mouseY.value = ((mY - (window.innerHeight/2))/window.innerHeight);
+				TweenMax.to($plane2.material.uniforms.amount, 1, {value: .4 - overallAvg/100});
+				TweenMax.to($plane2.material.uniforms.count, 4, {value: overallAvg/2});				
+				if(upperMaxFr !== oldMax && $switch){
+					switchBG = 0;
+					var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+					$plane2.material.uniforms.tex0.value = randBG;
+					$switch = false;
+					oldMax = upperMaxFr;
+					console.log('switch');
+					if (switcher) window.clearTimeout(switcher);
+					switcher = window.setTimeout(function(){
+						$switch = true;
+					},1000);
+				}	
+			} else{
+				group7.position.z=100;	
+			}
+		}
 	}
 	camera.layers.set(OCCLUSION_LAYER);
     renderer.setClearColor(0x000000);
@@ -1332,7 +1294,6 @@ function adjustMeshPlaneVertices(offset1, offset2, rate) {
 		var noise3 =  simplex.noise2D(x1 + rate, y1) * 2; 
 		vertex.z = noise3;
 	}
-
 	$plane1.geometry.verticesNeedUpdate = true;
 	$plane1.geometry.normalsNeedUpdate = true;
 	$plane1.geometry.computeVertexNormals();
@@ -1365,13 +1326,7 @@ function onWindowResize() {
 	camera.updateProjectionMatrix();
 	renderer.setSize(window.innerWidth, window.innerHeight);
 }
-$('#test').click(function(){
-	 if($first){
-		loadLoop();	  
-		console.log('load');  
-    }
-});
-function mouseDown() { 
+function mouseDown(e) { 
     //mouseUp();
 	 if($first){
 		loadLoop();	  
@@ -1379,6 +1334,7 @@ function mouseDown() {
     }
     holding = true;
     if(!playing && ready && ready2 && ready3){
+		$switch = true;
 
 	    if(!sound.isPlaying){
 			sound.play();
@@ -1389,27 +1345,44 @@ function mouseDown() {
     }
     if (loopTimer) window.clearTimeout(loopTimer); 
     if (idleTimer) window.clearTimeout(idleTimer);
-
+	if($drawMe){
+		startX = e.pageX ;
+		startY = e.pageY ;
+		drawMask(startX, startY,20,0,255,0, 1);
+	}
     idleTimer = window.setTimeout(idleMouse,500);
-  
 }
 function mouseMove(event) {
-  if(!holding){
-    movingMouse();
-    event.preventDefault();
-  }
-  mX = event.pageX;
-  mY =  event.pageY;
-  if($drawMe){
-	  textureContext.fillStyle = 'white';
-    textureContext.beginPath();
-    textureContext.moveTo(mX, mY);
-    textureContext.arc(mX, mY, 20, 0, Math.PI * 2, false);
-    textureContext.fill();
-   $plane1.material.alphaMap.needsUpdate = true;
-  }
+	if(!holding){
+		movingMouse();
+		event.preventDefault();
+	}
+	mX = event.pageX;
+	mY =  event.pageY;
+	if($drawMe){
+		var dis = Math.sqrt(Math.pow(startX-mX, 2)+Math.pow(startY-mY, 2));
+		for (i=0;i<dis;i+=1) {
+			var s = i/dis;
+			drawMask(startX*s + mX*(1-s), startY*s + mY*(1-s),20,0,255,0, 1);
+		}
+		startX = mX;
+		startY = mY;  
+	}
 }
-var loopTimer;
+function drawMask(x,y,w,r,g,b,a){
+    var gradient = textureContext.createRadialGradient(x/2, y/2, 0, x/2, y/2, w/2);
+    gradient.addColorStop(0, 'rgba('+r+', '+g+', '+b+', '+a+')');
+    //gradient.addColorStop(1, 'rgba(0,100,0,)');
+    
+	gradient.addColorStop(.6, 'rgba('+r+', '+g+', '+b+', 0)');
+    textureContext.beginPath();
+    textureContext.arc(x/2, y/2, w/2, 0, 2 * Math.PI);
+    textureContext.fillStyle = gradient;
+    textureContext.fill();
+    textureContext.closePath();
+    textureContext.filter = "blur(10px)";
+    $plane1.material.alphaMap.needsUpdate = true;
+};
 function mouseUp() { 
     holding = false;
 	movingMouse();
@@ -1423,8 +1396,8 @@ function mouseUp() {
 		playing = true;
 	}    
     if (loopTimer) window.clearTimeout(loopTimer); 
-	 if(!$first){
-    loopTimer = window.setTimeout(loadLoop,400);
+	if(!$first){
+   		loopTimer = window.setTimeout(loadLoop,400);
 	}
     if (idleTimer) window.clearTimeout(idleTimer); 
     idleTimer = window.setTimeout(movingMouse,600);
@@ -1435,17 +1408,15 @@ function movingMouse(){
 function idleMouse(){
 	$('body').addClass('idle');
 }
-function execMouseDown() { 
-   // console.log('jump');
-}
-document.body.addEventListener("mousemove", mouseMove);
 $(document).on('mousemove touchmove', function(event) {
   event.preventDefault();
  });
- $('#scene')[0].addEventListener("mousedown", mouseDown);
+$('#scene')[0].addEventListener("mousedown", mouseDown);
+document.body.addEventListener("mousemove", mouseMove);
 document.body.addEventListener("mouseup", mouseUp); 
 document.body.addEventListener("touchstart", mouseDown);
 document.body.addEventListener("touchend", mouseUp); 
+window.addEventListener("resize", onWindowResize);
 function fractionate(val, minVal, maxVal) {
     return (val - minVal)/(maxVal - minVal);
 }

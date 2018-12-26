@@ -52,23 +52,19 @@ module.exports = function(grunt) {
 					'docroot/assets/js/vendor/perlin.js',
 					'docroot/assets/js/vendor/GlitchPass.js',
 					'docroot/assets/js/vendor/MaskPass.js',
-					'docroot/assets/js/vendor/THREE.MeshLine.js',
 					'docroot/assets/js/vendor/AfterimagePass.js',
 					'docroot/assets/js/vendor/ShaderGodRays.js',
 					'docroot/assets/js/vendor/RGBShiftShader.js',
 					'docroot/assets/js/vendor/BadTVShader.js',
 					'docroot/assets/js/vendor/ColorifyShader.js',
 					'docroot/assets/js/vendor/custom.js',
-		            //'docroot/assets/js/vendor/Maf.js',
-		            //'docroot/assets/js/vendor/THREE.MeshLine.js',
-					//'docroot/assets/js/vendor/threex.geometricglowmesh.js',
-					//'docroot/assets/js/vendor/threex.dilategeometry.js',
-					//'docroot/assets/js/vendor/threex.atmospherematerial.js',
+					'docroot/assets/js/vendor/shaders.js',
 				],
 				dest: 'docroot/assets/js/libs.min.js',
 		    },
 		    countdown: {
 		        src: [
+					'docroot/assets/js/libs.min.js',
 					'docroot/assets/js/countdown.js'
 				],
 				dest: 'docroot/assets/js/countdown.min.js',
@@ -76,8 +72,9 @@ module.exports = function(grunt) {
 		}
     });
 	grunt.loadNpmTasks('grunt-contrib-watch');
-	grunt.loadNpmTasks('grunt-contrib-uglify');
+	grunt.loadNpmTasks('grunt-contrib-uglify-es');
 	grunt.loadNpmTasks('grunt-contrib-sass');
     grunt.registerTask('work', ['watch']);
-    grunt.registerTask('build', ['sass','uglify:libs']);
+    grunt.registerTask('libs', ['uglify:libs']);
+    grunt.registerTask('build', ['sass','uglify:countdown']);
 };
