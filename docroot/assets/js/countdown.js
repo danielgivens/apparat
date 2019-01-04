@@ -1,25 +1,30 @@
 backgrounds = [
-	'/assets/images/app.jpg',
 	'/assets/images/test-4.jpg',
-	'/assets/images/texture-tour-1.jpg',
-	'/assets/images/texture-tour-2.jpg',
-	'/assets/images/texture-tour-3.jpg',
-	'/assets/images/texture-tour-4.jpg',
-	'/assets/images/texture-tour-6.jpg',
-	'/assets/images/texture-tour-8.jpg',
-	'/assets/images/texture-tour-10.jpg',
+	'/assets/images/app2.jpg',
+	'/assets/images/app-flowers-pink.jpg',
+	'/assets/images/app-smudges-2.jpg',
+];
+masks =[
+	'/assets/images/appn.jpg',
+	//'/assets/images/app-photobooth.jpg',	
+	'/assets/images/type-texture.png',
+	'/assets/images/app-flower-mask.png',	
 ];
 textTextures = [
-	'/assets/images/type-texture.png'
+	'/assets/images/type-texture.png',
+	'/assets/images/app-flower-mask.png',	
 ];
 snips = [
-	'/assets/audio/loop-1.mp3',
-	'/assets/audio/loop-3.mp3',
-	'/assets/audio/loop-4.mp3',
-	'/assets/audio/loop-6.mp3',
-	'/assets/audio/loop-8.mp3',
-	'/assets/audio/loop-10.mp3'	
+	'/assets/audio/loop-1.aac',
+	'/assets/audio/loop-3.aac',
+	'/assets/audio/loop-4.aac',
+	'/assets/audio/loop-6.aac',
+	'/assets/audio/loop-8.aac',
+	'/assets/audio/loop-10.aac'	
+
+//'/assets/audio/dawan.mp3'
 ];
+$loopSequence = shuffle(snips.slice(0));
 groups = [
 	'group1',
 	'group2',
@@ -28,28 +33,44 @@ groups = [
 	'group5',
 	'group6',
 	'group7',
+	'group8',
+	//'group9',
+	'group10',
 ];
-group1 = new THREE.Group();
-group2 = new THREE.Group();
-group3 = new THREE.Group();
-group4 = new THREE.Group();
-group5 = new THREE.Group();
-group6 = new THREE.Group();
-group7 = new THREE.Group();
+
 colors = [
 	0xffd064,
 	0xfb248b,
-	0x01d765
+	0x01d765,
+	0xf7ec13,
+	0x1d8e40,
+	0xe27940,
+	0x29a9fd,
+	0x0040ff,
+	
 ];
-var scene, switcher, mouse, upperAvgFr, upperMaxFr, lowerAvgFr, lowerMaxFr, upperAvg, upperMax, lowerAvg, lowerMax, overallAvg, deadline, $buff, loopTimer, listener, $track, textureContext, sphere_mesh,ambientLight, volumetericLightShaderUniforms, audioLoader, videoTexture, occlusionComposer, occlusionRenderTarget, occlusionBox, lightSphere, dartaArray, pointLight, $pointLight, idleTimer, $portal, textMesh, mouseTimer, portalMesh, portalrenderer, sound, camera, material, composer, analyser, dataArray, glitchPass, afterimagePass, renderPass, copyPass, rgbParams, rgbPass, filmParams, filmPass, renderPass, copyPass;
-var DEFAULT_LAYER = 0, OCCLUSION_LAYER = 1, renderScale = 0.5, angle = 0, audioData = [], shaderTime = 0, fftSize = 512, $drawMe = false, ready3 = false, playing = false, ready = false, ready2 = false, holding = false, font2 = undefined, startX = window.innerWidth/2, startY = window.innerHeight/2, backgroundsLoaded = false, loadedBackgrounds = [],removeableItems = [], loadedText = [], mX = 0, mY = 0, b = 0, d = 0, $r = 0, $switch = true, oldMax = 0, shaderTime = 0, start = Date.now(), wifreframeBallColor = 0, switchBG = 0, switchColor = 0, rate = 0, time = 0, offset = { upper : 0,lower : 0}, showGroup = 'none', $g = 1, $first = true; timeOutput = '00:00:00:00';
+var scene, switcher, mouse, fire, upperAvgFr, upperMaxFr, lowerAvgFr, lowerMaxFr, upperAvg, upperMax, lowerAvg, lowerMax, overallAvg, deadline, $buff, loopTimer, listener, $track, textureContext, sphere_mesh,ambientLight, volumetericLightShaderUniforms, audioLoader, videoTexture, occlusionComposer, occlusionRenderTarget, occlusionBox, lightSphere, dartaArray, pointLight, $pointLight, idleTimer, $portal, textMesh, mouseTimer, portalMesh, portalrenderer, sound, camera, material, composer, analyser, dataArray, glitchPass, afterimagePass, renderPass, copyPass, rgbParams, rgbPass, filmParams, filmPass, renderPass, copyPass;
+var DEFAULT_LAYER = 0, OCCLUSION_LAYER = 1, objects = [], randomPlanes = [], textureIndex = 0, $loopDur = 0, $loopLength = 0, renderScale = 0.5, ready4 = false, angle = 0, audioData = [], shaderTime = 0, btime = 0, fftSize = 512, $drawMe = false, ready3 = false, playing = false, ready = false, ready2 = false, holding = false, font2 = undefined, startX = window.innerWidth/2, startY = window.innerHeight/2, backgroundsLoaded = false, loadedBackgrounds = [], loadedMasks = [],removeableItems = [], loadedText = [], mX = 0, mY = 0, b = 0, d = 0, r= 0, $r = 0, $switch = true, oldMax = 0, shaderTime = 0, start = Date.now(), wifreframeBallColor = 0, switchBG = 0, switchColor = 0, rate = 0, time = 0, offset = { upper : 0,lower : 0}, showGroup = 'none', $g = 1, $first = true; timeOutput = '00:00:00:00';
 var noise2 = new SimplexNoise(), simplex = new SimplexNoise(), manager = new THREE.LoadingManager(), loader = new THREE.TextureLoader(manager);
+var shaderUniforms, shaderAttributes;
+
+var particles = [];
+var particleSystem;
+
+var imageWidth = 1024/2;
+var imageHeight = 1024/2;
+var imageData = null;
+
+var animationTime = 0;
+var animationDelta = 0.03;
 var loadChecker = setInterval(function(){
-	if(backgroundsLoaded){clearInterval(loadChecker);}
+	if(backgroundsLoaded){
+		clearInterval(loadChecker);
+		ready4 = true;
+	}
 },100);
-
+var $sequence = [];
 init();
-
 function init(){
 	setupScene();
 	loadBackgrounds(backgrounds[0]);
@@ -59,23 +80,27 @@ function randGroup(){
 	ready3 = false;
 	//rand = Math.floor(Math.random() * groups.length) + 1;
 	//rand = 1;
-	rand = $g;
-	showGroup = 'group'+rand;
+	//showGroup = 'group'+rand;
 	$scene = getUrlVars()["s"];
-	if($first && $scene){
+	if($scene){
 	    if($scene <= groups.length){
 			showGroup = 'group'+$scene;
 			//console.log('target:'+ $scene);
 		} else{
 			showGroup = 'group1';
 		}
-		$g = $scene;
+	} else if($first){
+		$sequence = shuffle(groups.slice(0));
+		showGroup = $sequence[0];
+		$sequence.shift();	
+	} else{
+		showGroup = $sequence[0];
+		$sequence.shift();
+	}
+	if($sequence.length === 1){
+		$sequence = shuffle(groups.slice(0));
 	}
 	createGroup(showGroup);
-	$g++;
-	if($g > groups.length){
-		$g = 1;
-	}
 	$first = false;
 		
 }
@@ -109,6 +134,16 @@ function setupScene(){
 	spotLight.name = 'mainSpot';
 	scene.add( spotLight );
 	$mainSpot = scene.getObjectByName('mainSpot');
+	group1 = new THREE.Group();
+	group2 = new THREE.Group();
+	group3 = new THREE.Group();
+	group4 = new THREE.Group();
+	group5 = new THREE.Group();
+	group6 = new THREE.Group();
+	group7 = new THREE.Group();
+	group8 = new THREE.Group();
+	group9 = new THREE.Group();
+	group10 = new THREE.Group();
 	scene.add(group1);		
 	scene.add(group2);		
 	scene.add(group3);		
@@ -116,6 +151,9 @@ function setupScene(){
 	scene.add(group5);		
 	scene.add(group6);
 	scene.add(group7);
+	scene.add(group8);
+	scene.add(group9);
+	scene.add(group10);
 	
 	renderer = new THREE.WebGLRenderer({ 
 	    antialias: true,
@@ -125,7 +163,6 @@ function setupScene(){
 	renderer.shadowMap.type = THREE.PCFShadowMap;
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	pixelRatio = 1;
-	
 	
 	occlusionRenderTarget = new THREE.WebGLRenderTarget( window.innerWidth, window.innerHeight);
 	occlusionComposer = new THREE.EffectComposer( renderer, occlusionRenderTarget);
@@ -144,13 +181,20 @@ function setupScene(){
 	
 	composer = new THREE.EffectComposer(this.renderer);
 	composer.setSize( window.innerWidth * pixelRatio, window.innerHeight * pixelRatio );
-	composer.addPass( new THREE.RenderPass( this.scene, this.camera ) );
+	composer.addPass( new THREE.RenderPass( scene, camera ) );
+
+	var hue = new THREE.ShaderPass(THREE.HueSaturationShader);
+    //hue.enabled = true;
+    //hue.uniforms.hue.value = 10;
+	//hue.renderToScreen = false;
+	//composer.addPass( hue );
 	
 	colorify = new THREE.ShaderPass(THREE.ColorifyShader)
 	colorify.uniforms['opacity'].value = 0;
 	colorify.uniforms['color'].value.setRGB(1, 1, 1);
 	colorify.renderToScreen = false;
 	composer.addPass( colorify );
+
 	
 	badTVPass = new THREE.ShaderPass( THREE.BadTVShader );
 	badTVPass.renderToScreen = false;
@@ -192,11 +236,29 @@ function loadBackgrounds(bg){
 		loadedBackgrounds.push(object);
 		//console.log('loaded background:'+object);
 		if(loadedBackgrounds.length == backgrounds.length ){
-			loadTextTextures(textTextures[0]);
+			loadMasks(masks[0]);
 		} else{
 			b++
 			if(b <= backgrounds.length){
 				loadBackgrounds(backgrounds[b]);
+			} else{
+				loadMasks(masks[0]);
+				
+			}
+		}
+	});
+}
+function loadMasks(bg){
+	var loader = new THREE.TextureLoader(manager)
+	loader.load(bg, function (object) {
+		loadedMasks.push(object);
+		//console.log('loaded background:'+object);
+		if(loadedMasks.length == masks.length ){
+			loadTextTextures(textTextures[0]);
+		} else{
+			r++
+			if(r <= masks.length){
+				loadMasks(masks[r]);
 			} else{
 				loadTextTextures(textTextures[0]);
 				
@@ -225,7 +287,7 @@ function setupTicker(){
 	/* ticker stuff */
 	ticker = new THREE.Group();
 	var countDown = 'LP_5';
-	deadline = "2019-03-12T12:00:00+00:00";
+	deadline = "2019-03-22T12:00:00+00:00";
 	var fontLoader = new THREE.FontLoader();
 	var font = fontLoader.load( '/assets/fonts/Terminal Grotesque_Regular.json', function ( response ) {
 	    font2 = response;
@@ -289,7 +351,7 @@ function createText(){
 	var textGeometry = new THREE.TextGeometry(countDown, {
 		font: font2,
 		size: window.innerWidth/1000,
-		height: .1,
+		height: .01,
 		curveSegments: 4
 	});
 	textGeometry.center();
@@ -300,6 +362,7 @@ function createText(){
 	
 }
 function handleGroup(){
+	ready2 = false;
 	if(showGroup != 'none'){
 	    if(showGroup === 'group1'){
 		    group = group1;
@@ -315,13 +378,25 @@ function handleGroup(){
 		    group = group6;
 	    } else if(showGroup === 'group7'){
 		    group = group7;
+	    } else if(showGroup === 'group8'){
+		    group = group8;
+	    } else if(showGroup === 'group9'){
+		    group = group9;
+	    } else if(showGroup === 'group10'){
+		    group = group10;
 	    }
 		//console.log('theres a group');
 		removeableItems.forEach(function(v,i) {
-		  v.material.dispose();
-		  v.geometry.dispose();
-		  //console.log('dispose: '+v);
-		  v = undefined;
+			if(v.material.length == 1){
+				v.material.dispose();
+			} else{
+				for (var m = 0; m < v.material.length; m++) {
+					v.material[m].dispose();
+				}
+			}
+			v.geometry.dispose();
+			//console.log('dispose: '+v);
+			v = undefined;
 		});
 	    if(group.children.length > 0){
 			//TweenMax.to(group.position, .2, {z: -100,onComplete: function(){
@@ -338,33 +413,36 @@ function handleGroup(){
 		
 	} else{
 		playing = false;
-		console.log('theres not a group, getting a random group and setting up audio context');
 		listener = new THREE.AudioListener();
 		camera.add( listener );
 		sound = new THREE.Audio( listener );
 		audioLoader = new THREE.AudioLoader();
 		analyser = new THREE.AudioAnalyser( sound, fftSize );
 		dataArray = analyser.data;
-		hpfilter = sound.context.createBiquadFilter();
+		/*hpfilter = sound.context.createBiquadFilter();
 		hpfilter.type = "highpass";
 		hpfilter.frequency.value = .0001;
-		sound.setFilters([hpfilter]);
+		sound.setFilters([hpfilter]);*/
 		getAudioData(dataArray);
 		randGroup();
-	    $track = getUrlVars()["t"];
-	    if($track){
-		    if($track <= snips.length){
-			    $r = parseInt($track)-1;
-		    } else{
-			    $r = 0;
-		    }
-	    }
-
-	    
 	}
+    $track = getUrlVars()["t"];
+    if($track){
+	    if($track <= snips.length){
+		    $r = parseInt($track)-1;
+		    $loop = snips[$r];
+	    } else{
+		   $loop = snips[0];
+	    }
+    } else{
+		$loop = $loopSequence[0];
+		$loopSequence.shift();	
+		if($loopSequence.length === 1){
+			$loopSequence = shuffle(snips.slice(0));
+		}
+	} 
 	//sound.context.suspend();
-	console.log(sound.context.state);
-	audioLoader.load( snips[$r], function( buffer ) {
+	audioLoader.load( $loop, function( buffer ) {
 		sound.setBuffer( buffer );
 		sound.setLoop( true );
 		sound.setVolume( 0);
@@ -381,11 +459,8 @@ function handleGroup(){
 		//sound.context.resume();
 		sound.playbackRate = .7;
 		//sound.play();
-		console.log(sound.context.state);
 		ready2 = true;
 		playing = false;
-		console.log('loaded loop: '+snips[$r]);
-		$r++;
 		if($r > snips.length -1){
 			$r = 0;
 		}
@@ -402,32 +477,25 @@ function loadLoop(){
 	}
 }
 function createGroup(g){
+	if(!$('#vidTexture')[0].paused){
+		$('#vidTexture')[0].pause();
+	}
+	if(!$('#vidTexture2')[0].paused){
+		$('#vidTexture2')[0].pause();
+	}
+	$drawMe = false;
 	//console.log('creategroup:'+g);
 	if(g === 'group1'){
-		/*var icosahedronGeometry = new THREE.IcosahedronGeometry(1, 5);
-		var randColor1 = colors[Math.floor(Math.random() * colors.length)];
-		var lambertMaterial = new THREE.MeshLambertMaterial({
-		    color: randColor1,
-		    wireframe: true,
-		    transparent: true,
-		    opacity:0
-		});
-		var wireframeBall = new THREE.Mesh(icosahedronGeometry, lambertMaterial);
-		wireframeBall.position.set(0, 0,3);
-		group1.add(wireframeBall);
-		removeableItems.push(wireframeBall);
-		wireframeBall.name = 'wireframeBall';
-		$wireframeBall = group1.getObjectByName('wireframeBall');*/
 		var randColor1 = colors[Math.floor(Math.random() * colors.length)];
 		material = new THREE.ShaderMaterial( {
-			//wireframe: true,
+			wireframe: true,
 			transparent: true,
 			opacity: 0,
 			side: THREE.DoubleSide,
 			uniforms: {
 				//tShine: { type: "t", value: panoTexture },
 				black: { type: "c", value: new THREE.Color( 0x000000 ) },
-				colors: { type: "c", value: new THREE.Color( randColor1 ) },
+				colors: { type: "c", value: new THREE.Color( 0xffffff ) },
 				time: { type: "f", value: 0 },
 				weight: { type: "f", value: 0.2 }
 			},
@@ -436,7 +504,7 @@ function createGroup(g){
 	
 		} );
 	
-		mesh = new THREE.Mesh( new THREE.IcosahedronBufferGeometry( 7, 6 ), material );
+		mesh = new THREE.Mesh( new THREE.IcosahedronBufferGeometry( 8, 6 ), material );
 		group1.add(mesh);
 		group1.position.z = 100;
 		
@@ -448,9 +516,20 @@ function createGroup(g){
 	}
 
 	if(g === 'group2'){
+		if($('#vidTexture2')[0].paused){
+			$('#vidTexture2')[0].play();
+		}
 		ratio = window.innerWidth / window.innerHeight;
-		sizes = 9 * ratio;
-		group2 = new THREE.Group();
+		var cameraZ = camera.position.z;
+		var planeZ =0;
+		var distance = cameraZ - planeZ;
+		var aspect = window.innerWidth / window.innerHeight;
+		var vFov = camera.fov * Math.PI / 180;
+		var planeHeightAtDistance = 2 * Math.tan(vFov / 2) * distance;
+		var planeWidthAtDistance = planeHeightAtDistance * aspect;	
+
+		sizes = planeWidthAtDistance * 1.2;
+		group2.position.z = 100;
 		var randColor1 = colors[Math.floor(Math.random() * colors.length)];
 		var randColor2 = colors[Math.floor(Math.random() * colors.length)];
 		var randColor3 = colors[Math.floor(Math.random() * colors.length)];
@@ -458,7 +537,7 @@ function createGroup(g){
 		var randBG2 = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
 		var randBG3 = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
 		var geometry1 = new THREE.PlaneGeometry( sizes, sizes, 112, 112 );
-		var material1 = new THREE.MeshBasicMaterial( {color:  0xffffff, map: randBG1, wireframe: false, transparent: true, opacity: 0} );
+		var material1 = new THREE.MeshBasicMaterial( {color:  0xffffff, map: randBG1, wireframe: false, transparent: true, opacity: 1} );
 		randBG1.magFilter = THREE.NearestFilter;
 		randBG1.wrapT = THREE.RepeatWrapping;
 		randBG1.wrapS = THREE.RepeatWrapping;
@@ -469,18 +548,22 @@ function createGroup(g){
 		group2.add(plane1);
 		$plane1 = group2.getObjectByName('plane1');
 		var geometry2 = new THREE.PlaneGeometry( sizes, sizes, 112, 112 );
-		var material2 = new THREE.MeshBasicMaterial( {color:   0xffffff, map: randBG2, wireframe: false, transparent: true, opacity: 0} );
+		var material2 = new THREE.MeshBasicMaterial( {color:   randColor2, wireframe: true, transparent: true, opacity: 1} );
 		randBG2.magFilter = THREE.NearestFilter;
 		randBG2.wrapT = THREE.RepeatWrapping;
 		randBG2.wrapS = THREE.RepeatWrapping;
 		randBG2.repeat.set( 1, 1 );		
+		videoTexture = new THREE.VideoTexture( $('#vidTexture2')[0] );
+		videoTexture.minFilter = THREE.NearestFilter;
+		videoTexture.wrapS = THREE.ClampToEdgeWrapping;
+		videoTexture.wrapT = THREE.ClampToEdgeWrapping;
 
 		var plane2 = new THREE.Mesh( geometry2, material2 );
 		plane2.name = 'plane2';
 		group2.add(plane2);
 		$plane2 = group2.getObjectByName('plane2');
 		var geometry3 = new THREE.PlaneGeometry( sizes, sizes, 112, 112 );
-		var material3 = new THREE.MeshBasicMaterial( {color:   0xffffff, map: randBG3, wireframe: false, transparent: true, opacity: 0} );
+		var material3 = new THREE.MeshBasicMaterial( {color:   randColor1, map: videoTexture, wireframe: false, transparent: true, opacity: 1} );
 		var plane3 = new THREE.Mesh( geometry3, material3 );
 		randBG3.magFilter = THREE.NearestFilter;
 		randBG3.wrapT = THREE.RepeatWrapping;
@@ -495,25 +578,28 @@ function createGroup(g){
 		removeableItems.push(plane2);
 		removeableItems.push(plane3);
 
-		scene.add( group2 );
 		
 	}
 	if(g === 'group3'){
+		group3.position.z = 100;
 		ratio = window.innerWidth / window.innerHeight;
 		sizes = 8 * ratio;		
-		var box = new THREE.BoxBufferGeometry(sizes,sizes,sizes);
-		//var box = new THREE.SphereGeometry(sizes, 64, 64);
+		//var box = new THREE.BoxBufferGeometry(sizes,sizes,sizes);
+		var box = new THREE.SphereGeometry(sizes, 64, 64);
 		var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
-	
+		randBG.magFilter = THREE.NearestFilter;
+		randBG.wrapT = THREE.RepeatWrapping;
+		randBG.wrapS = THREE.RepeatWrapping;
+		randBG.repeat.set( 1, 1 );
+
 		var material = new THREE.MeshStandardMaterial( {
 			color: 0xffffff,
 			roughness: 1,
 			metalness: 1,
 			map: randBG,
-			specular: 0xffffff,
 			side: THREE.BackSide,
 			transparent: true,
-			opacity: 0
+			opacity: 1
 		} );
 		var boxMesh = new THREE.Mesh( box, material);
 		//boxMesh.position.y = 5;
@@ -533,23 +619,22 @@ function createGroup(g){
 		var randColor = colors[Math.floor(Math.random() * colors.length)];
 		colorify.uniforms['color'].value = new THREE.Color( randColor );
 
-		scene.add(group3);
 	}
 	if(g === 'group4'){
 		geometry = new THREE.SphereBufferGeometry( 3, 32, 32 );
 		//geometry = new THREE.BoxBufferGeometry( 3, 3, 3 );
 		material = new THREE.MeshBasicMaterial( { color: colors[0] } );
 		var alphaMap = loadedText[Math.floor(Math.random() * loadedText.length)];
-
+		group4.position.z = 100;
 		lightSphere = new THREE.Mesh( geometry, material );
 		lightSphere.layers.set( OCCLUSION_LAYER );
 		lightSphere.name = 'lightSphere';
 		removeableItems.push(lightSphere);
 		group4.add( lightSphere );
 		$lightSphere = group4.getObjectByName('lightSphere');
-		var geometry = new THREE.SphereBufferGeometry( 3, 32, 32 );
+		var geometry = new THREE.SphereBufferGeometry( 3, 200, 200 );
 		var material = new THREE.MeshPhongMaterial({
-			color: 0x000000,
+			color: 0xffffff,
 			specular: colors[0],
 			shininess: 1,
 			polygonOffset: true,
@@ -576,9 +661,9 @@ function createGroup(g){
 		  new THREE.MeshBasicMaterial( { transparent: true, opacity: 0 } )
 		];
 		var sphere_material = new THREE.MeshPhongMaterial( {
-			side: THREE.DoubleSide,
+			//side: THREE.DoubleSide,
 			alphaMap: texture,
-			shininess: 10,
+			shininess: 20,
 			color: 0xffffff,
 			specular: 0xffffff,
 			alphaTest: 0.5,
@@ -592,6 +677,22 @@ function createGroup(g){
 		sphere_mesh.name = 'spheremesh';
 		mesh.add(sphere_mesh);
 		sphere_mesh.layers.set( OCCLUSION_LAYER );   
+		var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+		randBG.wrapS = THREE.RepeatWrapping;
+		randBG.blending = THREE.SubtractiveBlending;
+		randBG.wrapT = THREE.RepeatWrapping;
+		randBG.repeat.set( 20, 10 );		
+
+var randColor = colors[Math.floor(Math.random() * colors.length)];
+		var sphere_geometry = new THREE.SphereBufferGeometry(2.99, 32, 32 );
+		sphere_material = new THREE.MeshStandardMaterial( { roughness: .8, metalness: .5, map: randBG, color: randColor } ),
+		sphere_mesh = new THREE.Mesh( sphere_geometry, sphere_material );
+		sphere_mesh.position.set(0, 0, 0);
+		sphere_mesh.name = 'orblayer';
+		group4.add(sphere_mesh);
+		$orbLayer = group4.getObjectByName('orblayer');
+		removeableItems.push(sphere_mesh);
+	
 	}
 	if(g === 'group5'){
 		ratio = window.innerWidth / window.innerHeight;
@@ -599,36 +700,24 @@ function createGroup(g){
 		//var size = 20;
 		//var divisions = size*12;
 		group5.position.z = 100;
-
+		if($('#vidTexture')[0].paused){
+			$('#vidTexture')[0].play();
+		}
 		canvasTexture = document.createElement( 'canvas' );
 		canvasTexture.id = 'drawingCanvas';
 		canvasTexture.width = window.innerWidth/2;
 		canvasTexture.height = window.innerHeight/2;
-		document.body.appendChild(canvasTexture);
+		//document.body.appendChild(canvasTexture);
 		textureContext = canvasTexture.getContext( '2d' );
-		 textureContext.fillStyle = "black";
-textureContext.fillRect(0, 0, window.innerWidth/2, window.innerHeight/2);
+		textureContext.fillStyle = "black";
+		textureContext.fillRect(0, 0, window.innerWidth/2, window.innerHeight/2);
 
-		/*var color1 = "white",color2="black";
-		var numberOfStripes = 2048/3;		
-		for (var i=0;i<numberOfStripes;i++){
-		  var thickness = 2048 / numberOfStripes;
-		  context.beginPath();
-		  context.strokeStyle = i % 2?color1:color2;
-		  context.lineWidth =thickness;  
-		  
-		   context.moveTo(i*thickness + thickness/2,0);
-		  context.lineTo(i*thickness+thickness/2, 2048);
-		  context.stroke();
-		}	*/
-
-       // context.clearTo();
         $drawMe = true;
 		
 		var randBG1 = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
 		$rand2 = Math.floor(Math.random() * loadedBackgrounds.length);
 		var randBG2 = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
-		var randBG3 = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+		var randMask = loadedMasks[Math.floor(Math.random() * loadedMasks.length)];
 
 		var cameraZ = camera.position.z;
 		var planeZ = 1.1;
@@ -641,14 +730,15 @@ textureContext.fillRect(0, 0, window.innerWidth/2, window.innerHeight/2);
 		videoTexture.minFilter = THREE.NearestFilter;
 		videoTexture.wrapS = THREE.ClampToEdgeWrapping;
 		videoTexture.wrapT = THREE.ClampToEdgeWrapping;
+		var randColor = colors[Math.floor(Math.random() * colors.length)];
 
 		var geometry = new THREE.PlaneBufferGeometry( planeWidthAtDistance, planeHeightAtDistance, 64, 64 );
 		//var geometry = new THREE.SphereBufferGeometry( planeWidthAtDistance,64, 64 );
-		var material = new THREE.MeshBasicMaterial( {color:  0xffffff, map: videoTexture, wireframe: false, transparent: true, opacity: 1 } );
+		var material = new THREE.MeshBasicMaterial( {color:  randColor, map: videoTexture, wireframe: false, transparent: true, opacity: 1 } );
 		var alpha = new THREE.CanvasTexture( canvasTexture );
 		alpha.minFilter = THREE.NearestFilter;
 		//material.alphaMap.magFilter = THREE.NearestFilter;
-		material.alphaTest = 0.8;
+		material.alphaTest = 0.25;
 		alpha.wrapS = THREE.ClampToEdgeWrapping;
 		alpha.wrapT = THREE.ClampToEdgeWrapping;
 		alpha.repeat.y = 1;
@@ -698,11 +788,11 @@ textureContext.fillRect(0, 0, window.innerWidth/2, window.innerHeight/2);
 var mat = new THREE.ShaderMaterial({
 		  uniforms:{
 			  col1 : {type:"c", value: new THREE.Color( randColor )},
-		      tex0: {type:"t", value: randBG2},
+		      tex0: {type:"t", value: randMask},
 		      tex1: {type:"t", value: randBG1},
 		      amt : {tyle:"f", value: .08}
 		  },
-		  color: randColor,
+		  //color: randColor,
 		  vertexShader:`
 precision highp float;
 precision highp int;
@@ -717,6 +807,7 @@ void main() {
 precision mediump float;
 varying vec2 vUv;
 uniform vec3 col1;
+varying vec4 color;
 uniform sampler2D tex0;
 uniform sampler2D tex1;
 uniform float amt;
@@ -727,23 +818,25 @@ void main() {
   avg = avg * 2.0 - 1.0;
   float disp = avg * amt;
   vec4 pup = texture2D(tex1, uv + disp);
-  gl_FragColor = pup ;
+  vec4 color = pup;
+	float gray = dot(0.6 - color.rgb, vec3(0.299, 0.587, 0.114));
+	//gl_FragColor = vec4(vec3(gray), 1.0) * 2.5;
+  gl_FragColor = pup;
 }
 `
 		});
 
 
-		var material = new THREE.MeshBasicMaterial( {color:  0xffffff, map: randBG2, wireframe: false, transparent: true, opacity: 1} );
-		material.needsUpdate = true;
+		//var material = new THREE.MeshBasicMaterial( {color:  0xffffff, map: randBG2, wireframe: false, transparent: true, opacity: 1} );
+		//material.needsUpdate = true;
 		//material.side = THREE.DoubleSide;
 		//var data = getHeightData(backgrounds[$rand2], 1);
-		console.log(randBG2);
+		//console.log(randBG2);
 		var plane2 = new THREE.Mesh( geometry, mat );
 		plane2.name = 'plane2';
 		/*for ( var i = 0; i<plane2.geometry.vertices.length; i++ ) {
 		     plane2.geometry.vertices[i].z = data[i];
 		}*/
-		
 		plane2.position.z = planeZ;
 		plane2.castShadow = false;
 		plane2.receiveShadow = true;
@@ -753,15 +846,15 @@ void main() {
 		removeableItems.push(plane1);
 		removeableItems.push(plane2);		
 		
+	} else{
+		
 	}
 	if(g === 'group6'){
 		group6.position.z = 100;
+		var randMask = loadedMasks[Math.floor(Math.random() * loadedMasks.length)];
+
 		var randBG1 = loadedBackgrounds[0];
-		var randBG2 = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
-		if(randBG2 === loadedBackgrounds[0]){
-			var randBG2 = loadedBackgrounds[3];
-			
-		}
+		var randBG2 = loadedBackgrounds[0];
 		randBG1.wrapS = THREE.RepeatWrapping;
 		randBG1.wrapT = THREE.RepeatWrapping;
 		randBG1.repeat.set( 1, 1 );		
@@ -776,7 +869,7 @@ void main() {
 		      time: {value: 0},
 					mx: {value: 0},
 					my: {value: 0},
-		      texture1: {value: randBG1},
+		      texture1: {value: randMask},
 					texture2: {value: randBG2}
 		  },
 		  vertexShader:`precision highp float;
@@ -813,7 +906,8 @@ void main() {
 		$feedback = group6.getObjectByName('feedback');
 	}
 	if(g === 'group7'){
-		var randBG1 = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+		var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+
 		var cameraZ = camera.position.z;
 		var planeZ = 0;
 		var distance = cameraZ - planeZ;
@@ -831,7 +925,7 @@ void main() {
 			  amount: {type: 'f', value: [0.3] }  ,
 			  count: {type: 'f', value: [10.0] }  ,
 			  resolution : {type: "v2", value: new THREE.Vector2( window.innerWidth, window.innerWidth )},
-		      tex0: {type:"t", value: randBG1},
+		      tex0: {type:"t", value: randBG},
 		  },
 		  vertexShader:`
 			precision highp float;
@@ -870,7 +964,6 @@ void main() {
 			}
 			`
 		});
-		console.log(randBG2);
 		var plane2 = new THREE.Mesh( geometry, mat );
 		plane2.name = 'plane2';
 		plane2.position.z = planeZ;
@@ -882,8 +975,241 @@ void main() {
 		$plane2 = group7.getObjectByName('plane2');
 		
 	}
+	if(g === 'group8'){
+		group8.position.z = 900;
+		textureIndex = Math.floor(Math.random() * backgrounds.length);
+		imageSource = backgrounds[textureIndex];
+		createPixelData(imageSource);
+		/*var geometry = new THREE.PlaneBufferGeometry( 2, 2, 16 );
+		for ( var i = 0; i < loadedBackgrounds.length; i ++ ) {
+			var material = new THREE.MeshBasicMaterial( { color: 0xffffff, map: loadedBackgrounds[i] ,refractionRatio: 0.95, transparent: true, opacity: 0 } );
+			material.side = THREE.DoubleSide;
+		
+			var mesh = new THREE.Mesh( geometry, material);
+		
+			mesh.position.x = Math.random() * 15 - 7.6;
+			mesh.position.y = Math.random() * 15 - 7.6;
+			mesh.position.y = Math.random() * 10 - 5;
+			mesh.scale.x = mesh.scale.y = mesh.scale.z = 1;
+			randomPlanes.push(mesh);
+			group8.add( mesh );
+			removeableItems.push(mesh);
+		
+		}*/
+		//wireframeBall2.position.set(0, 0,3);
+		//group8.add(wireframeBall2);
+		//removeableItems.push(wireframeBall2);
+		//wireframeBall2.name = 'wireframeBall2';
+		//$wireframeBall2 = group8.getObjectByName('wireframeBall2');
+		
+		
+	}
+	if(g === 'group9'){
+		objects = [];
+		var geo = new THREE.SphereBufferGeometry( 1, 60, 60 );
+		var xgrid = 8,
+			ygrid = 8,
+			zgrid = 8;
+		nobjects = xgrid * ygrid * zgrid;
+		var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+		var material = new THREE.MeshBasicMaterial( {map: randBG, wireframe: false, transparent: true, opacity: 1} );
+
+		var s = 1;
+		var count = 0;
+		for ( i = 0; i < xgrid; i ++ ){
+			for ( j = 0; j < ygrid; j ++ ){
+				for ( k = 0; k < zgrid; k ++ ) {
+					var mesh;
+					mesh = new THREE.Mesh( geo, material );
+
+					x = 6 * ( i - xgrid / 2 );
+					y = 6 * ( j - ygrid / 2 );
+					z = 6 * ( k - zgrid / 2 );
+					mesh.position.set( x, y, z );
+					mesh.scale.set( s, s, s );
+					mesh.matrixAutoUpdate = false;
+					mesh.updateMatrix();
+					removeableItems.push(mesh);
+					group9.add( mesh );
+					objects.push( mesh );
+					count ++;
+				}
+			}
+		}
+	}
+	if(g === 'group10'){
+		var cameraZ = camera.position.z;
+		var planeZ = 0;
+		var distance = cameraZ - planeZ;
+		var aspect = window.innerWidth / window.innerHeight;
+		var vFov = camera.fov * Math.PI / 180;
+		var planeHeightAtDistance = 2 * Math.tan(vFov / 2) * distance;
+		var planeWidthAtDistance = planeHeightAtDistance * aspect;	
+		var plane = new THREE.PlaneBufferGeometry( planeWidthAtDistance, planeWidthAtDistance );
+		var randBG = loadedText[Math.floor(Math.random() * loadedText.length)];
+		var randColor1 = colors[Math.floor(Math.random() * colors.length)];
+		var randColor2 = colors[Math.floor(Math.random() * colors.length)];
+		var randColor3 = colors[Math.floor(Math.random() * colors.length)];
+		fire = new THREE.Fire( plane, {
+			textureWidth: 1024,
+			textureHeight: 1024,
+			debug: false
+		} );
+		fire.color1.set( 0x000000 );
+		fire.color2.set( randColor2 );
+		fire.color3.set( randColor3 );
+		fire.colorBias = 0.5;
+		fire.burnRate = 10.0;
+		fire.diffuse = 1.0;
+		fire.viscosity = 0.0;
+		fire.expansion = -1.0;
+		fire.swirl = 0.0;
+		fire.drag = 0.0;
+		fire.airSpeed = 0.0;	
+		fire.windVector.x = 0;
+		fire.windVector.y = 0;
+		fire.speed = 40.0;
+		
+		fire.setSourceMap( randBG );
+		group10.position.z = 100;
+		group10.add( fire );		
+	}
 	ready3 = true;
 }
+function createPixelData(source) {
+  var image = document.createElement("img");
+  var canvas = document.createElement("canvas");
+  var context = canvas.getContext("2d");
+  
+  image.crossOrigin = "Anonymous";
+  image.onload = function() {
+    image.width = canvas.width = imageWidth;
+    image.height = canvas.height = imageHeight;
+    
+    //context.fillStyle = context.createPattern(image, 'no-repeat');
+    //context.fillRect(0, 0, imageWidth, imageHeight);
+    context.drawImage(image, 0, 0, imageWidth, imageHeight);
+    
+    imageData = context.getImageData(0, 0, imageWidth, imageHeight).data;
+
+    createPaticles(source);
+    //tick();
+  };
+
+  image.src = source;
+}
+function createPaticles() {
+  var colors = [];
+  var weights = [0.2126, 0.7152, 0.0722];
+  var c = 0;
+
+  var geometry, material;
+  var x, y;
+  var zRange = 30;
+
+  /*geometry = new THREE.BufferGeometry();
+  geometry.dynamic = false;
+  //geometry.position.needsUpdate = true;;
+
+  x = imageWidth * -0.5;
+  y = imageHeight * 0.5;
+
+		var randBG = loadedText[Math.floor(Math.random() * loadedText.length)];
+*/
+geometry = new THREE.eometry();
+ //geometry.addAttribute( 'position', new THREE.BufferAttribute( colors, 3 ) );
+// geometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3 ) );
+  x = imageWidth * -0.5;
+  y = imageHeight * 0.5;
+var randColor = colors[Math.floor(Math.random() * colors.length)];
+  var tloader = new THREE.TextureLoader();
+   shaderAttributes = {
+	  vertexColor: {
+      type: "c",
+      value: []
+    },	      
+  };
+  shaderUniforms = {
+   vertexColor: {
+      type: "c",
+      value: new THREE.Color(randColor)
+    },	   
+    amplitude: {
+      type: "f",
+      value: 0.5
+    },
+   tex0: {type:"t", value: loadedBackgrounds[textureIndex]},
+  };
+
+  var shaderMaterial = new THREE.ShaderMaterial({
+    uniforms: shaderUniforms,
+    vertexShader:` 
+  uniform float amplitude;
+
+  attribute vec3 vertexColor;
+
+  varying vec4 varColor;
+
+  void main()
+  {
+  varColor = vec4(vertexColor, 1.0);
+
+  vec4 pos = vec4(position, 1.0);
+  pos.z *= amplitude;
+
+  vec4 mvPosition = modelViewMatrix * pos;
+
+  gl_PointSize = 1.0;
+  gl_Position = projectionMatrix * mvPosition;
+  } `   ,
+    fragmentShader: ` 
+  varying vec4 varColor;
+
+  void main()
+  {
+  gl_FragColor = varColor;
+  }` 
+  })
+
+  for (var i = 0; i < imageHeight; i++) {
+    for (var j = 0; j < imageWidth; j++) {
+      var color = new THREE.Color();
+
+      color.setRGB(imageData[c] / 255, imageData[c + 1] / 255, imageData[c + 2] / 255);
+      var randColor = colors[Math.floor(Math.random() * colors.length)];
+					//$plane2.material.color = new THREE.Color(randColor);
+     //shaderUniforms.vertexColor.value = new THREE.Color(randColor);
+     // console.log(color);
+
+      var weight = color.r * weights[0] +
+        color.g * weights[1] +
+        color.b * weights[2];
+
+      var vertex = new THREE.Vector3();
+
+      vertex.x = x;
+      vertex.y = y;
+      vertex.color = randColor;
+      vertex.z = (zRange * -0.5) + (zRange * weight);
+	  //geometry.addAttribute('color', new THREE.BufferAttribute(vertex, 3));
+	 
+      geometry.vertices.push(vertex);
+
+      c += 4;
+      x++;
+    }
+
+    x = imageWidth * -0.5;
+    y--;
+  }
+  geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+geometry.computeVertexNormals() 
+  particleSystem = new THREE.Points(geometry, shaderMaterial);
+  //particleSystem.material.uniforms.tex0.value.needsUpdate = true;
+  group8.add(particleSystem);
+  removeableItems.push(particleSystem);
+}
+
 function getHeightData(img,scale) {
   
  if (scale == undefined) scale=1;
@@ -973,8 +1299,8 @@ function createLight( color, alphaMap ) {
 	pointLight.castShadow = true;
 	pointLight.shadow.camera.near = .1;
 	pointLight.shadow.camera.far = 100;
-	pointLight.shadow.mapSize.height = 1024;
-	pointLight.shadow.mapSize.width = 1024;
+	pointLight.shadow.mapSize.height = 2048;
+	pointLight.shadow.mapSize.width = 2048;
 	pointLight.shadow.bias = - 0.00; // reduces self-shadowing on double-sided objects
 	var texture = alphaMap;
 	//texture.magFilter = THREE.NearestFilter;
@@ -983,7 +1309,7 @@ function createLight( color, alphaMap ) {
 	texture.wrapT = THREE.RepeatWrapping;
 	texture.wrapS = THREE.RepeatWrapping;
 	//texture.repeat.set( 1, 1 );
-	var geometry = new THREE.SphereBufferGeometry( 1, 32, 32 );
+	var geometry = new THREE.SphereBufferGeometry( .8, 32, 32 );
 	var material = new THREE.MeshPhongMaterial( {
 		side: THREE.DoubleSide,
 		alphaMap: texture,
@@ -1009,21 +1335,26 @@ function createLight( color, alphaMap ) {
 }
 function addPortal(){
 	var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+	randBG.wrapT = THREE.RepeatWrapping;
+	randBG.wrapS = THREE.RepeatWrapping;
+		randBG.repeat.set( 1, 1 );
+
 	//console.log('adding portal:'+randBG);
-	var geometry = new THREE.SphereGeometry( 1, 64, 64);
+	var geometry = new THREE.SphereBufferGeometry( 1, 128, 128);
+	//var geometry = new THREE.CircleGeometry( 1, 64);
 	var material = new THREE.MeshStandardMaterial( { color: 0xffffff ,map:randBG,  refractionRatio: 0.1, transparent: true, roughness: 1, alphaTest: 0.5, opacity: 0 } );
 	material.side = THREE.DoubleSide;
 	material.wrapS = material.wrapT = THREE.MirroredRepeatWrapping;
 	var portalMesh = new THREE.Mesh( geometry, material);
 	removeableItems.push(portalMesh);
-	portalMesh.position.z = 0;
+	portalMesh.position.z = -2;
 	portalMesh.geometry.needsUpdate = true;
 	portalMesh.material.needsUpdate = true;
 	portalMesh.name = 'portalMesh';
 	group1.add(portalMesh);		
 	$portal = group1.getObjectByName('portalMesh');
 }
-function makeWireframe(mesh, bassFr, treFr, ampl) {
+function makeWireframe(mesh,  bassFr, treFr, ampl) {
     mesh.geometry.vertices.forEach(function (vertex, i) {
         var offset = mesh.geometry.parameters.radius;
         var amp = ampl/40;
@@ -1037,7 +1368,7 @@ function makeWireframe(mesh, bassFr, treFr, ampl) {
    mesh.geometry.normalsNeedUpdate = true;
     mesh.geometry.computeVertexNormals();
     mesh.geometry.computeFaceNormals();
-	//mesh.material.needsUpdate = true;
+
 
 }
 function draw() {
@@ -1045,30 +1376,32 @@ function draw() {
 	shaderTime += .01
 	staticPass.uniforms[ 'time' ].value =  shaderTime;	
 	if(!holding){
-		TweenMax.to(badTVPass.uniforms[ 'distortion' ], .5, {value: 0});
-		TweenMax.to(badTVPass.uniforms[ 'speed' ], .5, {value: 0});
-		TweenMax.to(badTVPass.uniforms[ 'distortion2' ], .5, {value: 0});
-		TweenMax.to(ticker.position, .01, {delay: .5, z: 1});
-		staticPass.uniforms[ 'amount' ].value = 0.2
+		TweenMax.to(badTVPass.uniforms[ 'distortion' ], 1, {value: 0});
+		TweenMax.to(badTVPass.uniforms[ 'speed' ], 1, {value: 0});
+		TweenMax.to(badTVPass.uniforms[ 'distortion2' ], 1, {value: 0});
+		TweenMax.to(ticker.position, 0, {delay: 1, z: 0});
+		TweenMax.to($mainSpot, .25, {delay: 0.5, intensity: 1});
+		afterimagePass.uniforms.damp.value = 0.92;
+		staticPass.uniforms[ 'amount' ].value = 0.2;
 		$switch = true;
 		oldMax = 0;
+		if (switcher) window.clearTimeout(switcher);
+		volumetericLightShaderUniforms.exposure.value = 0;
+
 	}
-	if(ready2){
-		if(holding && ready3){
+	if(ready && ready3 && ready2){
+		if(holding){
 			playing = true;
 			analyser.getFrequencyData(dataArray);
 			lowerHalfArray = dataArray.slice(0, (dataArray.length/2) - 1);
 			upperHalfArray = dataArray.slice((dataArray.length/2) - 1, dataArray.length - 1);
 			overallAvg = avg(dataArray);
-			lowerMax = max(lowerHalfArray);
 			lowerAvg = avg(lowerHalfArray);
 			upperMax = max(upperHalfArray);
-			upperAvg = avg(upperHalfArray);
-			lowerMaxFr = lowerMax / lowerHalfArray.length;
-			lowerAvgFr = lowerAvg / lowerHalfArray.length;
 			upperMaxFr = upperMax / upperHalfArray.length;
-			upperAvgFr = upperAvg / upperHalfArray.length;
-			TweenMax.to(ticker.position, 0, {z: 10});
+			//TweenMax.to(ticker.position, .5, {delay: 0, z: 10});
+
+			TweenMax.to(ticker.position, 0, {z: 100});
 			if(!sound.isPlaying){
 				sound.play();
 			}
@@ -1078,26 +1411,27 @@ function draw() {
 			$('.output#data').html(parseFloat(overallAvg).toFixed(4)+'<br />'+parseFloat(lowerAvg).toFixed(4))
 			$('.output#coords').html('['+mX+','+ mY+']')
 			$('.output#loop').html(parseFloat($loopLength)+'<br />'+parseFloat($loopDur).toFixed(2));
-			staticPass.uniforms[ 'amount' ].value = 0.05;
+			staticPass.uniforms[ 'amount' ].value = 0.09;
 		} 
 		if(showGroup === 'group1'){
-			if(holding && ready3){
+			if(holding){
 				group1.position.z = 6;
 				$portal.material.opacity = 1;
-				//ampl = Math.min(90,(overallAvg) + 255-lowerMax);
+				
 				$wireframeBall.material.uniforms[ 'time' ].value = .0006 * ( Date.now() - start );
-				$wireframeBall.rotation.y += 0.001;
-				TweenMax.to($wireframeBall.material.uniforms[ 'weight' ], 1, {value: Math.min(7,overallAvg/2)});
-				//makeWireframe($wireframeBall, modulate(lowerAvgFr, .3, 6, 4, .4), modulate((lowerAvg - overallAvg)/5, 0, 5, .3, 2), ampl);
-				group1.rotation.y = (mX - (window.innerWidth/2))/window.innerWidth;
-				group1.rotation.x = (mY - (window.innerHeight/2))/window.innerHeight;
+				//$wireframeBall.rotation.y += 0.001;
+				TweenMax.to($wireframeBall.material.uniforms[ 'weight' ], 1, {value: Math.min(8,overallAvg/1.5)});
+				$wireframeBall.rotation.y = (mX - (window.innerWidth/2))/window.innerWidth;
+				$wireframeBall.rotation.x = (mY - (window.innerHeight/2))/window.innerHeight;
 				$portal.material.map.offset.x = (mX - (window.innerWidth/2))/window.innerWidth;
 				$portal.material.map.offset.y = (mY - (window.innerHeight/2))/window.innerHeight;
-				TweenMax.to($portal.position, 1, {z: overallAvg/30 * -.5, x: 0, y: 0});
+				//TweenMax.to($portal.position, 1, {z: overallAvg/30 * -.5, x: 0, y: 0});
 				//switchBG += overallAvg;
 				if(upperMaxFr !== oldMax && $switch){
 					switchBG = 0;
 					var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+					randBG.repeat.set( 1, 1 );
+
 					$portal.material.map = randBG;
 					$switch = false;
 					oldMax = upperMaxFr;
@@ -1114,27 +1448,51 @@ function draw() {
 			}
 		} 
 		if(showGroup === 'group2'){
-			if(holding && ready3){
-				TweenMax.to(group2.position, .2, {z: 0});
-				$plane1.rotation.z += ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*.015;
-				$plane2.rotation.z += ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*-.025;
-				$plane3.rotation.z -= ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*.025;
-				$plane1.material.opacity = 1;
-				$plane2.material.opacity = 1;
-				$plane3.material.opacity = 1;
- 				TweenMax.to($plane3.position, .6, {z:  overallAvg/50});
- 				TweenMax.to($plane2.position, .5, {z:  overallAvg/40});
- 				TweenMax.to($plane1.position, 1, {z:  overallAvg/30});
- 				TweenMax.to(offset, .6, {upper: overallAvg, lower: lowerAvg});
-				rate += 0.005;
-				adjustMeshPlaneVertices(Math.max(1, 2-offset['upper']), Math.max(1, offset['lower']), rate);
+			if(holding){
+				//afterimagePass.uniforms.damp.value = .9 - overallAvg/500;
+
+				group2.position.z=0;
+				//TweenMax.to(group2.position, .2, {z: 0});
+				//$plane1.rotation.z += ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*.015;
+				$plane2.rotation.z += ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*-.005;
+				$plane3.rotation.z -= ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*.005;
+ 				TweenMax.to($plane3.position, .6, {z:  overallAvg/500});
+ 				TweenMax.to($plane2.position, .5, {z:   overallAvg/400});
+ 				TweenMax.to($plane1.position, 1, {z:  overallAvg/300});
+ 				TweenMax.to(offset, .6, {upper: overallAvg/10, lower: lowerAvg/10});
+				rate += overallAvg/5000;
+				if(upperMaxFr !== oldMax && $switch){
+					switchBG = 0;
+					var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+					randBG.wrapS = THREE.RepeatWrapping;
+					randBG.wrapT = THREE.RepeatWrapping;
+					randBG.repeat.set( 1, 1 );
+
+					$plane1.material.map = randBG;
+					$switch = false;
+					var randColor = colors[Math.floor(Math.random() * colors.length)];
+					$plane2.material.color = new THREE.Color(randColor);
+					var randColor = colors[Math.floor(Math.random() * colors.length)];
+					$plane3.material.color = new THREE.Color(randColor);
+
+					oldMax = upperMaxFr;
+					if (switcher) window.clearTimeout(switcher);
+					switcher = window.setTimeout(function(){
+						$switch = true;
+					},500);
+				}	
+				adjustMeshPlaneVertices(Math.max(1, offset['upper']), Math.max(1, offset['lower']), rate);
 			} else{
+				group2.position.z=100;
+
 
 			}
 		} 
 		if(showGroup === 'group3'){
-			if(holding && ready3){
-				$mainSpot.intensity = 0.5;
+			if(holding){
+				//afterimagePass.uniforms.damp.value = 1 - overallAvg/100;
+				$mainSpot.intensity = 0.05;
+				group3.position.z = 0;
 				TweenMax.to(group3.position, .2, {z: 0});
 				$pointLight.traverse(function(obj) {
 				  if (obj.name && obj.name.includes('amap')) {
@@ -1143,34 +1501,48 @@ function draw() {
 				    
 				  }
 				});
-				
-				$pointLight.rotation.y = ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*-2;				
-				$pointLight.rotation.x = ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*2;
-				$pointLight.position.z = 3 + ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*10	;			
-				$room.material.opacity = 1;
-				TweenMax.to($pointLight, .8, {intensity: overallAvg/10});
+			  	$pointLight.rotation.y -= ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*-.025;
+			  	$pointLight.rotation.x += ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*.015;
+				if(upperMaxFr !== oldMax && $switch){
+					switchBG = 0;
+					var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+					randBG.wrapS = THREE.RepeatWrapping;
+					randBG.wrapT = THREE.RepeatWrapping;
+					randBG.repeat.set( 1, 1 );
+
+					$room.material.map = randBG;
+					$switch = false;
+					oldMax = upperMaxFr;
+					if (switcher) window.clearTimeout(switcher);
+					switcher = window.setTimeout(function(){
+						$switch = true;
+					},500);
+				}				
+				//$room.rotation.y = ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*-2;				
+				//$room.rotation.x = ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*2;
+				//$pointLight.position.z = 5 + ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*10;			
+				//$room.position.z = 3 + ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*10;			
+				//$room.material.opacity = 1;
+				TweenMax.to($pointLight, .8, {intensity: overallAvg/9});
 			} else{
-				$mainSpot.intensity = 1;
-				ambientLight.intensity = .6;
-				$room.material.opacity = 0;
+				group3.position.z = 100;
 				$pointLight.intensity = 0;
-				$pointLight.traverse(function(obj) {
-					if (obj.name && obj.name.includes('amap')) {
-						obj.material.opacity = 0;
-					}
-				})
+
 			}
 		} 
 		if(showGroup === 'group4'){
-			if(holding && ready3){
+			if(holding){
+				//$mainSpot.position.y = 20;
+				//$mainSpot.position.x = 20;
+				group4.position.z = -10;
 				//afterimagePass.uniforms.damp.value = 0;
 				//$god.rotation.x += 0.001;
-				volumetericLightShaderUniforms.exposure.value = .6;
+				volumetericLightShaderUniforms.exposure.value = .9;
+				TweenMax.to(volumetericLightShaderUniforms.samples, .8, {value: Math.max(0,90 - overallAvg)});
 				//volumetericLightShaderUniforms.decay.value = upperAvgFr/6;
-				volumetericLightShaderUniforms.samples.value = 120 - overallAvg;
-				switchColor += overallAvg;
-				if(parseInt(switchColor) > 700){
-					switchColor = 0;
+
+				if(upperMaxFr !== oldMax && $switch){
+					switchBG = 0;
 					var randColor = colors[Math.floor(Math.random() * colors.length)];
 					$god.material.specular = new THREE.Color(randColor);
 					//$god.material.needsUpdate = true;
@@ -1181,16 +1553,30 @@ function draw() {
 					  	
 					  }
 					 });
-				}
-				var time = performance.now() * 0.001;
-				//group4.position.x = Math.sin( time * 0.3 ) * 1.2 -.5;
-				//group4.position.y = Math.sin( time * 0.4 ) * 3 -.5;
-				//group4.position.z = Math.sin( time * 0.6 ) * 2;
-				//$god.rotation.x = mX/10;
-				var time = performance.now() * 0.001;
-				//pointLight.position.x = Math.sin( time * 0.6 ) * 9;
-				//pointLight.position.y = Math.sin( time * 0.7 ) * 9 + 5;				
-				//$god.rotation.Y = mY/10;
+					var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+					randBG.wrapS = THREE.RepeatWrapping;
+					randBG.wrapT = THREE.RepeatWrapping;
+					randBG.blending = THREE.SubtractiveBlending;
+
+					randBG.repeat.set( 20, 10 );		
+					var randColor = colors[Math.floor(Math.random() * colors.length)];
+					$orbLayer.material.color = new THREE.Color(randColor);
+					$orbLayer.material.map = randBG;
+					$orbLayer.material.needsUpdate = true;
+					$switch = false;
+					oldMax = upperMaxFr;
+					if (switcher) window.clearTimeout(switcher);
+					switcher = window.setTimeout(function(){
+						$switch = true;
+					},500);
+				}				
+				//var time = performance.now() * 0.001;
+				  	$orbLayer.material.map.offset.x -= ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*.09;
+				  	$orbLayer.material.map.offset.y += ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*.05;
+				  	//orbScale = 1 - overallAvg/1000;
+				  	//$orbLayer.scale.set(orbScale,orbScale,orbScale);
+				  	//$god.scale.set(orbScale,orbScale,orbScale);
+
 				$god.traverse(function(obj) {
 				  if (obj.name && obj.name.includes('spheremesh')) {
 				  	obj.material.alphaMap.offset.x -= ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*.005;
@@ -1201,25 +1587,29 @@ function draw() {
 				  }
 				});			
 			} else{
-				volumetericLightShaderUniforms.exposure.value = 0;
-				colorify.uniforms['opacity'].value = 0;
+				group4.position.z = 100;
+				//volumetericLightShaderUniforms.exposure.value = 0;
+				//colorify.uniforms['opacity'].value = 0;
 
 			}
 
 		}
 		if(showGroup === 'group5'){
-			if(holding && ready3){
+			if(holding){
+				//afterimagePass.uniforms.damp.value = 0;
 				videoTexture.needsUpdate = true;
-				if($('#vidTexture')[0].paused){
-					$('#vidTexture')[0].play();
-				}
+
 				TweenMax.to($plane2.material.uniforms.amt, 2, {value: overallAvg/800});
 				group5.position.z = 0;
 				if(upperMaxFr !== oldMax && $switch){
 					switchBG = 0;
 					var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+						randBG.repeat.set( 1, 1 );
+
 					$plane2.material.uniforms.tex1.value = randBG;
 					$switch = false;
+					var randColor = colors[Math.floor(Math.random() * colors.length)];
+					$plane1.material.color = new THREE.Color(randColor);
 					oldMax = upperMaxFr;
 					if (switcher) window.clearTimeout(switcher);
 					switcher = window.setTimeout(function(){
@@ -1227,45 +1617,43 @@ function draw() {
 					},500);
 				}		
 			} else{
+				//afterimagePass.uniforms.damp.value = 0.96;
 				group5.position.z = 100;
-				if(!$('#vidTexture')[0].paused){
-					$('#vidTexture')[0].pause();
-				}
+
 			}		
 		} 
 		if(showGroup === 'group6'){
-			if(holding && ready3){
+			if(holding){
 				TweenMax.to(badTVPass.uniforms[ 'distortion' ], 1, {value: overallAvg/100});
 				TweenMax.to(badTVPass.uniforms[ 'speed' ], 3, {value: overallAvg/200 * -.025});
 				TweenMax.to(badTVPass.uniforms[ 'distortion2' ], 2, {value: overallAvg/150});
 				group6.position.z = 0;
-				var time = performance.now() * 0.009;
-				badTVPass.uniforms[ 'time' ].value = time;
+				btime += overallAvg/100;
+				badTVPass.uniforms[ 'time' ].value = btime;
 				$feedback.material.uniforms.mx.value = (mX / window.innerWidth)*2 -1;
 				TweenMax.to($feedback.position, 2, {z: -5 - lowerAvg/20});
 				$feedback.material.uniforms.my.value = -(mY / window.innerHeight)*2 +1;
-				TweenMax.to($feedback.material.uniforms.time, 2, {value: overallAvg/20});
+				TweenMax.to($feedback.material.uniforms.time, 2, {value: overallAvg/100});
 				group6.rotation.y = (mX - (window.innerWidth/2))/window.innerWidth;
 				group6.rotation.x = (mY - (window.innerHeight/2))/window.innerHeight;
 
 			} else{
+				btime = 0;
 				group6.position.z = 100;
-				TweenMax.to(badTVPass.uniforms[ 'distortion' ], .5, {value: 0});
-				TweenMax.to(badTVPass.uniforms[ 'speed' ], .5, {value: 0});
-				TweenMax.to(badTVPass.uniforms[ 'distortion2' ], .5, {value: 0});
 				
 			}
 		}	
 		if(showGroup === 'group7'){
-			if(holding && ready3){
+			if(holding){
 				group7.position.z=0;
-				$plane2.material.uniforms.mouseX.value = ((mX - (window.innerWidth/2))/window.innerWidth);
-				$plane2.material.uniforms.mouseY.value = ((mY - (window.innerHeight/2))/window.innerHeight);
-				TweenMax.to($plane2.material.uniforms.amount, 1, {value: .4 - overallAvg/100});
+				$plane2.material.uniforms.mouseX.value = ((mX - (window.innerWidth/2))/window.innerWidth)*.5;
+				$plane2.material.uniforms.mouseY.value = ((mY - (window.innerHeight/2))/window.innerHeight)*.5;
+				TweenMax.to($plane2.material.uniforms.amount, 2, {value: .4 - overallAvg/100});
 				TweenMax.to($plane2.material.uniforms.count, 4, {value: overallAvg/2});				
 				if(upperMaxFr !== oldMax && $switch){
 					switchBG = 0;
 					var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+
 					$plane2.material.uniforms.tex0.value = randBG;
 					$switch = false;
 					oldMax = upperMaxFr;
@@ -1273,15 +1661,115 @@ function draw() {
 					if (switcher) window.clearTimeout(switcher);
 					switcher = window.setTimeout(function(){
 						$switch = true;
-					},1000);
+					},600);
 				}	
 			} else{
 				group7.position.z=100;	
 			}
 		}
+		if(showGroup === 'group8'){
+			if(holding){
+				//afterimagePass.uniforms.damp.value = 1;
+				group8.position.z = -800 - ((mY - (window.innerHeight/2))/window.innerHeight)*-800;
+				//group8.position.z = 0;
+				group8.rotation.x = Math.PI * -.45 + ((mY - (window.innerHeight/2))/window.innerHeight)*5;
+				//group8.rotation.z = Math.PI * -.25;
+				//group8.rotation.y = Math.PI * -.35;
+				group8.rotation.z =  ((mX - (window.innerWidth/2))/window.innerWidth)*5;
+				//group8.rotation.y = ((mY - (window.innerHeight/2))/window.innerHeight)*5;
+				TweenMax.to(shaderUniforms.amplitude, 1, {value:  (upperMax - overallAvg - lowerAvg)});
+				
+				//animationTime += animationDelta;
+				
+				//ampl = Math.min(90,(overallAvg) + 255-lowerMax);
+				//makeWireframe($wireframeBall, modulate(overallAvg, .3, 6, 4, .4), modulate((overallAvg/2)/5, 0, 5, .3, 2), ampl);
+				//makeWireframe($wireframeBall, modulate(overallAvg, .3, 6, 4, .4), modulate((overallAvg), 0, 5, .3, .2), ampl);
+				  	//$wireframeBall.rotation.y -= ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*.005;
+				  	//$wireframeBall.rotation.x += ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*.005;	
+
+					/*if(overallAvg !== oldMax && $switch){
+						switchBG = 0;
+						for (var m = 0; m < randomPlanes.length; m++) {
+							randomPlanes[m].material.opacity = 0;
+							randomPlanes[m].position.x = Math.random() * 9 - 4.5;
+							randomPlanes[m].position.y = Math.random() * 9 - 4.5;
+							randomPlanes[m].position.z = Math.random() * 9 - 4.5;
+						}
+						
+						randP = randomPlanes[Math.floor(Math.random() * randomPlanes.length)];
+						randP.material.opacity = 1;
+						oldMax = overallAvg;
+						console.log('switch');
+						$switch = false;
+						if (switcher) window.clearTimeout(switcher);
+						switcher = window.setTimeout(function(){
+							$switch = true;
+						},200);
+					}*/
+					//shaderUniforms.amplitude.value = Math.sin(animationTime);						
+			} else{
+				group8.position.z = 900;
+			}
+		}
+		if(showGroup === 'group9'){
+			if(holding){
+				time = Date.now() * 0.00005;
+				for ( i = 0; i < nobjects; i ++ ) {
+					TweenMax.to(objects[ i ].scale, 1, {x: 0.05 + overallAvg/50,y: 0.05 + overallAvg/50,z: 0.05 + overallAvg/50});
+					objects[i].updateMatrix();
+					//console.log(h);
+					
+				}
+				group9.rotation.y = (mX - (window.innerWidth/2))/window.innerWidth;
+				group9.rotation.x = (mY - (window.innerHeight/2))/window.innerHeight;
+
+				group9.position.z = 0;
+			} else{
+				group9.position.z = 400;
+			}
+		}
+		if(showGroup === 'group10'){
+			if(holding){
+				group10.position.z = 0;
+
+				fire.windVector.x = (mX - (window.innerWidth/2))/window.innerWidth * 5;
+				fire.windVector.y = (mY - (window.innerHeight/2))/window.innerHeight * -5;
+				fire.airSpeed = overallAvg/3;
+				fire.viscosity = overallAvg/100;
+				fire.expansion = -1 + lowerAvg/50;
+				fire.swirl = overallAvg/20;
+				fire.drag = overallAvg/200;
+				//fire.colorBias = overallAvg/100;
+				if(overallAvg !== oldMax && $switch){
+					switchBG = 0;
+					var randColor1 = colors[Math.floor(Math.random() * colors.length)];
+					var randColor2 = colors[Math.floor(Math.random() * colors.length)];
+					var randColor3 = colors[Math.floor(Math.random() * colors.length)];
+					//fire.color1.set( randColor1 );
+					fire.color2.set( randColor2 );
+					fire.color3.set( randColor3 );
+					var randBG = loadedMasks[Math.floor(Math.random() * loadedMasks.length)];
+
+					fire.setSourceMap( randBG );
+
+					oldMax = overallAvg;
+					console.log('switch');
+					$switch = false;
+					if (switcher) window.clearTimeout(switcher);
+					switcher = window.setTimeout(function(){
+						$switch = true;
+					},2000);
+				}
+
+			} else{
+				group10.position.z = 100;
+				oldMax = overallAvg
+			}
+		}
 	}
 	camera.layers.set(OCCLUSION_LAYER);
     renderer.setClearColor(0x000000);
+    //renderer.autoClear = false;
     occlusionComposer.render();
     camera.layers.set(DEFAULT_LAYER);
 	composer.render( this.renderer );
@@ -1295,29 +1783,29 @@ function adjustMeshPlaneVertices(offset1, offset2, rate) {
 		vertex.z = noise3;
 	}
 	$plane1.geometry.verticesNeedUpdate = true;
-	$plane1.geometry.normalsNeedUpdate = true;
+	//$plane1.geometry.normalsNeedUpdate = true;
 	$plane1.geometry.computeVertexNormals();
 	$plane1.geometry.computeFaceNormals();
 	for (var i = 0; i < $plane2.geometry.vertices.length; i++) {
 		var vertex = $plane2.geometry.vertices[i];
-		var x1 = vertex.x / offset1*.3;
-		var y1 = vertex.y / offset1*.3;
-		var noise3 =  simplex.noise2D(x1 + rate, y1) * 2.4; 
+		var x1 = vertex.x / offset1*-.3;
+		var y1 = vertex.y / offset1*-.3;
+		var noise3 =  simplex.noise2D(x1 + rate, y1) * -2.4; 
 		vertex.z = noise3;
 	}
 	$plane2.geometry.verticesNeedUpdate = true;
-	$plane2.geometry.normalsNeedUpdate = true;
+	//$plane2.geometry.normalsNeedUpdate = true;
 	$plane2.geometry.computeVertexNormals();
 	$plane2.geometry.computeFaceNormals();
 	for (var i = 0; i < $plane3.geometry.vertices.length; i++) {
 		var vertex = $plane3.geometry.vertices[i];
-		var x1 = vertex.x / offset1*.3;
-		var y1 = vertex.y / offset1*.3;
-		var noise3 =  simplex.noise2D(x1 + rate, y1 + rate) * 2.4; 
+		var x1 = vertex.x / offset1*.43;
+		var y1 = vertex.y / offset1*.43;
+		var noise3 =  simplex.noise2D(x1 + rate, y1 + rate) * -2.4; 
 		vertex.z = noise3;
 	}
 	$plane3.geometry.verticesNeedUpdate = true;
-	$plane3.geometry.normalsNeedUpdate = true;
+	//$plane3.geometry.normalsNeedUpdate = true;
 	$plane3.geometry.computeVertexNormals();
 	$plane3.geometry.computeFaceNormals();	
 }
@@ -1328,27 +1816,27 @@ function onWindowResize() {
 }
 function mouseDown(e) { 
     //mouseUp();
-	 if($first){
+	 if($first && ready4){
 		loadLoop();	  
-		console.log('load');  
     }
-    holding = true;
+	if(ready4){
+	    holding = true;
+	}
     if(!playing && ready && ready2 && ready3){
-		$switch = true;
+		//$switch = true;
 
 	    if(!sound.isPlaying){
 			sound.play();
 	    }
-	    console.log('play');
 		playing = true;
 		idleMouse();
     }
     if (loopTimer) window.clearTimeout(loopTimer); 
     if (idleTimer) window.clearTimeout(idleTimer);
-	if($drawMe){
+	if(holding && ready2 && $drawMe){
 		startX = e.pageX ;
 		startY = e.pageY ;
-		drawMask(startX, startY,20,0,255,0, 1);
+		drawMask(startX, startY,15,0,255,0, 1);
 	}
     idleTimer = window.setTimeout(idleMouse,500);
 }
@@ -1359,28 +1847,28 @@ function mouseMove(event) {
 	}
 	mX = event.pageX;
 	mY =  event.pageY;
-	if($drawMe){
+	if(holding && $drawMe){
 		var dis = Math.sqrt(Math.pow(startX-mX, 2)+Math.pow(startY-mY, 2));
 		for (i=0;i<dis;i+=1) {
 			var s = i/dis;
-			drawMask(startX*s + mX*(1-s), startY*s + mY*(1-s),20,0,255,0, 1);
+			drawMask(startX*s + mX*(1-s), startY*s + mY*(1-s),15,0,255,0,1);
 		}
 		startX = mX;
 		startY = mY;  
 	}
 }
 function drawMask(x,y,w,r,g,b,a){
-    var gradient = textureContext.createRadialGradient(x/2, y/2, 0, x/2, y/2, w/2);
+    var gradient = textureContext.createRadialGradient(x/2, y/2, 0, x/2, y/2, w/4);
     gradient.addColorStop(0, 'rgba('+r+', '+g+', '+b+', '+a+')');
-    //gradient.addColorStop(1, 'rgba(0,100,0,)');
+    //gradient.addColorStop(.5, 'rgba(0,100,0,1)');
     
-	gradient.addColorStop(.6, 'rgba('+r+', '+g+', '+b+', 0)');
+	//gradient.addColorStop(.6, 'rgba('+r+', '+g+', '+b+', 0)');
     textureContext.beginPath();
-    textureContext.arc(x/2, y/2, w/2, 0, 2 * Math.PI);
+    textureContext.arc(x/2, y/2, w/4, 0, 2 * Math.PI);
     textureContext.fillStyle = gradient;
     textureContext.fill();
     textureContext.closePath();
-    textureContext.filter = "blur(10px)";
+    //textureContext.filter = "blur(4px)";
     $plane1.material.alphaMap.needsUpdate = true;
 };
 function mouseUp() { 
@@ -1476,4 +1964,8 @@ function getUrlVars() {
         vars[key] = value;
     });
     return vars;
+}
+function shuffle(arr) {
+    for(var j, x, i = arr.length; i; j = parseInt(Math.random() * i), x = arr[--i], arr[i] = arr[j], arr[j] = x);
+    return arr;
 }

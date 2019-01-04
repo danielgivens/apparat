@@ -52,6 +52,7 @@ module.exports = function(grunt) {
 					'docroot/assets/js/vendor/perlin.js',
 					'docroot/assets/js/vendor/GlitchPass.js',
 					'docroot/assets/js/vendor/MaskPass.js',
+					'docroot/assets/js/vendor/HueSaturationShader.js',
 					'docroot/assets/js/vendor/AfterimagePass.js',
 					'docroot/assets/js/vendor/ShaderGodRays.js',
 					'docroot/assets/js/vendor/RGBShiftShader.js',

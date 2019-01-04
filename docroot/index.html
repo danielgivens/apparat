@@ -54,7 +54,7 @@
 			<nav class="global fixed">
 				<div><a href="http://apparat.net">Apparat<span class="hide-mobile">.net</span></a></div>
 				<div><a href="/tour">Tour<span class="hide-mobile"></span></a></div>
-				<div><a href="#">About<span class="hide-mobile"></span></a></div>
+				<div><a href="#">Pre-order<span class="hide-mobile"></span></a></div>
 			</nav>
 			<div id="messages">
 				<!--<div class="message first"><span>Seconds from freezing</span></div>
@@ -68,43 +68,14 @@
 			<div class="output" id="loop"></div>
 			<canvas id="scene"></canvas>
 		</section>	
+		<video playsinline loop muted autoplay id="vidTexture2" style="display:none">
+			<source src="/assets/videos/textscroll1.mp4" type="video/mp4">
+		</video>
 		<video playsinline loop muted autoplay id="vidTexture" style="display:none">
-			<source src="/assets/videos/test4.mp4" type="video/mp4">
+			<source src="/assets/videos/poem.mp4" type="video/mp4">
 		</video>
 		<script src="/assets/js/libs.min.js"></script>
-		<script id="vs" type="x-shader/x-vertex">
-				uniform sampler2D map;
-				uniform float width;
-				uniform float height;
-				uniform float nearClipping, farClipping;
-				uniform float pointSize;
-				uniform float zOffset;
-				varying vec2 vUv;
-				const float XtoZ = 1.11146; // tan( 1.0144686 / 2.0 ) * 2.0;
-				const float YtoZ = 1.11146; // tan( 0.7898090 / 2.0 ) * 2.0;
-				void main() {
-					vUv = vec2( position.x / width, position.y / height );
-					vec4 color = texture2D( map, vUv );
-					float depth = ( color.r + color.g + color.b ) / 3.0;
-					// Projection code by @kcmic
-					float z = ( 1.0 - depth ) * (farClipping - nearClipping) + nearClipping;
-					vec4 pos = vec4(
-						( position.x / width - 0.5 ) * z,
-						( position.y / height - 0.5 ) * z,
-						- z + zOffset,
-						1.0);
-					gl_PointSize = pointSize;
-					gl_Position = projectionMatrix * modelViewMatrix * pos;
-				}
-			</script>
-		<script id="fs" type="x-shader/x-fragment">
-				uniform sampler2D map;
-				varying vec2 vUv;
-				void main() {
-					vec4 color = texture2D( map, vUv );
-					gl_FragColor = vec4( color.r, color.g, color.b, 1. );
-				}
-			</script>
+		<script src="/assets/js/vendor/Fire.js"></script>
 		<script src="/assets/js/countdown.js"></script>
 	</body>
 </html>
