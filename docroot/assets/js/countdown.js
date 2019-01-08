@@ -49,8 +49,11 @@ colors = [
 	0x0040ff,
 	
 ];
+
+wW = window.innerWidth;
+wH = window.innerHeight;
 var scene, switcher, mouse, fire, upperAvgFr, upperMaxFr, lowerAvgFr, lowerMaxFr, upperAvg, upperMax, lowerAvg, lowerMax, overallAvg, deadline, $buff, loopTimer, listener, $track, textureContext, sphere_mesh,ambientLight, volumetericLightShaderUniforms, audioLoader, videoTexture, occlusionComposer, occlusionRenderTarget, occlusionBox, lightSphere, dartaArray, pointLight, $pointLight, idleTimer, $portal, textMesh, mouseTimer, portalMesh, portalrenderer, sound, camera, material, composer, analyser, dataArray, glitchPass, afterimagePass, renderPass, copyPass, rgbParams, rgbPass, filmParams, filmPass, renderPass, copyPass;
-var DEFAULT_LAYER = 0, OCCLUSION_LAYER = 1, objects = [], randomPlanes = [], textureIndex = 0, $loopDur = 0, $loopLength = 0, renderScale = 0.5, ready4 = false, angle = 0, audioData = [], shaderTime = 0, btime = 0, fftSize = 512, $drawMe = false, ready3 = false, playing = false, ready = false, ready2 = false, holding = false, font2 = undefined, startX = window.innerWidth/2, startY = window.innerHeight/2, backgroundsLoaded = false, loadedBackgrounds = [], loadedMasks = [],removeableItems = [], loadedText = [], mX = 0, mY = 0, b = 0, d = 0, r= 0, $r = 0, $switch = true, oldMax = 0, shaderTime = 0, start = Date.now(), wifreframeBallColor = 0, switchBG = 0, switchColor = 0, rate = 0, time = 0, offset = { upper : 0,lower : 0}, showGroup = 'none', $g = 1, $first = true; timeOutput = '00:00:00:00';
+var DEFAULT_LAYER = 0, OCCLUSION_LAYER = 1, objects = [], randomPlanes = [], textureIndex = 0, $loopDur = 0, $loopLength = 0, renderScale = 0.5, ready4 = false, angle = 0, audioData = [], shaderTime = 0, btime = 0, fftSize = 512, $drawMe = false, ready3 = false, playing = false, ready = false, ready2 = false, holding = false, font2 = undefined, startX = wW/2, startY = wH/2, backgroundsLoaded = false, loadedBackgrounds = [], loadedMasks = [],removeableItems = [], loadedText = [], mX = 0, mY = 0, b = 0, d = 0, r= 0, $r = 0, $switch = true, oldMax = 0, shaderTime = 0, start = Date.now(), wifreframeBallColor = 0, switchBG = 0, switchColor = 0, rate = 0, time = 0, offset = { upper : 0,lower : 0}, showGroup = 'none', $g = 1, $first = true; timeOutput = '00:00:00:00';
 var noise2 = new SimplexNoise(), simplex = new SimplexNoise(), manager = new THREE.LoadingManager(), loader = new THREE.TextureLoader(manager);
 var shaderUniforms, shaderAttributes;
 
@@ -97,7 +100,7 @@ function randGroup(){
 		showGroup = $sequence[0];
 		$sequence.shift();
 	}
-	if($sequence.length === 1){
+	if($sequence.length === 0){
 		$sequence = shuffle(groups.slice(0));
 	}
 	createGroup(showGroup);
@@ -109,7 +112,7 @@ function setupScene(){
 	fogColor = new THREE.Color(0x000000);
 	scene.background = fogColor;
 	scene.fog = new THREE.Fog(fogColor, 0.0025, 60);
-	res = window.innerWidth / window.innerHeight;
+	res = wW / wH;
 	camera = new THREE.PerspectiveCamera(45, res, 0.1, 2000);
 	camera.position.x = 0;
 	camera.position.y = 0;
@@ -161,10 +164,10 @@ function setupScene(){
 	});
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.PCFShadowMap;
-	renderer.setSize(window.innerWidth, window.innerHeight);
+	renderer.setSize(wW, wH);
 	pixelRatio = 1;
 	
-	occlusionRenderTarget = new THREE.WebGLRenderTarget( window.innerWidth, window.innerHeight);
+	occlusionRenderTarget = new THREE.WebGLRenderTarget( wW, wH);
 	occlusionComposer = new THREE.EffectComposer( renderer, occlusionRenderTarget);
 	occlusionComposer.addPass( new THREE.RenderPass( scene, camera ) );
 	
@@ -180,7 +183,7 @@ function setupScene(){
 	volumetericLightShaderUniforms.samples.value = 100;
 	
 	composer = new THREE.EffectComposer(this.renderer);
-	composer.setSize( window.innerWidth * pixelRatio, window.innerHeight * pixelRatio );
+	composer.setSize( wW, wH);
 	composer.addPass( new THREE.RenderPass( scene, camera ) );
 
 	var hue = new THREE.ShaderPass(THREE.HueSaturationShader);
@@ -228,7 +231,9 @@ function setupScene(){
 	
 	mouse = new THREE.Vector2();
 	
-	document.body.appendChild(renderer.domElement);
+	$('.scroll').append(renderer.domElement);
+
+	
 }
 function loadBackgrounds(bg){
 	var loader = new THREE.TextureLoader(manager)
@@ -311,6 +316,7 @@ function setupTicker(){
 	var textMesh;
 	scene.add(ticker);	
 }
+textCreated = false;
 function getTimeRemaining(endtime) {
   var t = Date.parse(endtime) - Date.parse(new Date());
   var seconds = Math.floor((t / 1000) % 60);
@@ -342,23 +348,30 @@ function updateClock() {
 	}
 }
 function refreshText(){
-	ticker.remove(ticker.getObjectByName('textMesh'));
-	textMesh = undefined;
+	if(textCreated){
+		ticker.getObjectByName('textMesh').material.dispose();
+		ticker.getObjectByName('textMesh').geometry.dispose();
+		ticker.remove(ticker.getObjectByName('textMesh'));
+	}
+
+
 	createText();  
 }
 function createText(){
+	textCreated = true;
 	var textMaterial = new THREE.MeshStandardMaterial({color: 0xffffff});
 	var textGeometry = new THREE.TextGeometry(countDown, {
 		font: font2,
-		size: window.innerWidth/1000,
+		size: wW/1000,
 		height: .01,
 		curveSegments: 4
 	});
 	textGeometry.center();
 	textMesh = new THREE.Mesh(textGeometry, textMaterial);
 	textMesh.scale.set(.25,.25,.25);
-	ticker.add(textMesh);	
 	textMesh.name = 'textMesh';
+	ticker.add(textMesh);	
+
 	
 }
 function handleGroup(){
@@ -480,9 +493,7 @@ function createGroup(g){
 	if(!$('#vidTexture')[0].paused){
 		$('#vidTexture')[0].pause();
 	}
-	if(!$('#vidTexture2')[0].paused){
-		$('#vidTexture2')[0].pause();
-	}
+
 	$drawMe = false;
 	//console.log('creategroup:'+g);
 	if(g === 'group1'){
@@ -516,14 +527,11 @@ function createGroup(g){
 	}
 
 	if(g === 'group2'){
-		if($('#vidTexture2')[0].paused){
-			$('#vidTexture2')[0].play();
-		}
-		ratio = window.innerWidth / window.innerHeight;
+		ratio = wW / wH;
 		var cameraZ = camera.position.z;
 		var planeZ =0;
 		var distance = cameraZ - planeZ;
-		var aspect = window.innerWidth / window.innerHeight;
+		var aspect = wW / wH;
 		var vFov = camera.fov * Math.PI / 180;
 		var planeHeightAtDistance = 2 * Math.tan(vFov / 2) * distance;
 		var planeWidthAtDistance = planeHeightAtDistance * aspect;	
@@ -553,17 +561,14 @@ function createGroup(g){
 		randBG2.wrapT = THREE.RepeatWrapping;
 		randBG2.wrapS = THREE.RepeatWrapping;
 		randBG2.repeat.set( 1, 1 );		
-		videoTexture = new THREE.VideoTexture( $('#vidTexture2')[0] );
-		videoTexture.minFilter = THREE.NearestFilter;
-		videoTexture.wrapS = THREE.ClampToEdgeWrapping;
-		videoTexture.wrapT = THREE.ClampToEdgeWrapping;
+
 
 		var plane2 = new THREE.Mesh( geometry2, material2 );
 		plane2.name = 'plane2';
 		group2.add(plane2);
 		$plane2 = group2.getObjectByName('plane2');
 		var geometry3 = new THREE.PlaneGeometry( sizes, sizes, 112, 112 );
-		var material3 = new THREE.MeshBasicMaterial( {color:   randColor1, map: videoTexture, wireframe: false, transparent: true, opacity: 1} );
+		var material3 = new THREE.MeshBasicMaterial( {color:   randColor1, map: randBG3, wireframe: false, transparent: true, opacity: 1} );
 		var plane3 = new THREE.Mesh( geometry3, material3 );
 		randBG3.magFilter = THREE.NearestFilter;
 		randBG3.wrapT = THREE.RepeatWrapping;
@@ -582,7 +587,7 @@ function createGroup(g){
 	}
 	if(g === 'group3'){
 		group3.position.z = 100;
-		ratio = window.innerWidth / window.innerHeight;
+		ratio = wW / wH;
 		sizes = 8 * ratio;		
 		//var box = new THREE.BoxBufferGeometry(sizes,sizes,sizes);
 		var box = new THREE.SphereGeometry(sizes, 64, 64);
@@ -695,7 +700,7 @@ var randColor = colors[Math.floor(Math.random() * colors.length)];
 	
 	}
 	if(g === 'group5'){
-		ratio = window.innerWidth / window.innerHeight;
+		ratio = wW / wH;
 		sizes = 10 * ratio;
 		//var size = 20;
 		//var divisions = size*12;
@@ -705,12 +710,12 @@ var randColor = colors[Math.floor(Math.random() * colors.length)];
 		}
 		canvasTexture = document.createElement( 'canvas' );
 		canvasTexture.id = 'drawingCanvas';
-		canvasTexture.width = window.innerWidth/2;
-		canvasTexture.height = window.innerHeight/2;
+		canvasTexture.width = wW/2;
+		canvasTexture.height = wH/2;
 		//document.body.appendChild(canvasTexture);
 		textureContext = canvasTexture.getContext( '2d' );
 		textureContext.fillStyle = "black";
-		textureContext.fillRect(0, 0, window.innerWidth/2, window.innerHeight/2);
+		textureContext.fillRect(0, 0, wW/2, wH/2);
 
         $drawMe = true;
 		
@@ -722,7 +727,7 @@ var randColor = colors[Math.floor(Math.random() * colors.length)];
 		var cameraZ = camera.position.z;
 		var planeZ = 1.1;
 		var distance = cameraZ - planeZ;
-		var aspect = window.innerWidth / window.innerHeight;
+		var aspect = wW / wH;
 		var vFov = camera.fov * Math.PI / 180;
 		var planeHeightAtDistance = 2 * Math.tan(vFov / 2) * distance;
 		var planeWidthAtDistance = planeHeightAtDistance * aspect;	
@@ -774,7 +779,7 @@ var randColor = colors[Math.floor(Math.random() * colors.length)];
 		var cameraZ = camera.position.z;
 		var planeZ = -5;
 		var distance = cameraZ - planeZ;
-		var aspect = window.innerWidth / window.innerHeight;
+		var aspect = wW / wH;
 		var vFov = camera.fov * Math.PI / 180;
 		var planeHeightAtDistance = 2 * Math.tan(vFov / 2) * distance;
 		var planeWidthAtDistance = planeHeightAtDistance * aspect;	
@@ -861,7 +866,7 @@ void main() {
 		randBG2.wrapS = THREE.RepeatWrapping;
 		randBG2.wrapT = THREE.RepeatWrapping;
 		randBG2.repeat.set( 1, 1 );		
-		ratio = window.innerWidth / window.innerHeight;
+		ratio = wW / wH;
 		size = 7 * ratio;
 		var geo = new THREE.PlaneBufferGeometry(size, size);
 		var mat = new THREE.ShaderMaterial({
@@ -911,7 +916,7 @@ void main() {
 		var cameraZ = camera.position.z;
 		var planeZ = 0;
 		var distance = cameraZ - planeZ;
-		var aspect = window.innerWidth / window.innerHeight;
+		var aspect = wW / wH;
 		var vFov = camera.fov * Math.PI / 180;
 		var planeHeightAtDistance = 2 * Math.tan(vFov / 2) * distance;
 		var planeWidthAtDistance = planeHeightAtDistance * aspect;	
@@ -924,7 +929,7 @@ void main() {
 			  mouseY: {type: 'f', value: [0.5] }  ,
 			  amount: {type: 'f', value: [0.3] }  ,
 			  count: {type: 'f', value: [10.0] }  ,
-			  resolution : {type: "v2", value: new THREE.Vector2( window.innerWidth, window.innerWidth )},
+			  resolution : {type: "v2", value: new THREE.Vector2( wW, wW )},
 		      tex0: {type:"t", value: randBG},
 		  },
 		  vertexShader:`
@@ -1041,7 +1046,7 @@ void main() {
 		var cameraZ = camera.position.z;
 		var planeZ = 0;
 		var distance = cameraZ - planeZ;
-		var aspect = window.innerWidth / window.innerHeight;
+		var aspect = wW / wH;
 		var vFov = camera.fov * Math.PI / 180;
 		var planeHeightAtDistance = 2 * Math.tan(vFov / 2) * distance;
 		var planeWidthAtDistance = planeHeightAtDistance * aspect;	
@@ -1116,7 +1121,7 @@ function createPaticles() {
 
 		var randBG = loadedText[Math.floor(Math.random() * loadedText.length)];
 */
-geometry = new THREE.eometry();
+geometry = new THREE.Geometry();
  //geometry.addAttribute( 'position', new THREE.BufferAttribute( colors, 3 ) );
 // geometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3 ) );
   x = imageWidth * -0.5;
@@ -1146,7 +1151,7 @@ var randColor = colors[Math.floor(Math.random() * colors.length)];
     vertexShader:` 
   uniform float amplitude;
 
-  attribute vec3 vertexColor;
+  uniform vec3 vertexColor;
 
   varying vec4 varColor;
 
@@ -1176,7 +1181,7 @@ var randColor = colors[Math.floor(Math.random() * colors.length)];
       var color = new THREE.Color();
 
       color.setRGB(imageData[c] / 255, imageData[c + 1] / 255, imageData[c + 2] / 255);
-      var randColor = colors[Math.floor(Math.random() * colors.length)];
+      //var randColor = colors[Math.floor(Math.random() * colors.length)];
 					//$plane2.material.color = new THREE.Color(randColor);
      //shaderUniforms.vertexColor.value = new THREE.Color(randColor);
      // console.log(color);
@@ -1189,7 +1194,7 @@ var randColor = colors[Math.floor(Math.random() * colors.length)];
 
       vertex.x = x;
       vertex.y = y;
-      vertex.color = randColor;
+      //vertex.color = randColor;
       vertex.z = (zRange * -0.5) + (zRange * weight);
 	  //geometry.addAttribute('color', new THREE.BufferAttribute(vertex, 3));
 	 
@@ -1202,24 +1207,23 @@ var randColor = colors[Math.floor(Math.random() * colors.length)];
     x = imageWidth * -0.5;
     y--;
   }
-  geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
-geometry.computeVertexNormals() 
+ // geometry.addAttribute('position', new THREE.BufferAttribute(vertices, 3));
+//geometry.computeVertexNormals() 
   particleSystem = new THREE.Points(geometry, shaderMaterial);
-  //particleSystem.material.uniforms.tex0.value.needsUpdate = true;
+  particleSystem.material.uniforms.tex0.value.needsUpdate = true;
   group8.add(particleSystem);
   removeableItems.push(particleSystem);
 }
-
 function getHeightData(img,scale) {
   
  if (scale == undefined) scale=1;
   
     var canvas = document.createElement( 'canvas' );
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerWidth;
+    canvas.width = wW;
+    canvas.height = wW;
     var context = canvas.getContext( '2d' );
  
-    var size = window.innerWidth * window.innerWidth;
+    var size = wW * wW;
     var data = new Float32Array( size );
  
     context.drawImage(img,0,0);
@@ -1228,7 +1232,7 @@ function getHeightData(img,scale) {
         data[i] = 0
     }
  
-    var imgd = context.getImageData(0, 0, window.innerWidth, window.innerWidth);
+    var imgd = context.getImageData(0, 0, wW, wW);
     var pix = imgd.data;
  
     var j=0;
@@ -1387,7 +1391,6 @@ function draw() {
 		oldMax = 0;
 		if (switcher) window.clearTimeout(switcher);
 		volumetericLightShaderUniforms.exposure.value = 0;
-
 	}
 	if(ready && ready3 && ready2){
 		if(holding){
@@ -1421,10 +1424,10 @@ function draw() {
 				$wireframeBall.material.uniforms[ 'time' ].value = .0006 * ( Date.now() - start );
 				//$wireframeBall.rotation.y += 0.001;
 				TweenMax.to($wireframeBall.material.uniforms[ 'weight' ], 1, {value: Math.min(8,overallAvg/1.5)});
-				$wireframeBall.rotation.y = (mX - (window.innerWidth/2))/window.innerWidth;
-				$wireframeBall.rotation.x = (mY - (window.innerHeight/2))/window.innerHeight;
-				$portal.material.map.offset.x = (mX - (window.innerWidth/2))/window.innerWidth;
-				$portal.material.map.offset.y = (mY - (window.innerHeight/2))/window.innerHeight;
+				$wireframeBall.rotation.y = (mX - (wW/2))/wW;
+				$wireframeBall.rotation.x = (mY - (wH/2))/wH;
+				$portal.material.map.offset.x = (mX - (wW/2))/wW;
+				$portal.material.map.offset.y = (mY - (wH/2))/wH;
 				//TweenMax.to($portal.position, 1, {z: overallAvg/30 * -.5, x: 0, y: 0});
 				//switchBG += overallAvg;
 				if(upperMaxFr !== oldMax && $switch){
@@ -1453,9 +1456,9 @@ function draw() {
 
 				group2.position.z=0;
 				//TweenMax.to(group2.position, .2, {z: 0});
-				//$plane1.rotation.z += ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*.015;
-				$plane2.rotation.z += ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*-.005;
-				$plane3.rotation.z -= ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*.005;
+				//$plane1.rotation.z += ((mX - (wW/2))/wW * 1.5)*.015;
+				$plane2.rotation.z += ((mX - (wW/2))/wW * 1.5)*-.005;
+				$plane3.rotation.z -= ((mX - (wW/2))/wW * 1.5)*.005;
  				TweenMax.to($plane3.position, .6, {z:  overallAvg/500});
  				TweenMax.to($plane2.position, .5, {z:   overallAvg/400});
  				TweenMax.to($plane1.position, 1, {z:  overallAvg/300});
@@ -1501,8 +1504,8 @@ function draw() {
 				    
 				  }
 				});
-			  	$pointLight.rotation.y -= ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*-.025;
-			  	$pointLight.rotation.x += ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*.015;
+			  	$pointLight.rotation.y -= ((mX - (wW/2))/wW * 1.5)*-.025;
+			  	$pointLight.rotation.x += ((mY - (wH/2))/wH * 1.5)*.015;
 				if(upperMaxFr !== oldMax && $switch){
 					switchBG = 0;
 					var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
@@ -1518,10 +1521,10 @@ function draw() {
 						$switch = true;
 					},500);
 				}				
-				//$room.rotation.y = ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*-2;				
-				//$room.rotation.x = ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*2;
-				//$pointLight.position.z = 5 + ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*10;			
-				//$room.position.z = 3 + ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*10;			
+				//$room.rotation.y = ((mX - (wW/2))/wW * 1.5)*-2;				
+				//$room.rotation.x = ((mY - (wH/2))/wH * 1.5)*2;
+				//$pointLight.position.z = 5 + ((mY - (wH/2))/wH * 1.5)*10;			
+				//$room.position.z = 3 + ((mY - (wH/2))/wH * 1.5)*10;			
 				//$room.material.opacity = 1;
 				TweenMax.to($pointLight, .8, {intensity: overallAvg/9});
 			} else{
@@ -1571,16 +1574,16 @@ function draw() {
 					},500);
 				}				
 				//var time = performance.now() * 0.001;
-				  	$orbLayer.material.map.offset.x -= ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*.09;
-				  	$orbLayer.material.map.offset.y += ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*.05;
+				  	$orbLayer.material.map.offset.x -= ((mX - (wW/2))/wW * 1.5)*.09;
+				  	$orbLayer.material.map.offset.y += ((mY - (wH/2))/wH * 1.5)*.05;
 				  	//orbScale = 1 - overallAvg/1000;
 				  	//$orbLayer.scale.set(orbScale,orbScale,orbScale);
 				  	//$god.scale.set(orbScale,orbScale,orbScale);
 
 				$god.traverse(function(obj) {
 				  if (obj.name && obj.name.includes('spheremesh')) {
-				  	obj.material.alphaMap.offset.x -= ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*.005;
-				  	obj.material.alphaMap.offset.y += ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*.005;
+				  	obj.material.alphaMap.offset.x -= ((mX - (wW/2))/wW * 1.5)*.005;
+				  	obj.material.alphaMap.offset.y += ((mY - (wH/2))/wH * 1.5)*.005;
 				    //obj.material.alphaMap.offset.y = mY * 0.001;
 				    //obj.material.alphaMap.offset.x = mX * 0.001;
 				    //obj.material.alphaMap.offset.x = Math.sin( time * 0.002 ) * 7 + 5;
@@ -1630,12 +1633,12 @@ function draw() {
 				group6.position.z = 0;
 				btime += overallAvg/100;
 				badTVPass.uniforms[ 'time' ].value = btime;
-				$feedback.material.uniforms.mx.value = (mX / window.innerWidth)*2 -1;
+				$feedback.material.uniforms.mx.value = (mX / wW)*2 -1;
 				TweenMax.to($feedback.position, 2, {z: -5 - lowerAvg/20});
-				$feedback.material.uniforms.my.value = -(mY / window.innerHeight)*2 +1;
+				$feedback.material.uniforms.my.value = -(mY / wH)*2 +1;
 				TweenMax.to($feedback.material.uniforms.time, 2, {value: overallAvg/100});
-				group6.rotation.y = (mX - (window.innerWidth/2))/window.innerWidth;
-				group6.rotation.x = (mY - (window.innerHeight/2))/window.innerHeight;
+				group6.rotation.y = (mX - (wW/2))/wW;
+				group6.rotation.x = (mY - (wH/2))/wH;
 
 			} else{
 				btime = 0;
@@ -1646,8 +1649,8 @@ function draw() {
 		if(showGroup === 'group7'){
 			if(holding){
 				group7.position.z=0;
-				$plane2.material.uniforms.mouseX.value = ((mX - (window.innerWidth/2))/window.innerWidth)*.5;
-				$plane2.material.uniforms.mouseY.value = ((mY - (window.innerHeight/2))/window.innerHeight)*.5;
+				$plane2.material.uniforms.mouseX.value = ((mX - (wW/2))/wW)*.5;
+				$plane2.material.uniforms.mouseY.value = ((mY - (wH/2))/wH)*.5;
 				TweenMax.to($plane2.material.uniforms.amount, 2, {value: .4 - overallAvg/100});
 				TweenMax.to($plane2.material.uniforms.count, 4, {value: overallAvg/2});				
 				if(upperMaxFr !== oldMax && $switch){
@@ -1670,13 +1673,13 @@ function draw() {
 		if(showGroup === 'group8'){
 			if(holding){
 				//afterimagePass.uniforms.damp.value = 1;
-				group8.position.z = -800 - ((mY - (window.innerHeight/2))/window.innerHeight)*-800;
+				group8.position.z = -800 - ((mY - (wH/2))/wH)*-800;
 				//group8.position.z = 0;
-				group8.rotation.x = Math.PI * -.45 + ((mY - (window.innerHeight/2))/window.innerHeight)*5;
+				group8.rotation.x = Math.PI * -.45 + ((mY - (wH/2))/wH)*5;
 				//group8.rotation.z = Math.PI * -.25;
 				//group8.rotation.y = Math.PI * -.35;
-				group8.rotation.z =  ((mX - (window.innerWidth/2))/window.innerWidth)*5;
-				//group8.rotation.y = ((mY - (window.innerHeight/2))/window.innerHeight)*5;
+				group8.rotation.z =  ((mX - (wW/2))/wW)*5;
+				//group8.rotation.y = ((mY - (wH/2))/wH)*5;
 				TweenMax.to(shaderUniforms.amplitude, 1, {value:  (upperMax - overallAvg - lowerAvg)});
 				
 				//animationTime += animationDelta;
@@ -1684,8 +1687,8 @@ function draw() {
 				//ampl = Math.min(90,(overallAvg) + 255-lowerMax);
 				//makeWireframe($wireframeBall, modulate(overallAvg, .3, 6, 4, .4), modulate((overallAvg/2)/5, 0, 5, .3, 2), ampl);
 				//makeWireframe($wireframeBall, modulate(overallAvg, .3, 6, 4, .4), modulate((overallAvg), 0, 5, .3, .2), ampl);
-				  	//$wireframeBall.rotation.y -= ((mX - (window.innerWidth/2))/window.innerWidth * 1.5)*.005;
-				  	//$wireframeBall.rotation.x += ((mY - (window.innerHeight/2))/window.innerHeight * 1.5)*.005;	
+				  	//$wireframeBall.rotation.y -= ((mX - (wW/2))/wW * 1.5)*.005;
+				  	//$wireframeBall.rotation.x += ((mY - (wH/2))/wH * 1.5)*.005;	
 
 					/*if(overallAvg !== oldMax && $switch){
 						switchBG = 0;
@@ -1720,8 +1723,8 @@ function draw() {
 					//console.log(h);
 					
 				}
-				group9.rotation.y = (mX - (window.innerWidth/2))/window.innerWidth;
-				group9.rotation.x = (mY - (window.innerHeight/2))/window.innerHeight;
+				group9.rotation.y = (mX - (wW/2))/wW;
+				group9.rotation.x = (mY - (wH/2))/wH;
 
 				group9.position.z = 0;
 			} else{
@@ -1732,8 +1735,8 @@ function draw() {
 			if(holding){
 				group10.position.z = 0;
 
-				fire.windVector.x = (mX - (window.innerWidth/2))/window.innerWidth * 5;
-				fire.windVector.y = (mY - (window.innerHeight/2))/window.innerHeight * -5;
+				fire.windVector.x = (mX - (wW/2))/wW * 5;
+				fire.windVector.y = (mY - (wH/2))/wH * -5;
 				fire.airSpeed = overallAvg/3;
 				fire.viscosity = overallAvg/100;
 				fire.expansion = -1 + lowerAvg/50;
@@ -1767,8 +1770,9 @@ function draw() {
 			}
 		}
 	}
+	
 	camera.layers.set(OCCLUSION_LAYER);
-    renderer.setClearColor(0x000000);
+    renderer.setClearColor(0x000000);	
     //renderer.autoClear = false;
     occlusionComposer.render();
     camera.layers.set(DEFAULT_LAYER);
@@ -1810,9 +1814,14 @@ function adjustMeshPlaneVertices(offset1, offset2, rate) {
 	$plane3.geometry.computeFaceNormals();	
 }
 function onWindowResize() {
-	camera.aspect = window.innerWidth / window.innerHeight;
+	wW = window.innerWidth;
+	wH = window.innerHeight;
+
+	camera.aspect = wW / wH;
 	camera.updateProjectionMatrix();
-	renderer.setSize(window.innerWidth, window.innerHeight);
+
+	composer.setSize(wW, wH);
+	renderer.setSize(wW, wH);
 }
 function mouseDown(e) { 
     //mouseUp();
