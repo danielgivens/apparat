@@ -3,6 +3,16 @@ backgrounds = [
 	'/assets/images/app2.jpg',
 	'/assets/images/app-flowers-pink.jpg',
 	'/assets/images/app-smudges-2.jpg',
+	'/assets/images/app-textures-2.1.jpg',
+	'/assets/images/app-textures-2.2.jpg',
+	'/assets/images/app-textures-2.3.jpg',
+	'/assets/images/app-textures-2.4.jpg',
+	'/assets/images/app-textures-2.5.jpg',
+	'/assets/images/app-textures-2.6.jpg',
+	'/assets/images/app-textures-2.7.jpg',
+	'/assets/images/app-textures-2.8.jpg',
+	'/assets/images/app-textures-2.9.jpg',
+	'/assets/images/app-textures-2.10.jpg',
 ];
 masks =[
 	'/assets/images/appn.jpg',
@@ -15,13 +25,20 @@ textTextures = [
 	'/assets/images/app-flower-mask.png',	
 ];
 snips = [
-	'/assets/audio/loop-1.aac',
-	'/assets/audio/loop-3.aac',
-	'/assets/audio/loop-4.aac',
-	'/assets/audio/loop-6.aac',
-	'/assets/audio/loop-8.aac',
-	'/assets/audio/loop-10.aac'	
-
+	'/assets/audio/Voido.aac',
+	'/assets/audio/airo5.aac',
+	'/assets/audio/Branden.aac',
+	'/assets/audio/Cock_Intro.aac',
+	'/assets/audio/euca_chords.aac',
+	'/assets/audio/EQ_Break.aac',
+	'/assets/audio/Jam9.aac',
+	'/assets/audio/Heroist.aac',
+	'/assets/audio/Hokkaido.aac',
+	'/assets/audio/Laminar.aac',
+	'/assets/audio/Laminar2.aac',
+	'/assets/audio/LeierBird.aac',
+	'/assets/audio/MeansOf.aac',
+	'/assets/audio/Somechords.aac'
 //'/assets/audio/dawan.mp3'
 ];
 $loopSequence = shuffle(snips.slice(0));
@@ -74,7 +91,55 @@ var loadChecker = setInterval(function(){
 },100);
 var $sequence = [];
 init();
+$(window).load(function(){
+	/*$('.marquee-wrap.top1 .marquee').marquee({
+		//duration in milliseconds of the marquee
+		duration: 25000,
+		gap: 10,
+		allowCss3Support: true,
+		startVisible: true,
+		direction: 'left',
+		duplicated: true
+	});
+	$('.marquee-wrap.top2 .marquee').marquee({
+		//duration in milliseconds of the marquee
+		duration: 25000,
+		gap: 10,
+		allowCss3Support: true,
+		startVisible: true,
+		direction: 'right',
+		duplicated: true
+	});*/
+	/*$('.marquee-wrap.left1 .marquee').marquee({
+		//duration in milliseconds of the marquee
+		duration: 30000,
+		gap: 10,
+		allowCss3Support: true,
+		startVisible: true,
+		direction: 'up',
+		duplicated: true
+	});
+	$('.marquee-wrap.left2 .marquee').marquee({
+		//duration in milliseconds of the marquee
+		duration: 30000,
+		gap: 10,
+		allowCss3Support: true,
+		startVisible: true,
+		direction: 'down',
+		duplicated: true
+	});*/
+	/*$('.marquee-wrap.right .marquee').marquee({
+		//duration in milliseconds of the marquee
+		duration: 20000,
+		gap: 10,
+		allowCss3Support: true,
+		startVisible: true,
+		direction: 'down',
+		duplicated: true
+	});*/
+})
 function init(){
+
 	setupScene();
 	loadBackgrounds(backgrounds[0]);
 	setupTicker();
@@ -86,12 +151,7 @@ function randGroup(){
 	//showGroup = 'group'+rand;
 	$scene = getUrlVars()["s"];
 	if($scene){
-	    if($scene <= groups.length){
-			showGroup = 'group'+$scene;
-			//console.log('target:'+ $scene);
-		} else{
-			showGroup = 'group1';
-		}
+	   	showGroup = groups[$scene];
 	} else if($first){
 		$sequence = shuffle(groups.slice(0));
 		showGroup = $sequence[0];
@@ -239,7 +299,6 @@ function loadBackgrounds(bg){
 	var loader = new THREE.TextureLoader(manager)
 	loader.load(bg, function (object) {
 		loadedBackgrounds.push(object);
-		//console.log('loaded background:'+object);
 		if(loadedBackgrounds.length == backgrounds.length ){
 			loadMasks(masks[0]);
 		} else{
@@ -257,7 +316,6 @@ function loadMasks(bg){
 	var loader = new THREE.TextureLoader(manager)
 	loader.load(bg, function (object) {
 		loadedMasks.push(object);
-		//console.log('loaded background:'+object);
 		if(loadedMasks.length == masks.length ){
 			loadTextTextures(textTextures[0]);
 		} else{
@@ -275,7 +333,6 @@ function loadTextTextures(bg){
 	var loader = new THREE.TextureLoader(manager)
 	loader.load(bg, function (object) {
 		loadedText.push(object);
-		//console.log(textTextures.length + ' loaded text:'+object);
 		if(loadedText.length == textTextures.length ){
 			backgroundsLoaded = true;
 		} else{
@@ -316,6 +373,7 @@ function setupTicker(){
 	var textMesh;
 	scene.add(ticker);	
 }
+
 textCreated = false;
 function getTimeRemaining(endtime) {
   var t = Date.parse(endtime) - Date.parse(new Date());
@@ -362,9 +420,9 @@ function createText(){
 	var textMaterial = new THREE.MeshStandardMaterial({color: 0xffffff});
 	var textGeometry = new THREE.TextGeometry(countDown, {
 		font: font2,
-		size: wW/1000,
-		height: .01,
-		curveSegments: 4
+		size: wW/600,
+		height: .1,
+		curveSegments: 3
 	});
 	textGeometry.center();
 	textMesh = new THREE.Mesh(textGeometry, textMaterial);
@@ -398,7 +456,6 @@ function handleGroup(){
 	    } else if(showGroup === 'group10'){
 		    group = group10;
 	    }
-		//console.log('theres a group');
 		removeableItems.forEach(function(v,i) {
 			if(v.material.length == 1){
 				v.material.dispose();
@@ -408,7 +465,6 @@ function handleGroup(){
 				}
 			}
 			v.geometry.dispose();
-			//console.log('dispose: '+v);
 			v = undefined;
 		});
 	    if(group.children.length > 0){
@@ -417,7 +473,6 @@ function handleGroup(){
 				    group.remove(group.children[i]);
 					
 				}
-				//console.log('group removed, getting new group');
 				randGroup();
 			//}}); 
 				
@@ -495,7 +550,6 @@ function createGroup(g){
 	}
 
 	$drawMe = false;
-	//console.log('creategroup:'+g);
 	if(g === 'group1'){
 		var randColor1 = colors[Math.floor(Math.random() * colors.length)];
 		material = new THREE.ShaderMaterial( {
@@ -856,7 +910,7 @@ void main() {
 	}
 	if(g === 'group6'){
 		group6.position.z = 100;
-		var randMask = loadedMasks[Math.floor(Math.random() * loadedMasks.length)];
+		var randMask = loadedMasks[0];
 
 		var randBG1 = loadedBackgrounds[0];
 		var randBG2 = loadedBackgrounds[0];
@@ -867,7 +921,7 @@ void main() {
 		randBG2.wrapT = THREE.RepeatWrapping;
 		randBG2.repeat.set( 1, 1 );		
 		ratio = wW / wH;
-		size = 7 * ratio;
+		size = 9 * ratio;
 		var geo = new THREE.PlaneBufferGeometry(size, size);
 		var mat = new THREE.ShaderMaterial({
 		  uniforms:{
@@ -1620,7 +1674,6 @@ function draw() {
 					},500);
 				}		
 			} else{
-				//afterimagePass.uniforms.damp.value = 0.96;
 				group5.position.z = 100;
 
 			}		
@@ -1630,16 +1683,29 @@ function draw() {
 				TweenMax.to(badTVPass.uniforms[ 'distortion' ], 1, {value: overallAvg/100});
 				TweenMax.to(badTVPass.uniforms[ 'speed' ], 3, {value: overallAvg/200 * -.025});
 				TweenMax.to(badTVPass.uniforms[ 'distortion2' ], 2, {value: overallAvg/150});
+				
 				group6.position.z = 0;
-				btime += overallAvg/100;
+				btime += overallAvg/10000;
 				badTVPass.uniforms[ 'time' ].value = btime;
 				$feedback.material.uniforms.mx.value = (mX / wW)*2 -1;
 				TweenMax.to($feedback.position, 2, {z: -5 - lowerAvg/20});
-				$feedback.material.uniforms.my.value = -(mY / wH)*2 +1;
-				TweenMax.to($feedback.material.uniforms.time, 2, {value: overallAvg/100});
+				$feedback.material.uniforms.time.value = btime;
+				TweenMax.to($feedback.material.uniforms.my, 2, {value: overallAvg/300});
 				group6.rotation.y = (mX - (wW/2))/wW;
 				group6.rotation.x = (mY - (wH/2))/wH;
+				if(upperMaxFr !== oldMax && $switch){
+					switchBG = 0;
+					var randBG = loadedMasks[Math.floor(Math.random() * loadedMasks.length)];
+						randBG.repeat.set( 1, 1 );
+					$feedback.material.uniforms.texture1.value = randBG;
 
+					$switch = false;
+					oldMax = upperMaxFr;
+					if (switcher) window.clearTimeout(switcher);
+					switcher = window.setTimeout(function(){
+						$switch = true;
+					},500);
+				}	
 			} else{
 				btime = 0;
 				group6.position.z = 100;
@@ -1660,7 +1726,6 @@ function draw() {
 					$plane2.material.uniforms.tex0.value = randBG;
 					$switch = false;
 					oldMax = upperMaxFr;
-					console.log('switch');
 					if (switcher) window.clearTimeout(switcher);
 					switcher = window.setTimeout(function(){
 						$switch = true;
@@ -1756,7 +1821,6 @@ function draw() {
 					fire.setSourceMap( randBG );
 
 					oldMax = overallAvg;
-					console.log('switch');
 					$switch = false;
 					if (switcher) window.clearTimeout(switcher);
 					switcher = window.setTimeout(function(){
@@ -1886,7 +1950,6 @@ function mouseUp() {
     ready2 = false;
     ready3 = false;
     if(!playing && ready && ready2 && ready3){
-		console.log('play it');
 	    if(!sound.isPlaying){
 			sound.play();
 	    }
