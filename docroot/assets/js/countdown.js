@@ -85,12 +85,13 @@ var animationTime = 0;
 var animationDelta = 0.03;
 var loadChecker = setInterval(function(){
 	if(backgroundsLoaded){
+		init();
 		clearInterval(loadChecker);
 		ready4 = true;
 	}
 },100);
 var $sequence = [];
-init();
+//init();
 $(window).load(function(){
 	/*$('.marquee-wrap.top1 .marquee').marquee({
 		//duration in milliseconds of the marquee
@@ -138,10 +139,11 @@ $(window).load(function(){
 		duplicated: true
 	});*/
 })
+	loadBackgrounds(backgrounds[0]);
+
 function init(){
 
 	setupScene();
-	loadBackgrounds(backgrounds[0]);
 	setupTicker();
 }
 function randGroup(){
@@ -167,6 +169,8 @@ function randGroup(){
 	$first = false;
 		
 }
+var windowResize;
+
 function setupScene(){
 	scene = new THREE.Scene();	
 	fogColor = new THREE.Color(0x000000);
@@ -220,13 +224,23 @@ function setupScene(){
 	
 	renderer = new THREE.WebGLRenderer({ 
 	    antialias: true,
-		alpha: false 
+		alpha: false,
+		 precision: "lowp", 
 	});
+ windowResize = new THREEx.WindowResize(renderer, camera, {
+    width     : function() { return wW; },
+    height    : function() { return wH; },
+    maxWidth  : 1024,
+    maxHeight : 1024,
+   //after     : otherResizeHandlers,
+   // scale     : '3d'
+});
+    
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.PCFShadowMap;
 	renderer.setSize(wW, wH);
 	pixelRatio = 1;
-	
+
 	occlusionRenderTarget = new THREE.WebGLRenderTarget( wW, wH);
 	occlusionComposer = new THREE.EffectComposer( renderer, occlusionRenderTarget);
 	occlusionComposer.addPass( new THREE.RenderPass( scene, camera ) );
@@ -251,13 +265,60 @@ function setupScene(){
     //hue.uniforms.hue.value = 10;
 	//hue.renderToScreen = false;
 	//composer.addPass( hue );
+THREE.ColorCorrectionShader = {
+
+	uniforms: {
+
+		"tDiffuse": { value: null },
+		"powRGB":   { value: new THREE.Vector3( 2, 2, 2 ) },
+		"mulRGB":   { value: new THREE.Vector3( 1, 1, 1 ) },
+		"addRGB":   { value: new THREE.Vector3( 0, 0, 0 ) }
+
+	},
+
+	vertexShader: [
+
+		"varying vec2 vUv;",
+
+		"void main() {",
+
+			"vUv = uv;",
+
+			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+
+		"}"
+
+	].join( "\n" ),
+
+	fragmentShader: [
+
+		"uniform sampler2D tDiffuse;",
+		"uniform vec3 powRGB;",
+		"uniform vec3 mulRGB;",
+		"uniform vec3 addRGB;",
+
+		"varying vec2 vUv;",
+
+		"void main() {",
+
+			"gl_FragColor = texture2D( tDiffuse, vUv );",
+			"gl_FragColor.rgb = mulRGB * pow( ( gl_FragColor.rgb + addRGB ), powRGB );",
+
+		"}"
+
+	].join( "\n" )
+
+};
+	correct = new THREE.ShaderPass(THREE.ColorCorrectionShader)
+	correct.renderToScreen = false;
+	//composer.addPass( correct );
+
 	
 	colorify = new THREE.ShaderPass(THREE.ColorifyShader)
 	colorify.uniforms['opacity'].value = 0;
 	colorify.uniforms['color'].value.setRGB(1, 1, 1);
 	colorify.renderToScreen = false;
 	composer.addPass( colorify );
-
 	
 	badTVPass = new THREE.ShaderPass( THREE.BadTVShader );
 	badTVPass.renderToScreen = false;
@@ -292,7 +353,7 @@ function setupScene(){
 	mouse = new THREE.Vector2();
 	
 	$('.scroll').append(renderer.domElement);
-
+windowResize.trigger();
 	
 }
 function loadBackgrounds(bg){
@@ -420,7 +481,7 @@ function createText(){
 	var textMaterial = new THREE.MeshStandardMaterial({color: 0xffffff});
 	var textGeometry = new THREE.TextGeometry(countDown, {
 		font: font2,
-		size: wW/600,
+		size: wW/800,
 		height: .1,
 		curveSegments: 3
 	});
@@ -1886,6 +1947,7 @@ function onWindowResize() {
 
 	composer.setSize(wW, wH);
 	renderer.setSize(wW, wH);
+	windowResize.trigger();
 }
 function mouseDown(e) { 
     //mouseUp();
@@ -1971,7 +2033,7 @@ function idleMouse(){
 $(document).on('mousemove touchmove', function(event) {
   event.preventDefault();
  });
-$('#scene')[0].addEventListener("mousedown", mouseDown);
+$('body')[0].addEventListener("mousedown", mouseDown);
 document.body.addEventListener("mousemove", mouseMove);
 document.body.addEventListener("mouseup", mouseUp); 
 document.body.addEventListener("touchstart", mouseDown);
