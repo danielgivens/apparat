@@ -579,6 +579,14 @@ THREE.Fire.DiffuseShader = {
 			type: 'f',
 			value: null
 		},
+		'moveX': {
+			type: 'f',
+			value: null
+		},
+		'moveY': {
+			type: 'f',
+			value: null
+		},
 		'burnRate': {
 			type: 'f',
 			value: null

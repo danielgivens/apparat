@@ -44,6 +44,7 @@ module.exports = function(grunt) {
 		            'docroot/assets/js/vendor/gsap.js', 
 		            'docroot/assets/js/vendor/smooth-scrollbar.js',
 		            'docroot/assets/js/vendor/jquery.js', 
+		            'docroot/assets/js/vendor/marquee3k.js', 
 					'docroot/assets/js/vendor/three.min.js',
 					'docroot/assets/js/vendor/threex.windowresize.js',
 					'docroot/assets/js/vendor/simplex-noise.min.js',
@@ -54,6 +55,9 @@ module.exports = function(grunt) {
 					'docroot/assets/js/vendor/Fire.js',
 					'docroot/assets/js/vendor/GlitchPass.js',
 					'docroot/assets/js/vendor/MaskPass.js',
+					
+					'docroot/assets/js/vendor/BrightnessContrastShader.js',
+					'docroot/assets/js/vendor/GammaCorrectionShader.js',
 					'docroot/assets/js/vendor/HueSaturationShader.js',
 					'docroot/assets/js/vendor/AfterimagePass.js',
 					'docroot/assets/js/vendor/ShaderGodRays.js',

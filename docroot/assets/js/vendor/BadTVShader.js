@@ -126,7 +126,7 @@ THREE.BadTVShader = {
 			// boost distortion
 			"offset = offset*distortion * offset*distortion * offset;",
 			//add fine grain distortion
-			"offset += snoise(vec2(yt*2.0,0.0))*distortion2;",
+			"offset += snoise(vec2(yt*1.2,0.0))*distortion2;",
 			//combine distortion on X with roll on Y
 			"gl_FragColor = texture2D(tDiffuse,  vec2(fract(p.x + offset),fract(p.y-time*rollSpeed) ));",
 

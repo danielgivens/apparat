@@ -1,30 +1,25 @@
 backgrounds = [
 	'/assets/images/test-4.jpg',
-	'/assets/images/app2.jpg',
-	'/assets/images/app-flowers-pink.jpg',
-	'/assets/images/app-smudges-2.jpg',
-	'/assets/images/app-textures-2.1.jpg',
 	'/assets/images/app-textures-2.2.jpg',
-	'/assets/images/app-textures-2.3.jpg',
-	'/assets/images/app-textures-2.4.jpg',
+	'/assets/images/app-smudges-2.jpg',
 	'/assets/images/app-textures-2.5.jpg',
 	'/assets/images/app-textures-2.6.jpg',
-	'/assets/images/app-textures-2.7.jpg',
-	'/assets/images/app-textures-2.8.jpg',
-	'/assets/images/app-textures-2.9.jpg',
+	'/assets/images/texture-tour-3.jpg',
+	'/assets/images/texture-tour-2.jpg',
 	'/assets/images/app-textures-2.10.jpg',
 ];
-masks =[
-	'/assets/images/appn.jpg',
-	//'/assets/images/app-photobooth.jpg',	
-	'/assets/images/type-texture.png',
-	'/assets/images/app-flower-mask.png',	
-];
 textTextures = [
+	'/assets/images/app-poem.png',
+	'/assets/images/app.jpg',
+];
+maskTextures = [
+	'/assets/images/appn.jpg',
+	'/assets/images/app-mask-p.jpg',	
 	'/assets/images/type-texture.png',
 	'/assets/images/app-flower-mask.png',	
 ];
 snips = [
+	//'/assets/audio/02_DAWAN_16.8BoV2_M080119_TAPE_48-24_bo@calyx.aac',
 	'/assets/audio/Voido.aac',
 	'/assets/audio/airo5.aac',
 	'/assets/audio/Branden.aac',
@@ -51,7 +46,7 @@ groups = [
 	'group6',
 	'group7',
 	'group8',
-	//'group9',
+	'group9',
 	'group10',
 ];
 
@@ -70,10 +65,11 @@ colors = [
 wW = window.innerWidth;
 wH = window.innerHeight;
 var scene, switcher, mouse, fire, upperAvgFr, upperMaxFr, lowerAvgFr, lowerMaxFr, upperAvg, upperMax, lowerAvg, lowerMax, overallAvg, deadline, $buff, loopTimer, listener, $track, textureContext, sphere_mesh,ambientLight, volumetericLightShaderUniforms, audioLoader, videoTexture, occlusionComposer, occlusionRenderTarget, occlusionBox, lightSphere, dartaArray, pointLight, $pointLight, idleTimer, $portal, textMesh, mouseTimer, portalMesh, portalrenderer, sound, camera, material, composer, analyser, dataArray, glitchPass, afterimagePass, renderPass, copyPass, rgbParams, rgbPass, filmParams, filmPass, renderPass, copyPass;
-var DEFAULT_LAYER = 0, OCCLUSION_LAYER = 1, objects = [], randomPlanes = [], textureIndex = 0, $loopDur = 0, $loopLength = 0, renderScale = 0.5, ready4 = false, angle = 0, audioData = [], shaderTime = 0, btime = 0, fftSize = 512, $drawMe = false, ready3 = false, playing = false, ready = false, ready2 = false, holding = false, font2 = undefined, startX = wW/2, startY = wH/2, backgroundsLoaded = false, loadedBackgrounds = [], loadedMasks = [],removeableItems = [], loadedText = [], mX = 0, mY = 0, b = 0, d = 0, r= 0, $r = 0, $switch = true, oldMax = 0, shaderTime = 0, start = Date.now(), wifreframeBallColor = 0, switchBG = 0, switchColor = 0, rate = 0, time = 0, offset = { upper : 0,lower : 0}, showGroup = 'none', $g = 1, $first = true; timeOutput = '00:00:00:00';
+var DEFAULT_LAYER = 0, OCCLUSION_LAYER = 1, objects = [], p = 0, loadedTexts = []; randomPlanes = [], textureIndex = 0, $loopDur = 0, $loopLength = 0, renderScale = 0.5, ready4 = false, angle = 0, audioData = [], shaderTime = 0, btime = 0, fftSize = 512, $drawMe = false, ready3 = false, playing = false, ready = false, ready2 = false, holding = false, font2 = undefined, startX = wW/2, startY = wH/2, backgroundsLoaded = false, loadedCubes=[], loadedBackgrounds = [], loadedMasks = [],removeableItems = [], loadedMasks = [], mX = 0, mY = 0, b = 0, d = 0, r= 0, $r = 0, $switch = true, oldMax = 0, shaderTime = 0, start = Date.now(), wifreframeBallColor = 0, switchBG = 0, switchColor = 0, rate = 0, time = 0, offset = { upper : 0,lower : 0}, showGroup = 'none', $g = 1, $first = true; timeOutput = '00:00:00:00';
 var noise2 = new SimplexNoise(), simplex = new SimplexNoise(), manager = new THREE.LoadingManager(), loader = new THREE.TextureLoader(manager);
 var shaderUniforms, shaderAttributes;
-
+$spin = false;
+$done = false;
 var particles = [];
 var particleSystem;
 
@@ -85,62 +81,18 @@ var animationTime = 0;
 var animationDelta = 0.03;
 var loadChecker = setInterval(function(){
 	if(backgroundsLoaded){
-		init();
 		clearInterval(loadChecker);
 		ready4 = true;
+		$('body').addClass('started');
 	}
 },100);
 var $sequence = [];
-//init();
-$(window).load(function(){
-	/*$('.marquee-wrap.top1 .marquee').marquee({
-		//duration in milliseconds of the marquee
-		duration: 25000,
-		gap: 10,
-		allowCss3Support: true,
-		startVisible: true,
-		direction: 'left',
-		duplicated: true
-	});
-	$('.marquee-wrap.top2 .marquee').marquee({
-		//duration in milliseconds of the marquee
-		duration: 25000,
-		gap: 10,
-		allowCss3Support: true,
-		startVisible: true,
-		direction: 'right',
-		duplicated: true
-	});*/
-	/*$('.marquee-wrap.left1 .marquee').marquee({
-		//duration in milliseconds of the marquee
-		duration: 30000,
-		gap: 10,
-		allowCss3Support: true,
-		startVisible: true,
-		direction: 'up',
-		duplicated: true
-	});
-	$('.marquee-wrap.left2 .marquee').marquee({
-		//duration in milliseconds of the marquee
-		duration: 30000,
-		gap: 10,
-		allowCss3Support: true,
-		startVisible: true,
-		direction: 'down',
-		duplicated: true
-	});*/
-	/*$('.marquee-wrap.right .marquee').marquee({
-		//duration in milliseconds of the marquee
-		duration: 20000,
-		gap: 10,
-		allowCss3Support: true,
-		startVisible: true,
-		direction: 'down',
-		duplicated: true
-	});*/
-})
-	loadBackgrounds(backgrounds[0]);
+init();
 
+loadBackgrounds(backgrounds[0]);
+Marquee3k.init({
+ selector: 'marquee'	
+})
 function init(){
 
 	setupScene();
@@ -230,8 +182,8 @@ function setupScene(){
  windowResize = new THREEx.WindowResize(renderer, camera, {
     width     : function() { return wW; },
     height    : function() { return wH; },
-    maxWidth  : 1024,
-    maxHeight : 1024,
+    maxWidth  : 1920,
+    maxHeight : 1920,
    //after     : otherResizeHandlers,
    // scale     : '3d'
 });
@@ -260,7 +212,7 @@ function setupScene(){
 	composer.setSize( wW, wH);
 	composer.addPass( new THREE.RenderPass( scene, camera ) );
 
-	var hue = new THREE.ShaderPass(THREE.HueSaturationShader);
+	//var hue = new THREE.ShaderPass(THREE.HueSaturationShader);
     //hue.enabled = true;
     //hue.uniforms.hue.value = 10;
 	//hue.renderToScreen = false;
@@ -309,9 +261,6 @@ THREE.ColorCorrectionShader = {
 	].join( "\n" )
 
 };
-	correct = new THREE.ShaderPass(THREE.ColorCorrectionShader)
-	correct.renderToScreen = false;
-	//composer.addPass( correct );
 
 	
 	colorify = new THREE.ShaderPass(THREE.ColorifyShader)
@@ -344,7 +293,15 @@ THREE.ColorCorrectionShader = {
 	staticPass.uniforms[ 'amount' ].value = .2;
 	staticPass.uniforms[ 'size' ].value = 1;		
 	staticPass.renderToScreen = false;
-	composer.addPass( staticPass );
+	//composer.addPass( staticPass );
+
+	hueSat = new THREE.ShaderPass(THREE.HueSaturationShader)
+	hueSat.enabled = true;
+	hueSat.renderToScreen = false;
+	hueSat.uniforms['hue'].value = 0;
+	hueSat.uniforms['saturation'].value = 0;
+	composer.addPass( hueSat );
+
 		
 	afterimagePass = new THREE.AfterimagePass();
 	afterimagePass.renderToScreen = true;
@@ -360,32 +317,43 @@ function loadBackgrounds(bg){
 	var loader = new THREE.TextureLoader(manager)
 	loader.load(bg, function (object) {
 		loadedBackgrounds.push(object);
+		var urls = [
+			bg,
+			bg,
+			bg,
+			bg,
+			bg,
+			bg
+		];
+			
+		var textureCube = new THREE.CubeTextureLoader().load( urls );	
+		loadedCubes.push(textureCube)	
 		if(loadedBackgrounds.length == backgrounds.length ){
-			loadMasks(masks[0]);
+			loadMaskTextures(maskTextures[0]);
 		} else{
 			b++
 			if(b <= backgrounds.length){
 				loadBackgrounds(backgrounds[b]);
 			} else{
-				loadMasks(masks[0]);
+				loadMaskTextures(maskTextures[0]);
 				
 			}
 		}
 	});
 }
-function loadMasks(bg){
+
+function loadMaskTextures(bg){
 	var loader = new THREE.TextureLoader(manager)
 	loader.load(bg, function (object) {
 		loadedMasks.push(object);
-		if(loadedMasks.length == masks.length ){
+		if(loadedMasks.length == maskTextures.length ){
 			loadTextTextures(textTextures[0]);
 		} else{
-			r++
-			if(r <= masks.length){
-				loadMasks(masks[r]);
+			d++
+			if(d <= maskTextures.length){
+				loadMaskTextures(maskTextures[d]);
 			} else{
 				loadTextTextures(textTextures[0]);
-				
 			}
 		}
 	});
@@ -393,13 +361,13 @@ function loadMasks(bg){
 function loadTextTextures(bg){
 	var loader = new THREE.TextureLoader(manager)
 	loader.load(bg, function (object) {
-		loadedText.push(object);
-		if(loadedText.length == textTextures.length ){
+		loadedTexts.push(object);
+		if(loadedTexts.length == textTextures.length ){
 			backgroundsLoaded = true;
 		} else{
-			d++
-			if(d <= textTextures.length){
-				loadTextTextures(textTextures[d]);
+			p++
+			if(p <= textTextures.length){
+				loadTextTextures(textTextures[p]);
 			} else{
 				backgroundsLoaded = true;
 			}
@@ -452,11 +420,17 @@ function getTimeRemaining(endtime) {
 }
 function updateClock() {
 	var t = getTimeRemaining(deadline);	
-	if(ready){
-		countDown = 'LP_5.'+t.days+':' +''+ ('0' + t.hours).slice(-2) + ':' +''+ ('0' + t.minutes).slice(-2)+':' +''+ ('0' + t.seconds).slice(-2)+'';
+	if(ready4){
+		if($spin){
+			countDown = '[keep_holding]';
+			refreshText();
+		} else{
+			countDown = 'LP_5.'+t.days+':' +''+ ('0' + t.hours).slice(-2) + ':' +''+ ('0' + t.minutes).slice(-2)+':' +''+ ('0' + t.seconds).slice(-2)+'';
+		}
 	} else{
 		countDown = '<!--loading-->';
 	}
+	
 	timeOutput = t.days+':' +''+ ('0' + t.hours).slice(-2) + ':' +''+ ('0' + t.minutes).slice(-2)+':' +''+ ('0' + t.seconds).slice(-2);
 	if(!holding){
 
@@ -606,9 +580,7 @@ function loadLoop(){
 	}
 }
 function createGroup(g){
-	if(!$('#vidTexture')[0].paused){
-		$('#vidTexture')[0].pause();
-	}
+
 
 	$drawMe = false;
 	if(g === 'group1'){
@@ -729,22 +701,29 @@ function createGroup(g){
 		group3.add(boxMesh);
 		removeableItems.push(boxMesh);
 		$room = group3.getObjectByName('room');
-		var alphaMap = loadedText[Math.floor(Math.random() * loadedText.length)];
+		$ra = Math.floor(Math.random() * loadedMasks.length);
+		if($ra === 0){
+			$ra = 1;
+		}
+		var alphaMap = loadedMasks[$ra];
 		var randColor1 = colors[Math.floor(Math.random() * colors.length)];
 		pointLight = createLight( randColor1 , alphaMap);
 		pointLight.name = 'innerLight';
 		pointLight.position.z  = 3;
 		group3.add( pointLight );		
 		$pointLight = group3.getObjectByName('innerLight');
-		var randColor = colors[Math.floor(Math.random() * colors.length)];
-		colorify.uniforms['color'].value = new THREE.Color( randColor );
+
 
 	}
 	if(g === 'group4'){
 		geometry = new THREE.SphereBufferGeometry( 3, 32, 32 );
 		//geometry = new THREE.BoxBufferGeometry( 3, 3, 3 );
 		material = new THREE.MeshBasicMaterial( { color: colors[0] } );
-		var alphaMap = loadedText[Math.floor(Math.random() * loadedText.length)];
+		$am = Math.floor(Math.random() * loadedMasks.length)
+		if($am === 0){
+			$am = 1;
+		}
+		var alphaMap = loadedMasks[$am];
 		group4.position.z = 100;
 		lightSphere = new THREE.Mesh( geometry, material );
 		lightSphere.layers.set( OCCLUSION_LAYER );
@@ -820,17 +799,17 @@ var randColor = colors[Math.floor(Math.random() * colors.length)];
 		//var size = 20;
 		//var divisions = size*12;
 		group5.position.z = 100;
-		if($('#vidTexture')[0].paused){
-			$('#vidTexture')[0].play();
-		}
+
 		canvasTexture = document.createElement( 'canvas' );
 		canvasTexture.id = 'drawingCanvas';
-		canvasTexture.width = wW/2;
-		canvasTexture.height = wH/2;
+		canvasTexture.width = wW;
+		canvasTexture.height = wW;
 		//document.body.appendChild(canvasTexture);
 		textureContext = canvasTexture.getContext( '2d' );
 		textureContext.fillStyle = "black";
-		textureContext.fillRect(0, 0, wW/2, wH/2);
+		textureContext.fillRect(0, 0, wW, wW);
+
+
 
         $drawMe = true;
 		
@@ -846,29 +825,31 @@ var randColor = colors[Math.floor(Math.random() * colors.length)];
 		var vFov = camera.fov * Math.PI / 180;
 		var planeHeightAtDistance = 2 * Math.tan(vFov / 2) * distance;
 		var planeWidthAtDistance = planeHeightAtDistance * aspect;	
-		videoTexture = new THREE.VideoTexture( $('#vidTexture')[0] );
-		videoTexture.minFilter = THREE.NearestFilter;
-		videoTexture.wrapS = THREE.ClampToEdgeWrapping;
-		videoTexture.wrapT = THREE.ClampToEdgeWrapping;
+		
+		var randText = loadedTexts[Math.floor(Math.random() * loadedTexts.length)];
+		randText.wrapS = THREE.RepeatWrapping;
+		randText.wrapT = THREE.RepeatWrapping;
+		randText.repeat.set( 1, 1 );
+
 		var randColor = colors[Math.floor(Math.random() * colors.length)];
 
-		var geometry = new THREE.PlaneBufferGeometry( planeWidthAtDistance, planeHeightAtDistance, 64, 64 );
+		var geometry = new THREE.PlaneBufferGeometry( planeWidthAtDistance, planeWidthAtDistance, 12, 12 );
 		//var geometry = new THREE.SphereBufferGeometry( planeWidthAtDistance,64, 64 );
-		var material = new THREE.MeshBasicMaterial( {color:  randColor, map: videoTexture, wireframe: false, transparent: true, opacity: 1 } );
+		var material = new THREE.MeshBasicMaterial( {color:  randColor, map: randText, wireframe: false, transparent: true, opacity: 1 } );
 		var alpha = new THREE.CanvasTexture( canvasTexture );
 		alpha.minFilter = THREE.NearestFilter;
 		//material.alphaMap.magFilter = THREE.NearestFilter;
 		material.alphaTest = 0.25;
-		alpha.wrapS = THREE.ClampToEdgeWrapping;
-		alpha.wrapT = THREE.ClampToEdgeWrapping;
-		alpha.repeat.y = 1;
-		alpha.repeat.x = 1;
+		//alpha.wrapS = THREE.RepeatWrapping;
+		//alpha.wrapT = THREE.RepeatWrapping;
+		//alpha.repeat.y = 1;
+		//alpha.repeat.x = 1;
 		//alpha.offset.y = -1;
 		//alpha.offset.x = 1;
 		material.alphaMap = alpha;
 		alpha.needsUpdate = true;
 		
-		material.needsUpdate = true;
+		//material.needsUpdate = true;
 		//material.side = THREE.BackSide;
 
 		var plane1 = new THREE.Mesh( geometry, material );
@@ -900,8 +881,8 @@ var randColor = colors[Math.floor(Math.random() * colors.length)];
 		var planeWidthAtDistance = planeHeightAtDistance * aspect;	
 		randBG2.wrapS = THREE.RepeatWrapping;
 		randBG2.wrapT = THREE.RepeatWrapping;
-		//randBG2.repeat.set( 1, 1 );
-		var geometry = new THREE.PlaneBufferGeometry( planeWidthAtDistance, planeWidthAtDistance, 64, 64 );
+		randBG2.repeat.set( 1, 1 );
+		var geometry = new THREE.PlaneBufferGeometry( planeWidthAtDistance, planeWidthAtDistance, 12, 12 );
 				//var geometry = new THREE.SphereBufferGeometry( planeWidthAtDistance,64, 64 );
 		var randColor = colors[Math.floor(Math.random() * colors.length)];
 
@@ -910,16 +891,36 @@ var mat = new THREE.ShaderMaterial({
 			  col1 : {type:"c", value: new THREE.Color( randColor )},
 		      tex0: {type:"t", value: randMask},
 		      tex1: {type:"t", value: randBG1},
-		      amt : {tyle:"f", value: .08}
+		      amt : {tyle:"f", value: .08},
+		       delta: {type: 'f', value: 0.0},
+		      scale : {tyle:"f", value: 1.5}
 		  },
 		  //color: randColor,
 		  vertexShader:`
 precision highp float;
 precision highp int;
 varying vec2 vUv;
+uniform float delta;
+
+uniform float scale;
+
 void main() {
   vUv = uv;
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+  
+    vec3 p = position;
+
+   // p.z += sin(2.0 * p.y + delta) * 5.0;
+
+   // p.z += cos(2.0 * p.z + delta / 2.0) * 5.0;
+
+    //p.z += cos(2.0 * p.x + delta) * 5.0;
+
+    //p.x += sin(p.y + delta / 2.0) * 10.0;
+
+    vec4 mvPosition = modelViewMatrix * vec4(scale * p, 1.0 );
+
+    //gl_Position = projectionMatrix * mvPosition;
+  gl_Position = projectionMatrix * mvPosition;
 
 }
 `,
@@ -933,7 +934,7 @@ uniform sampler2D tex1;
 uniform float amt;
 void main() {
   vec2 uv = vUv;
-  vec4 cam = texture2D(tex0, uv);
+  vec4 cam = texture2D(tex0, uv + amt);
   float avg = dot(cam.rgb, vec3(0.33333));
   avg = avg * 2.0 - 1.0;
   float disp = avg * amt;
@@ -971,26 +972,29 @@ void main() {
 	}
 	if(g === 'group6'){
 		group6.position.z = 100;
-		var randMask = loadedMasks[0];
-
-		var randBG1 = loadedBackgrounds[0];
+		var randMask = loadedBackgrounds[0];
 		var randBG2 = loadedBackgrounds[0];
-		randBG1.wrapS = THREE.RepeatWrapping;
-		randBG1.wrapT = THREE.RepeatWrapping;
-		randBG1.repeat.set( 1, 1 );		
+		//var randBG2 = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+	
 		randBG2.wrapS = THREE.RepeatWrapping;
 		randBG2.wrapT = THREE.RepeatWrapping;
 		randBG2.repeat.set( 1, 1 );		
-		ratio = wW / wH;
-		size = 9 * ratio;
-		var geo = new THREE.PlaneBufferGeometry(size, size);
+		var cameraZ = camera.position.z;
+		var planeZ = 0;
+		var distance = cameraZ - planeZ;
+		var aspect = wW / wH;
+		var vFov = camera.fov * Math.PI / 180;
+		var planeHeightAtDistance = 2 * Math.tan(vFov / 2) * distance;
+		var planeWidthAtDistance = planeHeightAtDistance * aspect;	
+
+		var geo = new THREE.PlaneBufferGeometry(planeWidthAtDistance, planeHeightAtDistance);
 		var mat = new THREE.ShaderMaterial({
 		  uniforms:{
 		      time: {value: 0},
 					mx: {value: 0},
 					my: {value: 0},
-		      texture1: {value: randMask},
-					texture2: {value: randBG2}
+		      texture1: {value: randBG2},
+					texture2: {value: randMask}
 		  },
 		  vertexShader:`precision highp float;
 		  precision highp int;
@@ -1001,6 +1005,7 @@ void main() {
 		    }
 		  `,
 		  fragmentShader: `
+		  precision highp float;
 		    uniform float time;
 		uniform float mx;
 		uniform float my;
@@ -1011,7 +1016,7 @@ void main() {
 		      vec3 c = vec3(texture2D(texture1, vUv));
 		      //float v = time + (vUv.x*0.5 + vUv.y*0.5);
 		      float v = time;
-		      vec2 Uv2 = vec2(c.r + c.b+v + mx, c.g + c.b + v + my);
+		      vec2 Uv2 = vec2(c.r + c.g + v+ mx, c.r + c.b + v + mx);
 		      vec3 outcolor = vec3(texture2D(texture2, Uv2));
 			  //vec3 outcolor = vec3( mod(c.r+v,1.0), mod(c.g+v,1.0), mod(c.b+v,1.0));
    		
@@ -1027,7 +1032,9 @@ void main() {
 	}
 	if(g === 'group7'){
 		var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
-
+randBG.wrapT = THREE.RepeatWrapping;
+randBG.wrapS = THREE.RepeatWrapping;
+randBG.repeat.set( 1, 1 );
 		var cameraZ = camera.position.z;
 		var planeZ = 0;
 		var distance = cameraZ - planeZ;
@@ -1098,8 +1105,12 @@ void main() {
 	if(g === 'group8'){
 		group8.position.z = 900;
 		textureIndex = Math.floor(Math.random() * backgrounds.length);
+		if(textureIndex === 1){
+			textureIndex = 0;
+		}
 		imageSource = backgrounds[textureIndex];
 		createPixelData(imageSource);
+		
 		/*var geometry = new THREE.PlaneBufferGeometry( 2, 2, 16 );
 		for ( var i = 0; i < loadedBackgrounds.length; i ++ ) {
 			var material = new THREE.MeshBasicMaterial( { color: 0xffffff, map: loadedBackgrounds[i] ,refractionRatio: 0.95, transparent: true, opacity: 0 } );
@@ -1125,7 +1136,8 @@ void main() {
 		
 	}
 	if(g === 'group9'){
-		objects = [];
+		group9.position.z = 400;
+		/*objects = [];
 		var geo = new THREE.SphereBufferGeometry( 1, 60, 60 );
 		var xgrid = 8,
 			ygrid = 8,
@@ -1155,7 +1167,121 @@ void main() {
 					count ++;
 				}
 			}
-		}
+		}*/
+		var randCube = loadedCubes[Math.floor(Math.random() * loadedCubes.length)];
+		var randColor = colors[Math.floor(Math.random() * colors.length)];
+
+		var skyshader = THREE.ShaderLib[ "cube" ];
+		skyshader.uniforms[ "tCube" ].value = randCube;
+		
+		var skymaterial = new THREE.ShaderMaterial( {
+		
+		  fragmentShader: skyshader.fragmentShader,
+		  vertexShader: skyshader.vertexShader,
+		  uniforms: skyshader.uniforms,
+		  depthWrite: false,
+		  side: THREE.BackSide
+		
+		} );
+		
+
+		var uniforms = {
+		    color: {
+		      type: "c",
+		      value: new THREE.Color(randColor),
+		    },
+		    envMap: {
+		      type: "t",
+		      value: randCube
+		    },
+		    fresnelBias: {
+		      type: "f",
+		      value: 0.5,
+		      min: 0.0, // only used for dat.gui, not needed for production
+		      max: 1.0 // only used for dat.gui, not needed for production
+		    },
+		    fresnelScale: {
+		      type: "f",
+		      value: 0.5,
+		      min: 0.0, // only used for dat.gui, not needed for production
+		      max: 10.0 // only used for dat.gui, not needed for production
+		    },
+		    fresnelPower: {
+		      type: 'f',
+		      value: 0.5,
+		      min: 0.0, // only used for dat.gui, not needed for production
+		      max: 10.0 // only used for dat.gui, not needed for production
+		    }
+		};
+		var vertexShader = `
+		uniform float fresnelBias;
+		uniform float fresnelScale;
+		uniform float fresnelPower;
+		
+		varying float vReflectionFactor;
+		varying vec3 vI;
+		varying vec3 vWorldNormal;
+		
+		void main() {
+		  vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+		  vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
+		
+		  vWorldNormal = normalize( mat3( modelMatrix[0].xyz, modelMatrix[1].xyz, modelMatrix[2].xyz ) * normal );
+		
+		  vI = worldPosition.xyz - cameraPosition;
+		
+		  vReflectionFactor = fresnelBias + fresnelScale * pow( 1.0 + dot( normalize( vI ), vWorldNormal ), fresnelPower );
+		
+		  gl_Position = projectionMatrix * mvPosition;
+		}`;
+		var fragmentShader = `
+		uniform vec3 color;
+		uniform samplerCube envMap;
+		
+		
+		varying float vReflectionFactor;
+		varying vec3 vI;
+		varying vec3 vWorldNormal;
+		
+		void main() {
+		  vec3 reflection = reflect( vI, vWorldNormal );
+		  vec4 envColor = textureCube( envMap, vec3( -reflection.x, reflection.yz ) );
+		  gl_FragColor = vec4(mix(color, envColor.xyz, vec3(clamp( vReflectionFactor, 0.0, 1.0 ))), 1.0);
+		}`;
+		material = new THREE.ShaderMaterial(
+		    {
+		      uniforms : uniforms,
+		      vertexShader : vertexShader,
+		      fragmentShader : fragmentShader,
+		    });
+		
+		var geometry = new THREE.BoxGeometry(4, 4, 4);
+		// material = new THREE.MeshBasicMaterial();
+		mesh = new THREE.Mesh(geometry, material);
+		group9.add(mesh);	
+		removeableItems.push(mesh);
+		mesh.name = 'mirror';
+		$mirror = group9.getObjectByName('mirror');
+
+		mesh2 = new THREE.Mesh(geometry, material);
+		group9.add(mesh2);	
+		removeableItems.push(mesh2);
+		mesh2.name = 'mirror2';
+		$mirror2 = group9.getObjectByName('mirror2');
+			
+
+		mesh3 = new THREE.Mesh(geometry, material);
+		group9.add(mesh3);	
+		removeableItems.push(mesh3);
+		mesh3.name = 'mirror3';
+		$mirror3 = group9.getObjectByName('mirror3');
+
+
+		mesh4 = new THREE.Mesh(geometry, material);
+		group9.add(mesh4);	
+		removeableItems.push(mesh4);
+		mesh4.name = 'mirror4';
+		$mirror4 = group9.getObjectByName('mirror4');			
 	}
 	if(g === 'group10'){
 		var cameraZ = camera.position.z;
@@ -1166,13 +1292,16 @@ void main() {
 		var planeHeightAtDistance = 2 * Math.tan(vFov / 2) * distance;
 		var planeWidthAtDistance = planeHeightAtDistance * aspect;	
 		var plane = new THREE.PlaneBufferGeometry( planeWidthAtDistance, planeWidthAtDistance );
-		var randBG = loadedText[Math.floor(Math.random() * loadedText.length)];
+		var randBG = loadedMasks[Math.floor(Math.random() * loadedMasks.length)];
+		randBG.wrapS = THREE.RepeatWrapping;
+		randBG.wrapT = THREE.RepeatWrapping;
+		randBG.repeat.set( 1, 1 );		
 		var randColor1 = colors[Math.floor(Math.random() * colors.length)];
 		var randColor2 = colors[Math.floor(Math.random() * colors.length)];
 		var randColor3 = colors[Math.floor(Math.random() * colors.length)];
 		fire = new THREE.Fire( plane, {
-			textureWidth: 1024,
-			textureHeight: 1024,
+			textureWidth: wW,
+			textureHeight: wH,
 			debug: false
 		} );
 		fire.color1.set( 0x000000 );
@@ -1186,8 +1315,9 @@ void main() {
 		fire.swirl = 0.0;
 		fire.drag = 0.0;
 		fire.airSpeed = 0.0;	
-		fire.windVector.x = 0;
+		fire.oneOverWidth = 0;
 		fire.windVector.y = 0;
+
 		fire.speed = 40.0;
 		
 		fire.setSourceMap( randBG );
@@ -1234,9 +1364,9 @@ function createPaticles() {
   x = imageWidth * -0.5;
   y = imageHeight * 0.5;
 
-		var randBG = loadedText[Math.floor(Math.random() * loadedText.length)];
+		var randBG = loadedMasks[Math.floor(Math.random() * loadedMasks.length)];
 */
-geometry = new THREE.Geometry();
+var geometry = new THREE.Geometry();
  //geometry.addAttribute( 'position', new THREE.BufferAttribute( colors, 3 ) );
 // geometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3 ) );
   x = imageWidth * -0.5;
@@ -1456,7 +1586,7 @@ function addPortal(){
 	var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
 	randBG.wrapT = THREE.RepeatWrapping;
 	randBG.wrapS = THREE.RepeatWrapping;
-		randBG.repeat.set( 1, 1 );
+		randBG.repeat.set( 10,5 );
 
 	//console.log('adding portal:'+randBG);
 	var geometry = new THREE.SphereBufferGeometry( 1, 128, 128);
@@ -1490,35 +1620,66 @@ function makeWireframe(mesh,  bassFr, treFr, ampl) {
 
 
 }
+function makeWaveform(data){
+ // Draw the time domain chart.
+  for (var i = 0; i < this.analyser.frequencyBinCount; i++) {
+    var value = this.times[i];
+    var percent = value / 256;
+    var height = HEIGHT * percent;
+    var offset = HEIGHT - height - 1;
+    var barWidth = WIDTH/this.analyser.frequencyBinCount;
+    drawContext.fillStyle = 'white';
+    drawContext.fillRect(i * barWidth, offset, 1, 2);
+  }
+}
+
 function draw() {
 	requestAnimationFrame(draw);
 	shaderTime += .01
-	staticPass.uniforms[ 'time' ].value =  shaderTime;	
+	//staticPass.uniforms[ 'time' ].value =  shaderTime;	
 	if(!holding){
+		$done = false;
+		colorify.uniforms['opacity'].value = 0;	
 		TweenMax.to(badTVPass.uniforms[ 'distortion' ], 1, {value: 0});
 		TweenMax.to(badTVPass.uniforms[ 'speed' ], 1, {value: 0});
+		TweenMax.to(badTVPass.uniforms[ 'time' ], 1, {value: 0});
 		TweenMax.to(badTVPass.uniforms[ 'distortion2' ], 1, {value: 0});
+
+		badTVPass.uniforms[ 'speed' ].value = 0;
+		badTVPass.uniforms[ 'rollSpeed' ].value = 0;
+
 		TweenMax.to(ticker.position, 0, {delay: 1, z: 0});
 		TweenMax.to($mainSpot, .25, {delay: 0.5, intensity: 1});
 		afterimagePass.uniforms.damp.value = 0.92;
-		staticPass.uniforms[ 'amount' ].value = 0.2;
+		//staticPass.uniforms[ 'amount' ].value = 0.2;
 		$switch = true;
 		oldMax = 0;
 		if (switcher) window.clearTimeout(switcher);
 		volumetericLightShaderUniforms.exposure.value = 0;
+
 	}
+		if($spin){
+			ticker.rotation.x += .15;
+			//ticker.rotation.y += .05;
+			//ticker.position.z += .01;
+		} else{
+			ticker.rotation.x = 0;
+			ticker.rotation.y = 0;
+		}	
 	if(ready && ready3 && ready2){
 		if(holding){
+			$spin = false;
 			playing = true;
 			analyser.getFrequencyData(dataArray);
+			makeWaveform(dataArray)
 			lowerHalfArray = dataArray.slice(0, (dataArray.length/2) - 1);
 			upperHalfArray = dataArray.slice((dataArray.length/2) - 1, dataArray.length - 1);
 			overallAvg = avg(dataArray);
 			lowerAvg = avg(lowerHalfArray);
 			upperMax = max(upperHalfArray);
 			upperMaxFr = upperMax / upperHalfArray.length;
+			TweenMax.to(hueSat.uniforms['hue'], 5, { value:overallAvg/10});
 			//TweenMax.to(ticker.position, .5, {delay: 0, z: 10});
-
 			TweenMax.to(ticker.position, 0, {z: 100});
 			if(!sound.isPlaying){
 				sound.play();
@@ -1529,7 +1690,7 @@ function draw() {
 			$('.output#data').html(parseFloat(overallAvg).toFixed(4)+'<br />'+parseFloat(lowerAvg).toFixed(4))
 			$('.output#coords').html('['+mX+','+ mY+']')
 			$('.output#loop').html(parseFloat($loopLength)+'<br />'+parseFloat($loopDur).toFixed(2));
-			staticPass.uniforms[ 'amount' ].value = 0.09;
+			//staticPass.uniforms[ 'amount' ].value = 0.09;
 		} 
 		if(showGroup === 'group1'){
 			if(holding){
@@ -1541,14 +1702,18 @@ function draw() {
 				TweenMax.to($wireframeBall.material.uniforms[ 'weight' ], 1, {value: Math.min(8,overallAvg/1.5)});
 				$wireframeBall.rotation.y = (mX - (wW/2))/wW;
 				$wireframeBall.rotation.x = (mY - (wH/2))/wH;
-				$portal.material.map.offset.x = (mX - (wW/2))/wW;
-				$portal.material.map.offset.y = (mY - (wH/2))/wH;
+				$portal.rotation.y += ((mX - (wW/2))/wW)* .05;
+				$portal.rotation.x += ((mY - (wH/2))/wH)* .05;
+				//$portal.material.map.offset.x = (mX - (wW/2))/wW;
+				//$portal.material.map.offset.y = (mY - (wH/2))/wH;
 				//TweenMax.to($portal.position, 1, {z: overallAvg/30 * -.5, x: 0, y: 0});
 				//switchBG += overallAvg;
-				if(upperMaxFr !== oldMax && $switch){
+				/*if(upperMaxFr !== oldMax && $switch){
 					switchBG = 0;
 					var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
-					randBG.repeat.set( 1, 1 );
+					randBG.wrapT = THREE.RepeatWrapping;
+					randBG.wrapS = THREE.RepeatWrapping;
+					randBG.repeat.set( 10, 5 );
 
 					$portal.material.map = randBG;
 					$switch = false;
@@ -1557,7 +1722,7 @@ function draw() {
 					switcher = window.setTimeout(function(){
 						$switch = true;
 					},500);
-				}				
+				}	*/			
 			    
 
 			} else{
@@ -1581,12 +1746,12 @@ function draw() {
 				rate += overallAvg/5000;
 				if(upperMaxFr !== oldMax && $switch){
 					switchBG = 0;
-					var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+					/*var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
 					randBG.wrapS = THREE.RepeatWrapping;
 					randBG.wrapT = THREE.RepeatWrapping;
-					randBG.repeat.set( 1, 1 );
+					randBG.repeat.set( 1, 1 );*/
 
-					$plane1.material.map = randBG;
+					//$plane1.material.map = randBG;
 					$switch = false;
 					var randColor = colors[Math.floor(Math.random() * colors.length)];
 					$plane2.material.color = new THREE.Color(randColor);
@@ -1621,7 +1786,7 @@ function draw() {
 				});
 			  	$pointLight.rotation.y -= ((mX - (wW/2))/wW * 1.5)*-.025;
 			  	$pointLight.rotation.x += ((mY - (wH/2))/wH * 1.5)*.015;
-				if(upperMaxFr !== oldMax && $switch){
+				/*if(upperMaxFr !== oldMax && $switch){
 					switchBG = 0;
 					var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
 					randBG.wrapS = THREE.RepeatWrapping;
@@ -1635,7 +1800,7 @@ function draw() {
 					switcher = window.setTimeout(function(){
 						$switch = true;
 					},500);
-				}				
+				}	*/			
 				//$room.rotation.y = ((mX - (wW/2))/wW * 1.5)*-2;				
 				//$room.rotation.x = ((mY - (wH/2))/wH * 1.5)*2;
 				//$pointLight.position.z = 5 + ((mY - (wH/2))/wH * 1.5)*10;			
@@ -1706,7 +1871,10 @@ function draw() {
 				});			
 			} else{
 				group4.position.z = 100;
+				$orbLayer.material.map.offset.x = 0;
+			  	$orbLayer.material.map.offset.y = 0;
 				//volumetericLightShaderUniforms.exposure.value = 0;
+				
 				//colorify.uniforms['opacity'].value = 0;
 
 			}
@@ -1714,18 +1882,24 @@ function draw() {
 		}
 		if(showGroup === 'group5'){
 			if(holding){
-				//afterimagePass.uniforms.damp.value = 0;
-				videoTexture.needsUpdate = true;
-
 				TweenMax.to($plane2.material.uniforms.amt, 2, {value: overallAvg/800});
 				group5.position.z = 0;
 				if(upperMaxFr !== oldMax && $switch){
 					switchBG = 0;
-					var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
-						randBG.repeat.set( 1, 1 );
+					/*var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+					randBG.wrapT = THREE.RepeatWrapping;
+					randBG.wrapS = THREE.RepeatWrapping;
+					randBG.repeat.set( 1, 1 );*/
 
-					$plane2.material.uniforms.tex1.value = randBG;
+					//$plane2.material.uniforms.tex1.value = randBG;
+					var randMask = loadedMasks[Math.floor(Math.random() * loadedMasks.length)];
+					randMask.wrapT = THREE.RepeatWrapping;
+					randMask.wrapS = THREE.RepeatWrapping;
+					randMask.repeat.set( 1, 1 );
+
+					$plane2.material.uniforms.tex0.value = randMask;
 					$switch = false;
+
 					var randColor = colors[Math.floor(Math.random() * colors.length)];
 					$plane1.material.color = new THREE.Color(randColor);
 					oldMax = upperMaxFr;
@@ -1741,23 +1915,27 @@ function draw() {
 		} 
 		if(showGroup === 'group6'){
 			if(holding){
-				TweenMax.to(badTVPass.uniforms[ 'distortion' ], 1, {value: overallAvg/100});
-				TweenMax.to(badTVPass.uniforms[ 'speed' ], 3, {value: overallAvg/200 * -.025});
+				TweenMax.to(badTVPass.uniforms[ 'distortion' ], 2, {value: overallAvg/60});
+				TweenMax.to(badTVPass.uniforms[ 'speed' ], 3, {value: overallAvg/100 * -.25});
 				TweenMax.to(badTVPass.uniforms[ 'distortion2' ], 2, {value: overallAvg/150});
-				
+				//TweenMax.to(badTVPass.uniforms[ 'time' ], 4, {value: overallAvg});
+				btime += overallAvg/5000;
+				//badTVPass.uniforms[ 'time' ].value = .8;
+				//badTVPass.uniforms[ 'rollSpeed' ].value = ((mY - (wH/2))/wH)*1;
 				group6.position.z = 0;
-				btime += overallAvg/10000;
 				badTVPass.uniforms[ 'time' ].value = btime;
-				$feedback.material.uniforms.mx.value = (mX / wW)*2 -1;
-				TweenMax.to($feedback.position, 2, {z: -5 - lowerAvg/20});
-				$feedback.material.uniforms.time.value = btime;
+				$feedback.material.uniforms.mx.value = (mX / wW)*2 -.5;
+				//TweenMax.to($feedback.position, 2, {z: -5 - lowerAvg/20});
+				$feedback.material.uniforms.time.value = btime/2;
 				TweenMax.to($feedback.material.uniforms.my, 2, {value: overallAvg/300});
-				group6.rotation.y = (mX - (wW/2))/wW;
-				group6.rotation.x = (mY - (wH/2))/wH;
+				//group6.rotation.y = (mX - (wW/2))/wW;
+				//group6.rotation.x = (mY - (wH/2))/wH;
 				if(upperMaxFr !== oldMax && $switch){
 					switchBG = 0;
-					var randBG = loadedMasks[Math.floor(Math.random() * loadedMasks.length)];
-						randBG.repeat.set( 1, 1 );
+					var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+					randBG.wrapT = THREE.RepeatWrapping;
+					randBG.wrapS = THREE.RepeatWrapping;
+					randBG.repeat.set( 1, 1 );
 					$feedback.material.uniforms.texture1.value = randBG;
 
 					$switch = false;
@@ -1765,7 +1943,7 @@ function draw() {
 					if (switcher) window.clearTimeout(switcher);
 					switcher = window.setTimeout(function(){
 						$switch = true;
-					},500);
+					},1000);
 				}	
 			} else{
 				btime = 0;
@@ -1783,7 +1961,9 @@ function draw() {
 				if(upperMaxFr !== oldMax && $switch){
 					switchBG = 0;
 					var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
-
+					randBG.wrapT = THREE.RepeatWrapping;
+					randBG.wrapS = THREE.RepeatWrapping;
+					randBG.repeat.set( 1, 1 );
 					$plane2.material.uniforms.tex0.value = randBG;
 					$switch = false;
 					oldMax = upperMaxFr;
@@ -1800,49 +1980,57 @@ function draw() {
 			if(holding){
 				//afterimagePass.uniforms.damp.value = 1;
 				group8.position.z = -800 - ((mY - (wH/2))/wH)*-800;
+				//group8.position.z = -800 - overallAvg;
+				//TweenMax.to(group8.position, 1, {z:  (-800 - overallAvg)});
+	
 				//group8.position.z = 0;
 				group8.rotation.x = Math.PI * -.45 + ((mY - (wH/2))/wH)*5;
+				//group8.rotation.x +=overallAvg/1800;
+				//group8.rotation.x = Math.PI * .5;
 				//group8.rotation.z = Math.PI * -.25;
 				//group8.rotation.y = Math.PI * -.35;
 				group8.rotation.z =  ((mX - (wW/2))/wW)*5;
+				//group8.rotation.z +=overallAvg/2200;
 				//group8.rotation.y = ((mY - (wH/2))/wH)*5;
-				TweenMax.to(shaderUniforms.amplitude, 1, {value:  (upperMax - overallAvg - lowerAvg)});
-				
+				TweenMax.to(shaderUniforms.amplitude, .8, {value:  (upperMax - overallAvg/2 - lowerAvg)});
+							
 				//animationTime += animationDelta;
-				
+				colorify.uniforms['opacity'].value = 1;	
 				//ampl = Math.min(90,(overallAvg) + 255-lowerMax);
 				//makeWireframe($wireframeBall, modulate(overallAvg, .3, 6, 4, .4), modulate((overallAvg/2)/5, 0, 5, .3, 2), ampl);
 				//makeWireframe($wireframeBall, modulate(overallAvg, .3, 6, 4, .4), modulate((overallAvg), 0, 5, .3, .2), ampl);
 				  	//$wireframeBall.rotation.y -= ((mX - (wW/2))/wW * 1.5)*.005;
 				  	//$wireframeBall.rotation.x += ((mY - (wH/2))/wH * 1.5)*.005;	
 
-					/*if(overallAvg !== oldMax && $switch){
+					if(overallAvg !== oldMax && $switch){
 						switchBG = 0;
-						for (var m = 0; m < randomPlanes.length; m++) {
-							randomPlanes[m].material.opacity = 0;
-							randomPlanes[m].position.x = Math.random() * 9 - 4.5;
-							randomPlanes[m].position.y = Math.random() * 9 - 4.5;
-							randomPlanes[m].position.z = Math.random() * 9 - 4.5;
-						}
+						var randColor = colors[Math.floor(Math.random() * colors.length)];
+						colorify.uniforms['color'].value = new THREE.Color( randColor );
+					
 						
-						randP = randomPlanes[Math.floor(Math.random() * randomPlanes.length)];
-						randP.material.opacity = 1;
+
+						//textureIndex = Math.floor(Math.random() * backgrounds.length);
+						//imageSource = backgrounds[textureIndex];
+						//createPixelData(imageSource);
+							
 						oldMax = overallAvg;
-						console.log('switch');
+						//console.log('switch');
 						$switch = false;
 						if (switcher) window.clearTimeout(switcher);
 						switcher = window.setTimeout(function(){
 							$switch = true;
-						},200);
-					}*/
+						},800);
+					}
 					//shaderUniforms.amplitude.value = Math.sin(animationTime);						
 			} else{
+				
 				group8.position.z = 900;
 			}
 		}
 		if(showGroup === 'group9'){
 			if(holding){
-				time = Date.now() * 0.00005;
+				group9.position.z = 0;
+				/*time = Date.now() * 0.00005;
 				for ( i = 0; i < nobjects; i ++ ) {
 					TweenMax.to(objects[ i ].scale, 1, {x: 0.05 + overallAvg/50,y: 0.05 + overallAvg/50,z: 0.05 + overallAvg/50});
 					objects[i].updateMatrix();
@@ -1851,10 +2039,34 @@ function draw() {
 				}
 				group9.rotation.y = (mX - (wW/2))/wW;
 				group9.rotation.x = (mY - (wH/2))/wH;
+				group9.position.z = 0;*/
+				//TweenMax.to(group9.position, 1.5, {z: overallAvg/4});
+				TweenMax.to($mirror.scale, 2, {x: overallAvg/100, y: overallAvg/40, z: overallAvg/50});
+				//TweenMax.to($mirror.position, 1.5, {z: overallAvg/10});
+				$mirror.rotation.y -= .01 - ((mX - (wW/2))/wW * 1.5)*-.015;
+			  	$mirror.rotation.x += .01 + ((mY - (wH/2))/wH * 1.5)*.005;	  	
+			  	$mirror.rotation.z -= overallAvg/5000;
+			
+				TweenMax.to($mirror2.scale, 1, {x: overallAvg/40, y: overallAvg/60, z: overallAvg/80});
+				//TweenMax.to($mirror2.position, 1.5, {z: overallAvg/15});
+				$mirror2.rotation.y -= .005 - ((mX - (wW/2))/wW * 1.5)*.015;
+			  	$mirror2.rotation.x += .005 + ((mY - (wH/2))/wH * 1.5)*-.005;	  	
+			  	$mirror2.rotation.z += overallAvg/3000;
 
-				group9.position.z = 0;
+				TweenMax.to($mirror3.scale, 1.5, {x: overallAvg/100, y: overallAvg/50, z: overallAvg/70});
+				//TweenMax.to($mirror3.position, 1.5, {z: overallAvg/20});
+				$mirror3.rotation.y -= ((mX - (wW/2))/wW * 1.5)*.02;
+			  	$mirror3.rotation.x += ((mY - (wH/2))/wH * 1.5)*.008;	  	
+			  	$mirror3.rotation.z += overallAvg/5000;
+
+				TweenMax.to($mirror4.scale, 2, {x: overallAvg/100, y: overallAvg/30, z: overallAvg/100});
+				//TweenMax.to($mirror4.position, 1.5, {z: overallAvg/12});
+				$mirror4.rotation.y -= ((mX - (wW/2))/wW * 2)*-.02;
+			  	$mirror4.rotation.x += ((mY - (wH/2))/wH * 2)*-.008;	  	
+			  	$mirror4.rotation.z -= overallAvg/4000;
+
 			} else{
-				group9.position.z = 400;
+				group9.position.z = 900;
 			}
 		}
 		if(showGroup === 'group10'){
@@ -1878,7 +2090,9 @@ function draw() {
 					fire.color2.set( randColor2 );
 					fire.color3.set( randColor3 );
 					var randBG = loadedMasks[Math.floor(Math.random() * loadedMasks.length)];
-
+					randBG.wrapT = THREE.RepeatWrapping;
+					randBG.wrapS = THREE.RepeatWrapping;
+					randBG.repeat.set( 1, 1 );
 					fire.setSourceMap( randBG );
 
 					oldMax = overallAvg;
@@ -1948,15 +2162,25 @@ function onWindowResize() {
 	composer.setSize(wW, wH);
 	renderer.setSize(wW, wH);
 	windowResize.trigger();
+	if($drawMe){
+		canvasTexture.width = wW;
+		canvasTexture.height = wW;		
+		textureContext = canvasTexture.getContext( '2d' );
+		textureContext.fillStyle = "black";
+		textureContext.fillRect(0, 0, wW, wW);
+
+	}
 }
 function mouseDown(e) { 
     //mouseUp();
 	 if($first && ready4){
 		loadLoop();	  
     }
+     $spin = true;
 	if(ready4){
 	    holding = true;
-	}
+	   
+	} 
     if(!playing && ready && ready2 && ready3){
 		//$switch = true;
 
@@ -1965,7 +2189,7 @@ function mouseDown(e) {
 	    }
 		playing = true;
 		idleMouse();
-    }
+	} 
     if (loopTimer) window.clearTimeout(loopTimer); 
     if (idleTimer) window.clearTimeout(idleTimer);
 	if(holding && ready2 && $drawMe){
@@ -1991,15 +2215,20 @@ function mouseMove(event) {
 		startX = mX;
 		startY = mY;  
 	}
+	$('.instruction').css({
+		'top':mY,
+		'left': mX
+	})
 }
 function drawMask(x,y,w,r,g,b,a){
-    var gradient = textureContext.createRadialGradient(x/2, y/2, 0, x/2, y/2, w/4);
+	y = (wW - wH)/2 + y;
+    var gradient = textureContext.createRadialGradient(x, y, 0, x, y, w/4);
     gradient.addColorStop(0, 'rgba('+r+', '+g+', '+b+', '+a+')');
     //gradient.addColorStop(.5, 'rgba(0,100,0,1)');
     
 	//gradient.addColorStop(.6, 'rgba('+r+', '+g+', '+b+', 0)');
     textureContext.beginPath();
-    textureContext.arc(x/2, y/2, w/4, 0, 2 * Math.PI);
+    textureContext.arc(x, y, w/4, 0, 2 * Math.PI);
     textureContext.fillStyle = gradient;
     textureContext.fill();
     textureContext.closePath();
@@ -2011,6 +2240,7 @@ function mouseUp() {
 	movingMouse();
     ready2 = false;
     ready3 = false;
+    $spin = false;
     if(!playing && ready && ready2 && ready3){
 	    if(!sound.isPlaying){
 			sound.play();
