@@ -45,7 +45,7 @@ module.exports = function(grunt) {
 		            'docroot/assets/js/vendor/smooth-scrollbar.js',
 		            'docroot/assets/js/vendor/jquery.js', 
 		            'docroot/assets/js/vendor/marquee3k.js', 
-					'docroot/assets/js/vendor/three.min.js',
+					'docroot/assets/js/vendor/three-fix.js',
 					'docroot/assets/js/vendor/threex.windowresize.js',
 					'docroot/assets/js/vendor/simplex-noise.min.js',
 					'docroot/assets/js/vendor/EffectComposer.js',

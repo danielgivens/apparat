@@ -11,16 +11,23 @@ backgrounds = [
 textTextures = [
 	'/assets/images/app-poem.png',
 	'/assets/images/app.jpg',
+	'/assets/images/type-texture.png',
 ];
 maskTextures = [
 	'/assets/images/appn.jpg',
-	'/assets/images/app-mask-p.jpg',	
-	'/assets/images/type-texture.png',
+	'/assets/images/app-mask-8.jpg',
+	'/assets/images/app-mask-7.jpg',
+	'/assets/images/app-mask-6.jpg',
+	'/assets/images/app-mask-5.jpg',
+	'/assets/images/app-mask-4.jpg',
+	'/assets/images/app-mask-3.jpg',
+	'/assets/images/app-mask-2.jpg',
+	'/assets/images/app-mask-1.jpg',
 	'/assets/images/app-flower-mask.png',	
 ];
+
 snips = [
 	//'/assets/audio/02_DAWAN_16.8BoV2_M080119_TAPE_48-24_bo@calyx.aac',
-	'/assets/audio/Voido.aac',
 	'/assets/audio/airo5.aac',
 	'/assets/audio/Branden.aac',
 	'/assets/audio/Cock_Intro.aac',
@@ -64,7 +71,7 @@ colors = [
 
 wW = window.innerWidth;
 wH = window.innerHeight;
-var scene, switcher, mouse, fire, upperAvgFr, upperMaxFr, lowerAvgFr, lowerMaxFr, upperAvg, upperMax, lowerAvg, lowerMax, overallAvg, deadline, $buff, loopTimer, listener, $track, textureContext, sphere_mesh,ambientLight, volumetericLightShaderUniforms, audioLoader, videoTexture, occlusionComposer, occlusionRenderTarget, occlusionBox, lightSphere, dartaArray, pointLight, $pointLight, idleTimer, $portal, textMesh, mouseTimer, portalMesh, portalrenderer, sound, camera, material, composer, analyser, dataArray, glitchPass, afterimagePass, renderPass, copyPass, rgbParams, rgbPass, filmParams, filmPass, renderPass, copyPass;
+var scene, switcher, mouse, fire, upperAvgFr, sound, upperMaxFr, lowerAvgFr, lowerMaxFr, upperAvg, upperMax, lowerAvg, lowerMax, overallAvg, deadline, $buff, loopTimer, listener, $track, textureContext, sphere_mesh,ambientLight, volumetericLightShaderUniforms, audioLoader, videoTexture, occlusionComposer, occlusionRenderTarget, occlusionBox, lightSphere, dartaArray, pointLight, $pointLight, idleTimer, $portal, textMesh, mouseTimer, portalMesh, portalrenderer, sound, camera, material, composer, analyser, dataArray, glitchPass, afterimagePass, renderPass, copyPass, rgbParams, rgbPass, filmParams, filmPass, renderPass, copyPass;
 var DEFAULT_LAYER = 0, OCCLUSION_LAYER = 1, objects = [], p = 0, loadedTexts = []; randomPlanes = [], textureIndex = 0, $loopDur = 0, $loopLength = 0, renderScale = 0.5, ready4 = false, angle = 0, audioData = [], shaderTime = 0, btime = 0, fftSize = 512, $drawMe = false, ready3 = false, playing = false, ready = false, ready2 = false, holding = false, font2 = undefined, startX = wW/2, startY = wH/2, backgroundsLoaded = false, loadedCubes=[], loadedBackgrounds = [], loadedMasks = [],removeableItems = [], loadedMasks = [], mX = 0, mY = 0, b = 0, d = 0, r= 0, $r = 0, $switch = true, oldMax = 0, shaderTime = 0, start = Date.now(), wifreframeBallColor = 0, switchBG = 0, switchColor = 0, rate = 0, time = 0, offset = { upper : 0,lower : 0}, showGroup = 'none', $g = 1, $first = true; timeOutput = '00:00:00:00';
 var noise2 = new SimplexNoise(), simplex = new SimplexNoise(), manager = new THREE.LoadingManager(), loader = new THREE.TextureLoader(manager);
 var shaderUniforms, shaderAttributes;
@@ -556,9 +563,9 @@ function handleGroup(){
 		$loopLength = $buff.length; 
 		
 		if(sound.isPlaying){
-			//sound.pause();
+			sound.pause();
 		}
-		
+		console.log('test:'+$loopLength);
 		//sound.context.resume();
 		sound.playbackRate = .7;
 		//sound.play();
@@ -567,6 +574,7 @@ function handleGroup(){
 		if($r > snips.length -1){
 			$r = 0;
 		}
+		
 	});		
 }
 function loadLoop(){
@@ -1586,7 +1594,7 @@ function addPortal(){
 	var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
 	randBG.wrapT = THREE.RepeatWrapping;
 	randBG.wrapS = THREE.RepeatWrapping;
-		randBG.repeat.set( 10,5 );
+		randBG.repeat.set(1,1 );
 
 	//console.log('adding portal:'+randBG);
 	var geometry = new THREE.SphereBufferGeometry( 1, 128, 128);
@@ -1821,7 +1829,7 @@ function draw() {
 				//afterimagePass.uniforms.damp.value = 0;
 				//$god.rotation.x += 0.001;
 				volumetericLightShaderUniforms.exposure.value = .9;
-				TweenMax.to(volumetericLightShaderUniforms.samples, .8, {value: Math.max(0,90 - overallAvg)});
+				TweenMax.to(volumetericLightShaderUniforms.samples, .8, {value: Math.max(0,120 - overallAvg)});
 				//volumetericLightShaderUniforms.decay.value = upperAvgFr/6;
 
 				if(upperMaxFr !== oldMax && $switch){
@@ -2171,41 +2179,53 @@ function onWindowResize() {
 
 	}
 }
-function mouseDown(e) { 
+function mouseDown(mousex, mousey) { 
     //mouseUp();
 	 if($first && ready4){
 		loadLoop();	  
     }
-     $spin = true;
 	if(ready4){
+	    $spin = true;
 	    holding = true;
 	   
 	} 
+	
     if(!playing && ready && ready2 && ready3){
 		//$switch = true;
-
+		console.log('test2');
 	    if(!sound.isPlaying){
 			sound.play();
 	    }
 		playing = true;
+		
 		idleMouse();
 	} 
     if (loopTimer) window.clearTimeout(loopTimer); 
     if (idleTimer) window.clearTimeout(idleTimer);
 	if(holding && ready2 && $drawMe){
-		startX = e.pageX ;
-		startY = e.pageY ;
+		startX = mousex;
+		startY = mousey;
 		drawMask(startX, startY,15,0,255,0, 1);
 	}
     idleTimer = window.setTimeout(idleMouse,500);
 }
-function mouseMove(event) {
+function mouseMove(mousex, mousey) {
 	if(!holding){
 		movingMouse();
-		event.preventDefault();
+		
+	} else{
+	    if(!playing && ready && ready2 && ready3){
+			//$switch = true;
+			console.log('test');
+		    /*if(!sound.isPlaying){
+				sound.play();
+		    }*/
+			playing = true;
+			//idleMouse();
+		} 		
 	}
-	mX = event.pageX;
-	mY =  event.pageY;
+	mX = mousex;
+	mY =  mousey;
 	if(holding && $drawMe){
 		var dis = Math.sqrt(Math.pow(startX-mX, 2)+Math.pow(startY-mY, 2));
 		for (i=0;i<dis;i+=1) {
@@ -2241,12 +2261,12 @@ function mouseUp() {
     ready2 = false;
     ready3 = false;
     $spin = false;
-    if(!playing && ready && ready2 && ready3){
+    /*if(!playing && ready && ready2 && ready3){
 	    if(!sound.isPlaying){
 			sound.play();
 	    }
 		playing = true;
-	}    
+	}   */ 
     if (loopTimer) window.clearTimeout(loopTimer); 
 	if(!$first){
    		loopTimer = window.setTimeout(loadLoop,400);
@@ -2260,15 +2280,35 @@ function movingMouse(){
 function idleMouse(){
 	$('body').addClass('idle');
 }
-$(document).on('mousemove touchmove', function(event) {
-  event.preventDefault();
- });
-$('body')[0].addEventListener("mousedown", mouseDown);
-document.body.addEventListener("mousemove", mouseMove);
-document.body.addEventListener("mouseup", mouseUp); 
-document.body.addEventListener("touchstart", mouseDown);
-document.body.addEventListener("touchend", mouseUp); 
-window.addEventListener("resize", onWindowResize);
+//$('body')[0].addEventListener("mousedown", mouseDown);
+$(document).bind('mousemove', function(e){
+    mouseMove(e.pageX, e.pageY);
+});
+$(document).bind('touchmove', function(e){
+    var touch = e.originalEvent.touches[0];
+    mouseMove(touch.pageX, touch.pageY);
+     //e.preventDefault();
+});
+$(document).bind('mousedown', function(e){
+    mouseDown(e.pageX, e.pageY);
+
+});
+$(document).bind('touchstart', function(e){
+    var touch = e.originalEvent.touches[0];
+    mouseDown(touch.pageX, touch.pageY);
+});
+$(document).bind('mouseup', function(e){
+    mouseUp(e.pageX, e.pageY);
+});
+$(document).bind('touchend', function(e){
+    var touch = e.originalEvent.changedTouches[0];
+    mouseUp(touch.pageX, touch.pageY);
+});
+//document.body.addEventListener("mousemove", mouseMove);
+//document.body.addEventListener("mouseup", mouseUp); 
+//document.body.addEventListener("touchstart", mouseDown);
+//document.body.addEventListener("touchend", mouseUp); 
+$(window)[0].addEventListener("resize", onWindowResize);
 function fractionate(val, minVal, maxVal) {
     return (val - minVal)/(maxVal - minVal);
 }
