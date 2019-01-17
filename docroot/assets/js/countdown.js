@@ -27,7 +27,6 @@ maskTextures = [
 ];
 
 snips = [
-	//'/assets/audio/02_DAWAN_16.8BoV2_M080119_TAPE_48-24_bo@calyx.aac',
 	'/assets/audio/airo5.aac',
 	'/assets/audio/Branden.aac',
 	'/assets/audio/Cock_Intro.aac',
@@ -41,8 +40,27 @@ snips = [
 	'/assets/audio/LeierBird.aac',
 	'/assets/audio/MeansOf.aac',
 	'/assets/audio/Somechords.aac'
-//'/assets/audio/dawan.mp3'
 ];
+
+function preloadAudio(url) {
+var audio = new Audio();
+// once this file loads, it will call loadedAudio()
+// the file will be kept by the browser as cache
+audio.addEventListener('canplaythrough', loadedAudio, false);
+audio.src = url;
+}
+
+var loaded = 0;
+function loadedAudio() {
+	// this will be called every time an audio file is loaded
+	// we keep track of the loaded files vs the requested files
+	loaded++;
+	if (loaded == snips.length){
+		// all have loaded
+		//console.log('loaded audio');
+	}
+}
+
 $loopSequence = shuffle(snips.slice(0));
 groups = [
 	'group1',
@@ -104,6 +122,9 @@ function init(){
 
 	setupScene();
 	setupTicker();
+	for (var i in snips) {
+	    preloadAudio(snips[i]);
+	}	
 }
 function randGroup(){
 	ready3 = false;
@@ -189,8 +210,8 @@ function setupScene(){
  windowResize = new THREEx.WindowResize(renderer, camera, {
     width     : function() { return wW; },
     height    : function() { return wH; },
-    maxWidth  : 1920,
-    maxHeight : 1920,
+    maxWidth  : 1280,
+    maxHeight : 1280,
    //after     : otherResizeHandlers,
    // scale     : '3d'
 });
@@ -429,7 +450,7 @@ function updateClock() {
 	var t = getTimeRemaining(deadline);	
 	if(ready4){
 		if($spin){
-			countDown = '[keep_holding]';
+			countDown = 'keep_holding';
 			refreshText();
 		} else{
 			countDown = 'LP_5.'+t.days+':' +''+ ('0' + t.hours).slice(-2) + ':' +''+ ('0' + t.minutes).slice(-2)+':' +''+ ('0' + t.seconds).slice(-2)+'';
@@ -555,20 +576,18 @@ function handleGroup(){
 	audioLoader.load( $loop, function( buffer ) {
 		sound.setBuffer( buffer );
 		sound.setLoop( true );
-		sound.setVolume( 0);
+		//sound.setVolume( 0);
 		sound.offset = 0;
 		
 		$buff = buffer;
 		$loopDur = $buff.duration; 
 		$loopLength = $buff.length; 
 		
-		if(sound.isPlaying){
-			sound.pause();
-		}
-		console.log('test:'+$loopLength);
+
+		//console.log('test:'+$loopLength);
 		//sound.context.resume();
-		sound.playbackRate = .7;
-		//sound.play();
+		//sound.playbackRate = .7;
+		
 		ready2 = true;
 		playing = false;
 		if($r > snips.length -1){
@@ -579,10 +598,10 @@ function handleGroup(){
 }
 function loadLoop(){
 	if(playing){
-		TweenMax.to(sound, .2, {setPlaybackRate:.7,setVolume:0, onComplete: function(){
-			sound.pause();
+		//TweenMax.to(sound, .2, {setVolume:0, onComplete: function(){
+			//sound.pause();
 			handleGroup();
-		}});	
+		//}});	
 	} else{
 		handleGroup();
 	}
@@ -1556,8 +1575,8 @@ function createLight( color, alphaMap ) {
 	pointLight.castShadow = true;
 	pointLight.shadow.camera.near = .1;
 	pointLight.shadow.camera.far = 100;
-	pointLight.shadow.mapSize.height = 2048;
-	pointLight.shadow.mapSize.width = 2048;
+	pointLight.shadow.mapSize.height = 1024;
+	pointLight.shadow.mapSize.width = 1024;
 	pointLight.shadow.bias = - 0.00; // reduces self-shadowing on double-sided objects
 	var texture = alphaMap;
 	//texture.magFilter = THREE.NearestFilter;
@@ -1692,8 +1711,10 @@ function draw() {
 			if(!sound.isPlaying){
 				sound.play();
 			}
-			
-			TweenMax.to(sound, .2, { setPlaybackRate:1, setVolume:1});
+			//sound.setVolume(1);
+			//TweenMax.to(sound, .2, { setPlaybackRate:1, setVolume:1, onComplete: function(){
+			//	console.log('sound should be playing');
+			//}});
 			$('.output#time').html(timeOutput);
 			$('.output#data').html(parseFloat(overallAvg).toFixed(4)+'<br />'+parseFloat(lowerAvg).toFixed(4))
 			$('.output#coords').html('['+mX+','+ mY+']')
@@ -2179,6 +2200,7 @@ function onWindowResize() {
 
 	}
 }
+
 function mouseDown(mousex, mousey) { 
     //mouseUp();
 	 if($first && ready4){
@@ -2189,13 +2211,10 @@ function mouseDown(mousex, mousey) {
 	    holding = true;
 	   
 	} 
-	
+
     if(!playing && ready && ready2 && ready3){
 		//$switch = true;
-		console.log('test2');
-	    if(!sound.isPlaying){
-			sound.play();
-	    }
+
 		playing = true;
 		
 		idleMouse();
@@ -2216,7 +2235,7 @@ function mouseMove(mousex, mousey) {
 	} else{
 	    if(!playing && ready && ready2 && ready3){
 			//$switch = true;
-			console.log('test');
+			//console.log('test');
 		    /*if(!sound.isPlaying){
 				sound.play();
 		    }*/
@@ -2261,6 +2280,9 @@ function mouseUp() {
     ready2 = false;
     ready3 = false;
     $spin = false;
+	    if(sound.isPlaying){
+			sound.pause();
+	    }    
     /*if(!playing && ready && ready2 && ready3){
 	    if(!sound.isPlaying){
 			sound.play();
@@ -2291,6 +2313,8 @@ $(document).bind('touchmove', function(e){
 });
 $(document).bind('mousedown', function(e){
     mouseDown(e.pageX, e.pageY);
+    e.preventDefault();
+    //console.log('fuck you firefox');
 
 });
 $(document).bind('touchstart', function(e){
