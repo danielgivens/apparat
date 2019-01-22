@@ -55,9 +55,6 @@ module.exports = function(grunt) {
 					'docroot/assets/js/vendor/Fire.js',
 					'docroot/assets/js/vendor/GlitchPass.js',
 					'docroot/assets/js/vendor/MaskPass.js',
-					
-					'docroot/assets/js/vendor/BrightnessContrastShader.js',
-					'docroot/assets/js/vendor/GammaCorrectionShader.js',
 					'docroot/assets/js/vendor/HueSaturationShader.js',
 					'docroot/assets/js/vendor/AfterimagePass.js',
 					'docroot/assets/js/vendor/ShaderGodRays.js',

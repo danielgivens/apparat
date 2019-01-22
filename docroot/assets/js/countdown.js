@@ -1,3 +1,25 @@
+function webglAvailable() {
+    try {
+        var canvas = document.createElement("canvas");
+        return !!
+            window.WebGLRenderingContext && 
+            (canvas.getContext("webgl") || 
+                canvas.getContext("experimental-webgl"));
+    } catch(e) { 
+        return false;
+    } 
+}
+function webAudioAvailable() {
+  try {
+    // Fix up for prefixing
+    window.AudioContext = window.AudioContext||window.webkitAudioContext;
+    context = new AudioContext();
+    return true;
+  }
+  catch(e) {
+        return false;
+  }
+}
 backgrounds = [
 	'/assets/images/test-4.jpg',
 	'/assets/images/app-textures-2.2.jpg',
@@ -41,20 +63,23 @@ snips = [
 	'/assets/audio/MeansOf.aac',
 	'/assets/audio/Somechords.aac'
 ];
-
+loadedSnips = [];
 function preloadAudio(url) {
+	console.log(url);
 var audio = new Audio();
 // once this file loads, it will call loadedAudio()
 // the file will be kept by the browser as cache
-audio.addEventListener('canplaythrough', loadedAudio, false);
+audio.addEventListener('canplaythrough', function(){
+	loadedAudio(url);
+}, false);
 audio.src = url;
 }
-
 var loaded = 0;
-function loadedAudio() {
+function loadedAudio(url) {
 	// this will be called every time an audio file is loaded
 	// we keep track of the loaded files vs the requested files
 	loaded++;
+	loadedSnips.push(url);
 	if (loaded == snips.length){
 		// all have loaded
 		//console.log('loaded audio');
@@ -87,44 +112,113 @@ colors = [
 	
 ];
 
-wW = window.innerWidth;
-wH = window.innerHeight;
+wW = $(document).width();
+wH = $(document).height();
 var scene, switcher, mouse, fire, upperAvgFr, sound, upperMaxFr, lowerAvgFr, lowerMaxFr, upperAvg, upperMax, lowerAvg, lowerMax, overallAvg, deadline, $buff, loopTimer, listener, $track, textureContext, sphere_mesh,ambientLight, volumetericLightShaderUniforms, audioLoader, videoTexture, occlusionComposer, occlusionRenderTarget, occlusionBox, lightSphere, dartaArray, pointLight, $pointLight, idleTimer, $portal, textMesh, mouseTimer, portalMesh, portalrenderer, sound, camera, material, composer, analyser, dataArray, glitchPass, afterimagePass, renderPass, copyPass, rgbParams, rgbPass, filmParams, filmPass, renderPass, copyPass;
 var DEFAULT_LAYER = 0, OCCLUSION_LAYER = 1, objects = [], p = 0, loadedTexts = []; randomPlanes = [], textureIndex = 0, $loopDur = 0, $loopLength = 0, renderScale = 0.5, ready4 = false, angle = 0, audioData = [], shaderTime = 0, btime = 0, fftSize = 512, $drawMe = false, ready3 = false, playing = false, ready = false, ready2 = false, holding = false, font2 = undefined, startX = wW/2, startY = wH/2, backgroundsLoaded = false, loadedCubes=[], loadedBackgrounds = [], loadedMasks = [],removeableItems = [], loadedMasks = [], mX = 0, mY = 0, b = 0, d = 0, r= 0, $r = 0, $switch = true, oldMax = 0, shaderTime = 0, start = Date.now(), wifreframeBallColor = 0, switchBG = 0, switchColor = 0, rate = 0, time = 0, offset = { upper : 0,lower : 0}, showGroup = 'none', $g = 1, $first = true; timeOutput = '00:00:00:00';
-var noise2 = new SimplexNoise(), simplex = new SimplexNoise(), manager = new THREE.LoadingManager(), loader = new THREE.TextureLoader(manager);
 var shaderUniforms, shaderAttributes;
+textCreated = false;
 $spin = false;
+if(wH > wW){
+	$portrait = true;
+} else{
+	$portrait = false;
+}
+if(wW < 1024){
+	$mobile = true;
+	$('.sticker').addClass('rotated');
+} else{
+	$mobile = false;
+}
 $done = false;
 var particles = [];
 var particleSystem;
-
+var windowResize;
 var imageWidth = 1024/2;
 var imageHeight = 1024/2;
 var imageData = null;
-
 var animationTime = 0;
 var animationDelta = 0.03;
-var loadChecker = setInterval(function(){
-	if(backgroundsLoaded){
-		clearInterval(loadChecker);
-		ready4 = true;
-		$('body').addClass('started');
-	}
-},100);
-var $sequence = [];
-init();
 
-loadBackgrounds(backgrounds[0]);
-Marquee3k.init({
- selector: 'marquee'	
-})
+var $sequence = [];
+if(webglAvailable() && webAudioAvailable()){
+	var noise2 = new SimplexNoise(), simplex = new SimplexNoise(), manager = new THREE.LoadingManager(), loader = new THREE.TextureLoader(manager);
+
+	$fallback = false;
+	setTimeout(function(){
+		init();
+		loadBackgrounds(backgrounds[0]);
+		loadTextTextures(textTextures[0]);
+		loadMaskTextures(maskTextures[0]);
+		/*var sn;
+		for (sn = 0; sn < snips.length; sn++) { 
+		 preloadAudio(snips[sn]);
+		}*/
+		Marquee3k.init({
+		selector: 'marquee'	
+		})
+		var loadChecker = setInterval(function(){
+		if(loadedBackgrounds.length >= 2 && loadedMasks.length >= 1 && loadedTexts.length >= 1){
+			ready4 = true;
+			$spin = false;
+			$('body').addClass('started');
+			clearInterval(loadChecker);
+			
+		} else{
+			//console.log('something isnt right');
+		}
+		/*if(backgroundsLoaded){
+			clearInterval(loadChecker);
+			ready4 = true;
+			$('body').addClass('started');
+		}*/
+		},100);	
+		
+	},400);
+	$('.instruction.fallback').remove();
+
+} else{
+	$fallback = true;
+	$('body').addClass('fallback');
+	$('body').addClass('started');
+	$('.sticker .fallback').remove();
+	$('.instruction.primary').remove();
+	Marquee3k.init({
+	 selector: 'marquee'	
+	});
+	deadline = "2019-03-22T00:00:00+00:00";
+	function getTimeRemaining(endtime) {
+	  var t = Date.parse(endtime) - Date.parse(new Date());
+	  var seconds = Math.floor((t / 1000) % 60);
+	  var minutes = Math.floor((t / 1000 / 60) % 60);
+	  var hours = Math.floor((t / (1000 * 60 * 60)) % 24);
+	  var days = Math.floor(t / (1000 * 60 * 60 * 24));
+	  return {
+	    'total': t,
+	    'days': days,
+	    'hours': hours,
+	    'minutes': minutes,
+	    'seconds': seconds
+	  };
+	}
+	function updateClock() {
+		var t = getTimeRemaining(deadline);	
+		timeOutput = t.days+':' +''+ ('0' + t.hours).slice(-2) + ':' +''+ ('0' + t.minutes).slice(-2)+':' +''+ ('0' + t.seconds).slice(-2);
+		$('.output#time').html('LP_5'+timeOutput);
+		if (t.total <= 0) {
+			clearInterval(timeinterval);
+		}
+	}
+	var timeinterval = setInterval(updateClock, 1000);
+	$(window).resize(function(){
+		onWindowResize();		
+	});
+}
 function init(){
 
 	setupScene();
 	setupTicker();
-	for (var i in snips) {
-	    preloadAudio(snips[i]);
-	}	
+	
 }
 function randGroup(){
 	ready3 = false;
@@ -149,8 +243,6 @@ function randGroup(){
 	$first = false;
 		
 }
-var windowResize;
-
 function setupScene(){
 	scene = new THREE.Scene();	
 	fogColor = new THREE.Color(0x000000);
@@ -205,16 +297,18 @@ function setupScene(){
 	renderer = new THREE.WebGLRenderer({ 
 	    antialias: true,
 		alpha: false,
-		 precision: "lowp", 
+		 //precision: "lowp", 
 	});
- windowResize = new THREEx.WindowResize(renderer, camera, {
-    width     : function() { return wW; },
-    height    : function() { return wH; },
-    maxWidth  : 1280,
-    maxHeight : 1280,
-   //after     : otherResizeHandlers,
-   // scale     : '3d'
-});
+	wW = $(document).width();
+	wH = $(document).height();
+	 windowResize = new THREEx.WindowResize(renderer, camera, {
+	    width     : function() { return wW; },
+	    height    : function() { return wH; },
+	    maxWidth  : 1280,
+	    maxHeight : 1280,
+		after     : onWindowResize,
+	   // scale     : '3d'
+	});
     
 	renderer.shadowMap.enabled = true;
 	renderer.shadowMap.type = THREE.PCFShadowMap;
@@ -337,8 +431,21 @@ THREE.ColorCorrectionShader = {
 	
 	mouse = new THREE.Vector2();
 	
-	$('.scroll').append(renderer.domElement);
-windowResize.trigger();
+	$('.scroll .scroll-content').append(renderer.domElement);
+	setTimeout( function(){
+		wW = $(document).width();
+		wH = $(document).height();
+windowResize.destroy();   
+		 windowResize = new THREEx.WindowResize(renderer, camera, {
+		    width     : function() { return wW; },
+		    height    : function() { return wH; },
+		    maxWidth  : 1280,
+		    maxHeight : 1280,
+			after     : onWindowResize,
+		   // scale     : '3d'
+		});
+		windowResize.trigger();
+	},500);
 	
 }
 function loadBackgrounds(bg){
@@ -357,31 +464,31 @@ function loadBackgrounds(bg){
 		var textureCube = new THREE.CubeTextureLoader().load( urls );	
 		loadedCubes.push(textureCube)	
 		if(loadedBackgrounds.length == backgrounds.length ){
-			loadMaskTextures(maskTextures[0]);
+			
 		} else{
 			b++
 			if(b <= backgrounds.length){
 				loadBackgrounds(backgrounds[b]);
 			} else{
-				loadMaskTextures(maskTextures[0]);
+				//loadMaskTextures(maskTextures[0]);
 				
 			}
 		}
 	});
 }
-
 function loadMaskTextures(bg){
 	var loader = new THREE.TextureLoader(manager)
 	loader.load(bg, function (object) {
 		loadedMasks.push(object);
 		if(loadedMasks.length == maskTextures.length ){
-			loadTextTextures(textTextures[0]);
+			
 		} else{
 			d++
 			if(d <= maskTextures.length){
 				loadMaskTextures(maskTextures[d]);
 			} else{
-				loadTextTextures(textTextures[0]);
+				
+				//loadTextTextures(textTextures[0]);
 			}
 		}
 	});
@@ -392,12 +499,16 @@ function loadTextTextures(bg){
 		loadedTexts.push(object);
 		if(loadedTexts.length == textTextures.length ){
 			backgroundsLoaded = true;
+			windowResize.trigger();
+
 		} else{
 			p++
 			if(p <= textTextures.length){
 				loadTextTextures(textTextures[p]);
 			} else{
 				backgroundsLoaded = true;
+				windowResize.trigger();
+
 			}
 		}
 	});
@@ -406,7 +517,7 @@ function setupTicker(){
 	/* ticker stuff */
 	ticker = new THREE.Group();
 	var countDown = 'LP_5';
-	deadline = "2019-03-22T12:00:00+00:00";
+	deadline = "2019-03-22T00:00:00+00:00";
 	var fontLoader = new THREE.FontLoader();
 	var font = fontLoader.load( '/assets/fonts/Terminal Grotesque_Regular.json', function ( response ) {
 	    font2 = response;
@@ -430,9 +541,13 @@ function setupTicker(){
 	var textMesh;
 	scene.add(ticker);	
 }
-
-textCreated = false;
 function getTimeRemaining(endtime) {
+	$current = new Date();
+	//$start = new Date("January 22, 2019 04:45:00 GMT");
+	$start = new Date("January 22, 2019 04:20:00 GMT");
+	if($current.getTime()>$start.getTime()){
+		$('.announcement').removeClass('hidden');
+	}
   var t = Date.parse(endtime) - Date.parse(new Date());
   var seconds = Math.floor((t / 1000) % 60);
   var minutes = Math.floor((t / 1000 / 60) % 60);
@@ -449,17 +564,14 @@ function getTimeRemaining(endtime) {
 function updateClock() {
 	var t = getTimeRemaining(deadline);	
 	if(ready4){
-		if($spin){
-			countDown = 'keep_holding';
-			refreshText();
-		} else{
-			countDown = 'LP_5.'+t.days+':' +''+ ('0' + t.hours).slice(-2) + ':' +''+ ('0' + t.minutes).slice(-2)+':' +''+ ('0' + t.seconds).slice(-2)+'';
-		}
+		countDown = 'LP_5.'+t.days+':' +''+ ('0' + t.hours).slice(-2) + ':' +''+ ('0' + t.minutes).slice(-2)+':' +''+ ('0' + t.seconds).slice(-2)+'';
 	} else{
 		countDown = '<!--loading-->';
+		$spin = true;
 	}
 	
 	timeOutput = t.days+':' +''+ ('0' + t.hours).slice(-2) + ':' +''+ ('0' + t.minutes).slice(-2)+':' +''+ ('0' + t.seconds).slice(-2);
+	document.title = countDown;
 	if(!holding){
 
 		refreshText();
@@ -480,10 +592,18 @@ function refreshText(){
 }
 function createText(){
 	textCreated = true;
+	if($portrait){
+		tSize = wH/700;
+	} else{
+		tSize = wW/700;
+		if($mobile){
+			tSize = wW/400;
+		}
+	}
 	var textMaterial = new THREE.MeshStandardMaterial({color: 0xffffff});
 	var textGeometry = new THREE.TextGeometry(countDown, {
 		font: font2,
-		size: wW/800,
+		size: tSize,
 		height: .1,
 		curveSegments: 3
 	});
@@ -607,8 +727,6 @@ function loadLoop(){
 	}
 }
 function createGroup(g){
-
-
 	$drawMe = false;
 	if(g === 'group1'){
 		var randColor1 = colors[Math.floor(Math.random() * colors.length)];
@@ -658,6 +776,11 @@ function createGroup(g){
 		var randBG1 = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
 		var randBG2 = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
 		var randBG3 = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+		if($portrait){
+			sizes = planeHeightAtDistance * 1.2;
+		} else{
+			sizes = planeWidthAtDistance * 1.2;
+		}
 		var geometry1 = new THREE.PlaneGeometry( sizes, sizes, 112, 112 );
 		var material1 = new THREE.MeshBasicMaterial( {color:  0xffffff, map: randBG1, wireframe: false, transparent: true, opacity: 1} );
 		randBG1.magFilter = THREE.NearestFilter;
@@ -702,9 +825,14 @@ function createGroup(g){
 	if(g === 'group3'){
 		group3.position.z = 100;
 		ratio = wW / wH;
-		sizes = 8 * ratio;		
+		if($portrait){
+			sizes = 12 * ratio;	
+		} else{
+			sizes = 8 * ratio;	
+		}
+			
 		//var box = new THREE.BoxBufferGeometry(sizes,sizes,sizes);
-		var box = new THREE.SphereGeometry(sizes, 64, 64);
+		var box = new THREE.SphereGeometry(sizes, 32, 32);
 		var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
 		randBG.magFilter = THREE.NearestFilter;
 		randBG.wrapT = THREE.RepeatWrapping;
@@ -825,16 +953,21 @@ var randColor = colors[Math.floor(Math.random() * colors.length)];
 		sizes = 10 * ratio;
 		//var size = 20;
 		//var divisions = size*12;
+		if($portrait){
+			sizes = wH;
+		} else{
+			sizes = wW;
+		}
 		group5.position.z = 100;
 
 		canvasTexture = document.createElement( 'canvas' );
 		canvasTexture.id = 'drawingCanvas';
-		canvasTexture.width = wW;
-		canvasTexture.height = wW;
+		canvasTexture.width = sizes;
+		canvasTexture.height = sizes;
 		//document.body.appendChild(canvasTexture);
 		textureContext = canvasTexture.getContext( '2d' );
 		textureContext.fillStyle = "black";
-		textureContext.fillRect(0, 0, wW, wW);
+		textureContext.fillRect(0, 0, sizes, sizes);
 
 
 
@@ -852,7 +985,11 @@ var randColor = colors[Math.floor(Math.random() * colors.length)];
 		var vFov = camera.fov * Math.PI / 180;
 		var planeHeightAtDistance = 2 * Math.tan(vFov / 2) * distance;
 		var planeWidthAtDistance = planeHeightAtDistance * aspect;	
-		
+		if($portrait){
+			size = planeHeightAtDistance;
+		} else{
+			size = planeWidthAtDistance;
+		}		
 		var randText = loadedTexts[Math.floor(Math.random() * loadedTexts.length)];
 		randText.wrapS = THREE.RepeatWrapping;
 		randText.wrapT = THREE.RepeatWrapping;
@@ -860,7 +997,7 @@ var randColor = colors[Math.floor(Math.random() * colors.length)];
 
 		var randColor = colors[Math.floor(Math.random() * colors.length)];
 
-		var geometry = new THREE.PlaneBufferGeometry( planeWidthAtDistance, planeWidthAtDistance, 12, 12 );
+		var geometry = new THREE.PlaneBufferGeometry( size, size, 12, 12 );
 		//var geometry = new THREE.SphereBufferGeometry( planeWidthAtDistance,64, 64 );
 		var material = new THREE.MeshBasicMaterial( {color:  randColor, map: randText, wireframe: false, transparent: true, opacity: 1 } );
 		var alpha = new THREE.CanvasTexture( canvasTexture );
@@ -909,7 +1046,12 @@ var randColor = colors[Math.floor(Math.random() * colors.length)];
 		randBG2.wrapS = THREE.RepeatWrapping;
 		randBG2.wrapT = THREE.RepeatWrapping;
 		randBG2.repeat.set( 1, 1 );
-		var geometry = new THREE.PlaneBufferGeometry( planeWidthAtDistance, planeWidthAtDistance, 12, 12 );
+				if($portrait){
+			size = planeHeightAtDistance;
+		} else{
+			size = planeWidthAtDistance;
+		}	
+		var geometry = new THREE.PlaneBufferGeometry( size, size, 12, 12 );
 				//var geometry = new THREE.SphereBufferGeometry( planeWidthAtDistance,64, 64 );
 		var randColor = colors[Math.floor(Math.random() * colors.length)];
 
@@ -923,55 +1065,42 @@ var mat = new THREE.ShaderMaterial({
 		      scale : {tyle:"f", value: 1.5}
 		  },
 		  //color: randColor,
-		  vertexShader:`
-precision highp float;
-precision highp int;
-varying vec2 vUv;
-uniform float delta;
+		  vertexShader:[
+"precision highp float;",
+"precision highp int;",
+"varying vec2 vUv;",
+"uniform float delta;",
 
-uniform float scale;
+"uniform float scale;",
 
-void main() {
-  vUv = uv;
-  
-    vec3 p = position;
+"void main() {",
+  "vUv = uv;",
+    "vec3 p = position;",
+    "vec4 mvPosition = modelViewMatrix * vec4(scale * p, 1.0 );",
+  "gl_Position = projectionMatrix * mvPosition;",
 
-   // p.z += sin(2.0 * p.y + delta) * 5.0;
-
-   // p.z += cos(2.0 * p.z + delta / 2.0) * 5.0;
-
-    //p.z += cos(2.0 * p.x + delta) * 5.0;
-
-    //p.x += sin(p.y + delta / 2.0) * 10.0;
-
-    vec4 mvPosition = modelViewMatrix * vec4(scale * p, 1.0 );
-
-    //gl_Position = projectionMatrix * mvPosition;
-  gl_Position = projectionMatrix * mvPosition;
-
-}
-`,
-		  fragmentShader: `
-precision mediump float;
-varying vec2 vUv;
-uniform vec3 col1;
-varying vec4 color;
-uniform sampler2D tex0;
-uniform sampler2D tex1;
-uniform float amt;
-void main() {
-  vec2 uv = vUv;
-  vec4 cam = texture2D(tex0, uv + amt);
-  float avg = dot(cam.rgb, vec3(0.33333));
-  avg = avg * 2.0 - 1.0;
-  float disp = avg * amt;
-  vec4 pup = texture2D(tex1, uv + disp);
-  vec4 color = pup;
-	float gray = dot(0.6 - color.rgb, vec3(0.299, 0.587, 0.114));
-	//gl_FragColor = vec4(vec3(gray), 1.0) * 2.5;
-  gl_FragColor = pup;
-}
-`
+"}"
+].join( "\n" ),
+		  fragmentShader: [
+"precision mediump float;",
+"varying vec2 vUv;",
+"uniform vec3 col1;",
+"varying vec4 color;",
+"uniform sampler2D tex0;",
+"uniform sampler2D tex1;",
+"uniform float amt;",
+"void main() {",
+"  vec2 uv = vUv;",
+"  vec4 cam = texture2D(tex0, uv + amt);",
+"  float avg = dot(cam.rgb, vec3(0.33333));",
+"  avg = avg * 2.0 - 1.0;",
+"  float disp = avg * amt;",
+"  vec4 pup = texture2D(tex1, uv + disp);",
+"  vec4 color = pup;",
+"	float gray = dot(0.6 - color.rgb, vec3(0.299, 0.587, 0.114));",
+"  gl_FragColor = pup;",
+"}"
+].join( "\n" )
 		});
 
 
@@ -1002,6 +1131,9 @@ void main() {
 		var randMask = loadedBackgrounds[0];
 		var randBG2 = loadedBackgrounds[0];
 		//var randBG2 = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
+		randMask.wrapS = THREE.RepeatWrapping;
+		randMask.wrapT = THREE.RepeatWrapping;
+		randMask.repeat.set( 1, 1 );		
 	
 		randBG2.wrapS = THREE.RepeatWrapping;
 		randBG2.wrapT = THREE.RepeatWrapping;
@@ -1023,33 +1155,35 @@ void main() {
 		      texture1: {value: randBG2},
 					texture2: {value: randMask}
 		  },
-		  vertexShader:`precision highp float;
-		  precision highp int;
-		    varying vec2 vUv;
-		    void main() {
-		      vUv = uv;
-		      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-		    }
-		  `,
-		  fragmentShader: `
-		  precision highp float;
-		    uniform float time;
-		uniform float mx;
-		uniform float my;
-		    uniform sampler2D texture1;
-		uniform sampler2D texture2;
-		    varying vec2 vUv;
-		    void main() {
-		      vec3 c = vec3(texture2D(texture1, vUv));
-		      //float v = time + (vUv.x*0.5 + vUv.y*0.5);
-		      float v = time;
-		      vec2 Uv2 = vec2(c.r + c.g + v+ mx, c.r + c.b + v + mx);
-		      vec3 outcolor = vec3(texture2D(texture2, Uv2));
-			  //vec3 outcolor = vec3( mod(c.r+v,1.0), mod(c.g+v,1.0), mod(c.b+v,1.0));
-   		
-		      gl_FragColor = vec4( outcolor, 1.0 );
-		    }
-		  `
+		  vertexShader:[
+"precision highp float;",
+"precision highp int;",
+"varying vec2 vUv;",
+"void main() {",
+"  vUv = uv;",
+"  gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);",
+"}"
+
+].join( "\n" ),
+		  fragmentShader: [
+		  "precision highp float;",
+"uniform float time;",
+"uniform float mx;",
+"uniform float my;",
+"uniform sampler2D texture1;",
+"uniform sampler2D texture2;",
+"varying vec2 vUv;",
+"void main() {",
+"  vec3 c = vec3(texture2D(texture1, vUv));",
+"  //float v = time + (vUv.x*0.5 + vUv.y*0.5);",
+"  float v = time;",
+"  vec2 Uv2 = vec2(c.r + c.g + v+ mx, c.r + c.b + v + mx);",
+"  vec3 outcolor = vec3(texture2D(texture2, Uv2));",
+"  //vec3 outcolor = vec3( mod(c.r+v,1.0), mod(c.g+v,1.0), mod(c.b+v,1.0));",
+"  gl_FragColor = vec4( outcolor, 1.0 );",
+"}"
+
+].join( "\n" )
 		});
 		var plane = new THREE.Mesh(geo, mat);
 		plane.name = 'feedback';
@@ -1069,7 +1203,14 @@ randBG.repeat.set( 1, 1 );
 		var vFov = camera.fov * Math.PI / 180;
 		var planeHeightAtDistance = 2 * Math.tan(vFov / 2) * distance;
 		var planeWidthAtDistance = planeHeightAtDistance * aspect;	
-		var geometry = new THREE.PlaneBufferGeometry( planeWidthAtDistance, planeWidthAtDistance, 64, 64 );
+		if($portrait){
+			size = planeHeightAtDistance;
+			res = wH;
+		} else{
+			size = planeWidthAtDistance;
+			res = wW;
+		}
+		var geometry = new THREE.PlaneBufferGeometry( size, size, 12, 12 );
 				//var geometry = new THREE.SphereBufferGeometry( planeWidthAtDistance,64, 64 );
 
 		var mat = new THREE.ShaderMaterial({
@@ -1078,45 +1219,43 @@ randBG.repeat.set( 1, 1 );
 			  mouseY: {type: 'f', value: [0.5] }  ,
 			  amount: {type: 'f', value: [0.3] }  ,
 			  count: {type: 'f', value: [10.0] }  ,
-			  resolution : {type: "v2", value: new THREE.Vector2( wW, wW )},
+			  resolution : {type: "v2", value: new THREE.Vector2( res, res )},
 		      tex0: {type:"t", value: randBG},
 		  },
-		  vertexShader:`
-			precision highp float;
-			precision highp int;
-		    varying vec2 vUv;
-		    void main() {
-		      vUv = uv;
-		      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-		    }
-		  `,
-		  fragmentShader: `
-			precision mediump float;
-			varying vec2 vUv;
-			uniform sampler2D tex0;
-			uniform vec2 resolution;
-			uniform float amount;
-			uniform float count;
-			uniform float mouseX;
-			uniform float mouseY;
-			
-			
-			void main() {
-				float amt = amount; // the amount of displacement, higher is more
-				float squares = count; // the number of squares to render vertically
-			
-			  float aspect = resolution.x / resolution.y;
-			  float offset = amt * mouseY;
-			  vec2 uv = vUv;
-			  uv.y =  uv.y + mouseY;
-			  vec2 tc = uv;
-			  uv -= 0.5;
-			  uv.x *= aspect ;
-			  vec2 tile = fract(uv * squares + 0.5) * amt;
-			  vec4 tex = texture2D(tex0, tc + tile - offset - mouseX);
-			  gl_FragColor = tex;
-			}
-			`
+		  vertexShader:[
+"precision highp float;",
+"precision highp int;",
+"varying vec2 vUv;",
+"void main() {",
+"  vUv = uv;",
+"  gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);",
+"}"			  
+		  
+].join( "\n" ),
+		  fragmentShader: [
+"precision mediump float;",
+"varying vec2 vUv;",
+"uniform sampler2D tex0;",
+"uniform vec2 resolution;",
+"uniform float amount;",
+"uniform float count;",
+"uniform float mouseX;",
+"uniform float mouseY;",
+"void main() {",
+"	float amt = amount; // the amount of displacement, higher is more",
+"	float squares = count; // the number of squares to render vertically",
+"  float aspect = resolution.x / resolution.y;",
+"  float offset = amt * mouseY;",
+"  vec2 uv = vUv;",
+"  uv.y =  uv.y + mouseY;",
+"  vec2 tc = uv;",
+"  uv -= 0.5;",
+"  uv.x *= aspect ;",
+"  vec2 tile = fract(uv * squares + 0.5) * amt;",
+"  vec4 tex = texture2D(tex0, tc + tile - offset - mouseX);",
+"  gl_FragColor = tex;",
+"}"			  
+		  ].join( "\n" ),
 		});
 		var plane2 = new THREE.Mesh( geometry, mat );
 		plane2.name = 'plane2';
@@ -1240,46 +1379,38 @@ randBG.repeat.set( 1, 1 );
 		      max: 10.0 // only used for dat.gui, not needed for production
 		    }
 		};
-		var vertexShader = `
-		uniform float fresnelBias;
-		uniform float fresnelScale;
-		uniform float fresnelPower;
-		
-		varying float vReflectionFactor;
-		varying vec3 vI;
-		varying vec3 vWorldNormal;
-		
-		void main() {
-		  vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-		  vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
-		
-		  vWorldNormal = normalize( mat3( modelMatrix[0].xyz, modelMatrix[1].xyz, modelMatrix[2].xyz ) * normal );
-		
-		  vI = worldPosition.xyz - cameraPosition;
-		
-		  vReflectionFactor = fresnelBias + fresnelScale * pow( 1.0 + dot( normalize( vI ), vWorldNormal ), fresnelPower );
-		
-		  gl_Position = projectionMatrix * mvPosition;
-		}`;
-		var fragmentShader = `
-		uniform vec3 color;
-		uniform samplerCube envMap;
-		
-		
-		varying float vReflectionFactor;
-		varying vec3 vI;
-		varying vec3 vWorldNormal;
-		
-		void main() {
-		  vec3 reflection = reflect( vI, vWorldNormal );
-		  vec4 envColor = textureCube( envMap, vec3( -reflection.x, reflection.yz ) );
-		  gl_FragColor = vec4(mix(color, envColor.xyz, vec3(clamp( vReflectionFactor, 0.0, 1.0 ))), 1.0);
-		}`;
+
 		material = new THREE.ShaderMaterial(
 		    {
 		      uniforms : uniforms,
-		      vertexShader : vertexShader,
-		      fragmentShader : fragmentShader,
+		      vertexShader : [
+"uniform float fresnelBias;",
+"uniform float fresnelScale;",
+"uniform float fresnelPower;",
+"varying float vReflectionFactor;",
+"varying vec3 vI;",
+"varying vec3 vWorldNormal;",
+"void main() {",
+"  vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
+"  vec4 worldPosition = modelMatrix * vec4( position, 1.0 );",
+"  vWorldNormal = normalize( mat3( modelMatrix[0].xyz, modelMatrix[1].xyz, modelMatrix[2].xyz ) * normal );",
+"  vI = worldPosition.xyz - cameraPosition;",
+"  vReflectionFactor = fresnelBias + fresnelScale * pow( 1.0 + dot( normalize( vI ), vWorldNormal ), fresnelPower );",
+"  gl_Position = projectionMatrix * mvPosition;",
+"}"			
+		 ].join( "\n" ),
+		      fragmentShader : [
+			      "uniform vec3 color;",
+"uniform samplerCube envMap;",
+"varying float vReflectionFactor;",
+"varying vec3 vI;",
+"varying vec3 vWorldNormal;",
+"void main() {",
+"  vec3 reflection = reflect( vI, vWorldNormal );",
+"  vec4 envColor = textureCube( envMap, vec3( -reflection.x, reflection.yz ) );",
+"  gl_FragColor = vec4(mix(color, envColor.xyz, vec3(clamp( vReflectionFactor, 0.0, 1.0 ))), 1.0);",
+"}"
+		       ].join( "\n" )
 		    });
 		
 		var geometry = new THREE.BoxGeometry(4, 4, 4);
@@ -1318,7 +1449,14 @@ randBG.repeat.set( 1, 1 );
 		var vFov = camera.fov * Math.PI / 180;
 		var planeHeightAtDistance = 2 * Math.tan(vFov / 2) * distance;
 		var planeWidthAtDistance = planeHeightAtDistance * aspect;	
-		var plane = new THREE.PlaneBufferGeometry( planeWidthAtDistance, planeWidthAtDistance );
+		if($portrait){
+			size = planeHeightAtDistance;
+			tWidth = wH;
+		} else{
+			size = planeWidthAtDistance;
+			tWidth = wW;
+		}
+		var plane = new THREE.PlaneBufferGeometry( size, size );
 		var randBG = loadedMasks[Math.floor(Math.random() * loadedMasks.length)];
 		randBG.wrapS = THREE.RepeatWrapping;
 		randBG.wrapT = THREE.RepeatWrapping;
@@ -1326,9 +1464,10 @@ randBG.repeat.set( 1, 1 );
 		var randColor1 = colors[Math.floor(Math.random() * colors.length)];
 		var randColor2 = colors[Math.floor(Math.random() * colors.length)];
 		var randColor3 = colors[Math.floor(Math.random() * colors.length)];
+		
 		fire = new THREE.Fire( plane, {
-			textureWidth: wW,
-			textureHeight: wH,
+			textureWidth: tWidth,
+			textureHeight: tWidth,
 			debug: false
 		} );
 		fire.color1.set( 0x000000 );
@@ -1420,32 +1559,25 @@ var randColor = colors[Math.floor(Math.random() * colors.length)];
 
   var shaderMaterial = new THREE.ShaderMaterial({
     uniforms: shaderUniforms,
-    vertexShader:` 
-  uniform float amplitude;
-
-  uniform vec3 vertexColor;
-
-  varying vec4 varColor;
-
-  void main()
-  {
-  varColor = vec4(vertexColor, 1.0);
-
-  vec4 pos = vec4(position, 1.0);
-  pos.z *= amplitude;
-
-  vec4 mvPosition = modelViewMatrix * pos;
-
-  gl_PointSize = 1.0;
-  gl_Position = projectionMatrix * mvPosition;
-  } `   ,
-    fragmentShader: ` 
-  varying vec4 varColor;
-
-  void main()
-  {
-  gl_FragColor = varColor;
-  }` 
+    vertexShader:[
+"uniform float amplitude;",
+"uniform vec3 vertexColor;",
+"varying vec4 varColor;",
+"void main(){",
+"varColor = vec4(vertexColor, 1.0);",
+"vec4 pos = vec4(position, 1.0);",
+"pos.z *= amplitude;",
+"vec4 mvPosition = modelViewMatrix * pos;",
+"gl_PointSize = 1.0;",
+"gl_Position = projectionMatrix * mvPosition;",
+"}"	    
+    ].join( "\n" )   ,
+    fragmentShader: [
+    "varying vec4 varColor;",
+"void main(){",
+"gl_FragColor = varColor;",
+"}"
+ ].join( "\n" ) 
   })
 
   for (var i = 0; i < imageHeight; i++) {
@@ -1659,7 +1791,6 @@ function makeWaveform(data){
     drawContext.fillRect(i * barWidth, offset, 1, 2);
   }
 }
-
 function draw() {
 	requestAnimationFrame(draw);
 	shaderTime += .01
@@ -1999,7 +2130,7 @@ function draw() {
 					if (switcher) window.clearTimeout(switcher);
 					switcher = window.setTimeout(function(){
 						$switch = true;
-					},600);
+					},800);
 				}	
 			} else{
 				group7.position.z=100;	
@@ -2182,25 +2313,41 @@ function adjustMeshPlaneVertices(offset1, offset2, rate) {
 	$plane3.geometry.computeFaceNormals();	
 }
 function onWindowResize() {
-	wW = window.innerWidth;
-	wH = window.innerHeight;
-
-	camera.aspect = wW / wH;
-	camera.updateProjectionMatrix();
-
-	composer.setSize(wW, wH);
-	renderer.setSize(wW, wH);
-	windowResize.trigger();
-	if($drawMe){
-		canvasTexture.width = wW;
-		canvasTexture.height = wW;		
-		textureContext = canvasTexture.getContext( '2d' );
-		textureContext.fillStyle = "black";
-		textureContext.fillRect(0, 0, wW, wW);
-
+	//console.log('resizing');
+	wW = $(document).width();
+	wH = $(document).height();
+	if(wH > wW){
+		$portrait = true;
+	} else{
+		$portrait = false;
 	}
+	if(wW < 1024){
+		$mobile = true;
+	} else{
+		$mobile = false;
+	}
+	if(!$fallback){
+		
+		camera.updateProjectionMatrix();
+		composer.setSize(wW, wH);
+		renderer.setSize(wW, wH);
+		
+		if($drawMe){
+			if($portrait){
+				sizes = wH;
+			} else{
+				sizes = wW;
+			}
+			canvasTexture.width = sizes;
+			canvasTexture.height = sizes;		
+			textureContext = canvasTexture.getContext( '2d' );
+			textureContext.fillStyle = "black";
+			textureContext.fillRect(0, 0, sizes, sizes);
+	
+		}
+	}
+	
 }
-
 function mouseDown(mousex, mousey) { 
     //mouseUp();
 	 if($first && ready4){
@@ -2236,9 +2383,9 @@ function mouseMove(mousex, mousey) {
 	    if(!playing && ready && ready2 && ready3){
 			//$switch = true;
 			//console.log('test');
-		    /*if(!sound.isPlaying){
+		    if(!sound.isPlaying){
 				sound.play();
-		    }*/
+		    }
 			playing = true;
 			//idleMouse();
 		} 		
@@ -2254,13 +2401,28 @@ function mouseMove(mousex, mousey) {
 		startX = mX;
 		startY = mY;  
 	}
-	$('.instruction').css({
-		'top':mY,
-		'left': mX
-	})
+	if(!$mobile){
+		$('.instruction').css({
+			'top':mY,
+			'left': mX
+		})		
+	} else{
+		$('.instruction').css({
+			'top':'50%',
+			'left': '50%'
+		})			
+	}
+
 }
 function drawMask(x,y,w,r,g,b,a){
-	y = (wW - wH)/2 + y;
+	if($portrait){
+		y =  y;
+		x =  (wH - wW)/2 + x;
+	} else{
+		x = x;
+		y = (wW - wH)/2 + y;
+	}	
+	//y = (wW - wH)/2 + y;
     var gradient = textureContext.createRadialGradient(x, y, 0, x, y, w/4);
     gradient.addColorStop(0, 'rgba('+r+', '+g+', '+b+', '+a+')');
     //gradient.addColorStop(.5, 'rgba(0,100,0,1)');
@@ -2276,19 +2438,19 @@ function drawMask(x,y,w,r,g,b,a){
 };
 function mouseUp() { 
     holding = false;
+
+    if(playing && ready && ready2 && ready3){
+	    if(sound.isPlaying){
+			sound.pause();
+	    }
+		playing = true;
+	} 
 	movingMouse();
     ready2 = false;
     ready3 = false;
     $spin = false;
-	    if(sound.isPlaying){
-			sound.pause();
-	    }    
-    /*if(!playing && ready && ready2 && ready3){
-	    if(!sound.isPlaying){
-			sound.play();
-	    }
-		playing = true;
-	}   */ 
+ 
+  
     if (loopTimer) window.clearTimeout(loopTimer); 
 	if(!$first){
    		loopTimer = window.setTimeout(loadLoop,400);
@@ -2296,6 +2458,16 @@ function mouseUp() {
     if (idleTimer) window.clearTimeout(idleTimer); 
     idleTimer = window.setTimeout(movingMouse,600);
 }
+var scrollbar = Scrollbar.init($(document).find('.scroll')[0], {
+	speed:.8,
+	damping: 0.1,
+	renderByPixels: true,
+	syncCallbacks: true,
+	continuousScrolling: false,
+	alwaysShowTracks: false,
+	overscrollEffect: false
+});
+
 function movingMouse(){
 	$('body').removeClass('idle');
 }
@@ -2309,7 +2481,6 @@ $(document).bind('mousemove', function(e){
 $(document).bind('touchmove', function(e){
     var touch = e.originalEvent.touches[0];
     mouseMove(touch.pageX, touch.pageY);
-     //e.preventDefault();
 });
 $(document).bind('mousedown', function(e){
     mouseDown(e.pageX, e.pageY);
@@ -2332,7 +2503,12 @@ $(document).bind('touchend', function(e){
 //document.body.addEventListener("mouseup", mouseUp); 
 //document.body.addEventListener("touchstart", mouseDown);
 //document.body.addEventListener("touchend", mouseUp); 
-$(window)[0].addEventListener("resize", onWindowResize);
+$(window).resize(function(){
+	if(!$fallback){
+		windowResize.trigger();
+	
+	}
+});
 function fractionate(val, minVal, maxVal) {
     return (val - minVal)/(maxVal - minVal);
 }

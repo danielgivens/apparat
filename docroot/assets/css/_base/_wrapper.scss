@@ -16,9 +16,32 @@ body {
 	@include breakpoint(tablet){
 		//background: black;
 	}
+	&.front{
+		height: auto;
+		top:0;
+		left:0;		
+		bottom:0;
+		right:0;	
+		position: fixed;
+	}
 }
-.front .scroll{
+body.front .scroll{
 	cursor: pointer;
+	position: fixed!important;
+	overflow: hidden;
+	top:0;
+	height: auto;
+	left:0;		
+	bottom:0;
+	right:0;
+	canvas{
+		position: fixed;
+		top:0;
+		left:0;
+	}
+	.scroll-content{
+		height: 100%;
+	}
 }
 #scene{
 	position: absolute;
@@ -154,6 +177,115 @@ nav.global{
 #cookies{
 	
 }
+body.fallback{
+	/*.sticker{
+		border-radius: 0;
+		width: 100%;
+		right: auto;
+		height: auto;
+		left:0;
+		transform: rotate(45deg) translateX(50%) translateY(50%);
+		transform-origin: 100% 50%;
+		.marquee h1{
+			padding-top: 2px;
+		}
+		.primary{
+			display: none;
+		}
+	}*/
+
+
+	.sticker{
+		border-radius: 0;
+		width: 100%;
+		right: auto;
+		height: auto;
+		left:0;
+		transform: rotate(45deg) translateX(50%) translateY(50%);
+		transform-origin: 100% 50%;
+		.marquee h1{
+			padding-top: 2px;
+		}		
+	}
+	.instruction.primary{
+		display: none;
+	}
+	.instruction.fallback{
+		display: block;
+	}	
+	.output{
+		display: block;
+		position: fixed;
+		top:0;
+		left:0;
+		bottom:0;
+		right:0;
+		&#loop,
+		&#coords,
+		&#data{		
+			display: none;
+		}
+		&#time{
+			position: absolute;
+			top:50%;
+			left:50%;
+			font-family: $terminal, monospace;
+			font-size: 300%;
+			color: white;
+			text-align: center;
+			transform: translateX(-50%) translateY(-50%);
+			
+		}
+	}
+}
+.announcement{
+	width: 100%;
+	right: auto;
+	position: fixed;
+	z-index: 100;
+	height: auto;
+	left:0;
+	top:0;
+	background: white;
+	overflow: hidden;
+	transition: opacity 0s 1s;
+	visibility: hidden;
+	backface-visibility: hidden;	
+	animation: colorchange2 30s infinite alternate;
+	&.hidden{
+		visibility: hidden;
+	}
+	.marquee{
+		opacity: 0;
+		position: relative;
+		overflow: hidden;
+		text-transform: uppercase;
+		color: black;
+		font-size: 12px;
+		line-height: 1;
+		&.is-init{
+			opacity: 1;
+		}		
+	}
+	.marquee h1{
+		backface-visibility: hidden;
+		display: inline-block;
+		padding: 2px 5px 0;
+		white-space: nowrap;
+		a{
+			color: white;
+			text-decoration: none;
+		}
+	}		
+	@include breakpoint(mobile-custom){
+		z-index: 100000;
+		top:0;
+		//top:6px;
+		//transform: rotate(-7deg) translateX(-2%) translateY(106%);
+		//transform-origin: 0% 50%;
+		
+	}
+}
 .output{
 	display:none;
 	pointer-events: none;
@@ -182,15 +314,41 @@ nav.global{
 		top:$pad/1.5;
 		right:$pad/1.5;
 	}	
+	@include breakpoint(mobile-custom){
+		&#loop{
+			display: none;
+		}
+		&#coords{
+			display: none;
+		}
+		&#data{
+		text-align: right;
+		bottom: auto;
+		left: auto;
+		top:$pad/1.5;
+		right:$pad/1.5;
+		white-space: nowrap;
+		br{
+			display: none;
+		}
+			
+		}
+	}
 }
-@keyframes colorchange
-    {
-      0%   {background: #ffd064;}
-      25%  {background: #29a9fd;}
-      50%  {background: #fb248b;}
-      75%  {background: #01d765;}
-      100% {background: #e27940;}
-    }
+@keyframes colorchange{
+  0%   {background: #ffd064;}
+  25%  {background: #29a9fd;}
+  50%  {background: #fb248b;}
+  75%  {background: #01d765;}
+  100% {background: #e27940;}
+}
+@keyframes colorchange2{
+  0%   {background: #fb248b;}
+  25%  {background: #01d765;}
+  50%  {background: #ffd064;}
+  75%  {background: #e27940;}
+  100% {background: #29a9fd;}
+}
 .sticker{
 	position: fixed;
 	top:0px;
@@ -203,7 +361,6 @@ nav.global{
 	//height: 200px;
 	z-index: 1000;
 	pointer-events: none;
-	mix-blend-mode:difference;
 	border-radius: 100px;
 	overflow: hidden;
 	transform:translateY(25%) translateX(-25%);
@@ -234,19 +391,37 @@ nav.global{
 			white-space: nowrap;
 		}
 	}
+	@include breakpoint(mobile-custom){
+		&.rotated{
+			border-radius: 0;
+			width: 100%;
+			right: auto;
+			height: auto;
+			left:0;
+			transform: rotate(45deg) translateX(50%) translateY(50%);
+			transform-origin: 100% 50%;
+			.marquee h1{
+				padding-top: 2px;
+			}
+		}
+	}
+	
 }
 .instruction{
 	width: 100px;
 	background: black;
 	color: white;
 	position: absolute;
-	top:calc(100vh - 100px);
+	top:calc(100% - 100px);
 	left:calc(50vw - 75px);
 	transform:translateX(25%);
 	pointer-events: none;
+	z-index: 1000;
 	overflow: hidden;
 	transition: opacity 0s 1s;
 	visibility: hidden;
+	backface-visibility: hidden;
+	
 	.marquee{
 		opacity: 0;
 		position: relative;
@@ -265,17 +440,25 @@ nav.global{
 			white-space: nowrap;
 		}
 	}	
+	@include breakpoint(mobile-custom){
+	top:50%;
+	left:50%;
+	width: 150px;
+	transform:translateX(-50%) translateY(90px);			
+	}
+
 }
 .started{
 	.instruction,
-	.sticker{
+	.sticker,
+	.announcement:not(.hidden){
 		visibility: visible;
 		.marquee{
 			visibility: visible;
 		}
 	}
 }
-.idle{
+.idle:not(.fallback){
 	nav.global{
 		opacity: 0;
 	}
@@ -285,7 +468,7 @@ nav.global{
 	.output{
 		display: block;
 	}
-	.sticker, .instruction{
+	.sticker, .instruction, .announcement:not(.hidden){
 		opacity: 0;	
 		transition: opacity 0s 0s;
 	}
