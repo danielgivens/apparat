@@ -21,14 +21,14 @@ function webAudioAvailable() {
   }
 }
 backgrounds = [
-	'/assets/images/test-4.jpg',
-	'/assets/images/app-textures-2.2.jpg',
-	'/assets/images/app-smudges-2.jpg',
-	'/assets/images/app-textures-2.5.jpg',
-	'/assets/images/app-textures-2.6.jpg',
-	'/assets/images/texture-tour-3.jpg',
-	'/assets/images/texture-tour-2.jpg',
-	'/assets/images/app-textures-2.10.jpg',
+	'/assets/images/hd/test-4.jpg',
+	'/assets/images/hd/app-textures-2.2.jpg',
+	'/assets/images/hd/app-smudges-2.jpg',
+	'/assets/images/hd/app-textures-2.5.png',
+	'/assets/images/hd/app-textures-2.6.png',
+	'/assets/images/hd/app-texture-3.jpg',
+	'/assets/images/hd/app-texture-2.jpg',
+	'/assets/images/hd/app-textures-2.10.png',
 ];
 textTextures = [
 	'/assets/images/app-poem.png',
@@ -49,19 +49,16 @@ maskTextures = [
 ];
 
 snips = [
-	'/assets/audio/airo5.aac',
-	'/assets/audio/Branden.aac',
-	'/assets/audio/Cock_Intro.aac',
-	'/assets/audio/euca_chords.aac',
-	'/assets/audio/EQ_Break.aac',
-	'/assets/audio/Jam9.aac',
-	'/assets/audio/Heroist.aac',
-	'/assets/audio/Hokkaido.aac',
-	'/assets/audio/Laminar.aac',
-	'/assets/audio/Laminar2.aac',
-	'/assets/audio/LeierBird.aac',
-	'/assets/audio/MeansOf.aac',
-	'/assets/audio/Somechords.aac'
+'/assets/audio/album/01_VOIDO_M110119_48-24_bo@calyx_STREAM+DD.aac',
+'/assets/audio/album/02_DAWAN_M110119_48-24_bo@calyx_STREAM+DD.aac',
+'/assets/audio/album/03_LAMINAR_M110119_48-24_bo@calyx_STREAM+DD.aac',
+'/assets/audio/album/04_HEROIST_M110119_48-24_bo@calyx_STREAM+DD.aac',
+'/assets/audio/album/05_PROJECT_M110119_48-24_bo@calyx_STREAM+DD.aac',
+'/assets/audio/album/06_BRANDENBURG_M110119_48-24_bo@calyx_STREAM+DD.aac',
+'/assets/audio/album/07_EUCARIOTA_M110119_48-24_bo@calyx_STREAM+DD.aac',
+'/assets/audio/album/08_EQ BREAK_M110119_48-24_bo@calyx_STREAM+DD.aac',
+'/assets/audio/album/09_BEE_M110119_48-24_bo@calyx_STREAM+DD.aac',
+'/assets/audio/album/10_VEDI_M110119_48-24_bo@calyx_STREAM+DD.aac',
 ];
 loadedSnips = [];
 function preloadAudio(url) {
@@ -134,8 +131,8 @@ $done = false;
 var particles = [];
 var particleSystem;
 var windowResize;
-var imageWidth = 1024/2;
-var imageHeight = 1024/2;
+var imageWidth = 2048;
+var imageHeight = 2048;
 var imageData = null;
 var animationTime = 0;
 var animationDelta = 0.03;
@@ -217,7 +214,9 @@ if(webglAvailable() && webAudioAvailable()){
 function init(){
 
 	setupScene();
-	setupTicker();
+	ready = true;
+	draw();
+	//setupTicker();
 	
 }
 function randGroup(){
@@ -264,8 +263,8 @@ function setupScene(){
 	
 	spotLight.castShadow = true;
 	spotLight.intensity = 1;
-	spotLight.shadow.mapSize.width = 1024;
-	spotLight.shadow.mapSize.height = 1024;
+	spotLight.shadow.mapSize.width = 2048;
+	spotLight.shadow.mapSize.height = 2048;
 	
 	spotLight.shadow.camera.near = 1;
 	spotLight.shadow.camera.far = 2000;
@@ -304,8 +303,8 @@ function setupScene(){
 	 windowResize = new THREEx.WindowResize(renderer, camera, {
 	    width     : function() { return wW; },
 	    height    : function() { return wH; },
-	    maxWidth  : 1280,
-	    maxHeight : 1280,
+	    maxWidth  : 2048,
+	    maxHeight : 2048,
 		after     : onWindowResize,
 	   // scale     : '3d'
 	});
@@ -439,8 +438,8 @@ windowResize.destroy();
 		 windowResize = new THREEx.WindowResize(renderer, camera, {
 		    width     : function() { return wW; },
 		    height    : function() { return wH; },
-		    maxWidth  : 1280,
-		    maxHeight : 1280,
+		    maxWidth  : 2048,
+		    maxHeight : 2048,
 			after     : onWindowResize,
 		   // scale     : '3d'
 		});
@@ -971,7 +970,7 @@ var randColor = colors[Math.floor(Math.random() * colors.length)];
 
 
 
-        $drawMe = true;
+        //$drawMe = true;
 		
 		var randBG1 = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
 		$rand2 = Math.floor(Math.random() * loadedBackgrounds.length);
@@ -1707,8 +1706,8 @@ function createLight( color, alphaMap ) {
 	pointLight.castShadow = true;
 	pointLight.shadow.camera.near = .1;
 	pointLight.shadow.camera.far = 100;
-	pointLight.shadow.mapSize.height = 1024;
-	pointLight.shadow.mapSize.width = 1024;
+	pointLight.shadow.mapSize.height = 2048;
+	pointLight.shadow.mapSize.width = 2048;
 	pointLight.shadow.bias = - 0.00; // reduces self-shadowing on double-sided objects
 	var texture = alphaMap;
 	//texture.magFilter = THREE.NearestFilter;
@@ -1806,7 +1805,7 @@ function draw() {
 		badTVPass.uniforms[ 'speed' ].value = 0;
 		badTVPass.uniforms[ 'rollSpeed' ].value = 0;
 
-		TweenMax.to(ticker.position, 0, {delay: 1, z: 0});
+		//TweenMax.to(ticker.position, 0, {delay: 1, z: 0});
 		TweenMax.to($mainSpot, .25, {delay: 0.5, intensity: 1});
 		afterimagePass.uniforms.damp.value = 0.92;
 		//staticPass.uniforms[ 'amount' ].value = 0.2;
@@ -1817,12 +1816,12 @@ function draw() {
 
 	}
 		if($spin){
-			ticker.rotation.x += .15;
+			//ticker.rotation.x += .15;
 			//ticker.rotation.y += .05;
 			//ticker.position.z += .01;
 		} else{
-			ticker.rotation.x = 0;
-			ticker.rotation.y = 0;
+			//ticker.rotation.x = 0;
+			//ticker.rotation.y = 0;
 		}	
 	if(ready && ready3 && ready2){
 		if(holding){
@@ -1838,7 +1837,7 @@ function draw() {
 			upperMaxFr = upperMax / upperHalfArray.length;
 			TweenMax.to(hueSat.uniforms['hue'], 5, { value:overallAvg/10});
 			//TweenMax.to(ticker.position, .5, {delay: 0, z: 10});
-			TweenMax.to(ticker.position, 0, {z: 100});
+			//TweenMax.to(ticker.position, 0, {z: 100});
 			if(!sound.isPlaying){
 				sound.play();
 			}
@@ -2493,7 +2492,7 @@ $(document).bind('touchstart', function(e){
     mouseDown(touch.pageX, touch.pageY);
 });
 $(document).bind('mouseup', function(e){
-    mouseUp(e.pageX, e.pageY);
+    //mouseUp(e.pageX, e.pageY);
 });
 $(document).bind('touchend', function(e){
     var touch = e.originalEvent.changedTouches[0];
