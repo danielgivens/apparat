@@ -49,7 +49,7 @@ maskTextures = [
 ];
 
 snips = [
-'/assets/audio/album/01_VOIDO_M110119_48-24_bo@calyx_STREAM+DD.aac',
+/*'/assets/audio/album/01_VOIDO_M110119_48-24_bo@calyx_STREAM+DD.aac',
 '/assets/audio/album/02_DAWAN_M110119_48-24_bo@calyx_STREAM+DD.aac',
 '/assets/audio/album/03_LAMINAR_M110119_48-24_bo@calyx_STREAM+DD.aac',
 '/assets/audio/album/04_HEROIST_M110119_48-24_bo@calyx_STREAM+DD.aac',
@@ -58,7 +58,9 @@ snips = [
 '/assets/audio/album/07_EUCARIOTA_M110119_48-24_bo@calyx_STREAM+DD.aac',
 '/assets/audio/album/08_EQ BREAK_M110119_48-24_bo@calyx_STREAM+DD.aac',
 '/assets/audio/album/09_BEE_M110119_48-24_bo@calyx_STREAM+DD.aac',
-'/assets/audio/album/10_VEDI_M110119_48-24_bo@calyx_STREAM+DD.aac',
+'/assets/audio/album/10_VEDI_M110119_48-24_bo@calyx_STREAM+DD.aac',*/
+'/assets/audio/Voido.aac',
+
 ];
 loadedSnips = [];
 function preloadAudio(url) {
@@ -131,8 +133,8 @@ $done = false;
 var particles = [];
 var particleSystem;
 var windowResize;
-var imageWidth = 2048;
-var imageHeight = 2048;
+var imageWidth = 2048/3;
+var imageHeight = 2048/3;
 var imageData = null;
 var animationTime = 0;
 var animationDelta = 0.03;
@@ -2074,8 +2076,9 @@ function draw() {
 		} 
 		if(showGroup === 'group6'){
 			if(holding){
+				overallAvg = overallAvg*.7;
 				TweenMax.to(badTVPass.uniforms[ 'distortion' ], 2, {value: overallAvg/60});
-				TweenMax.to(badTVPass.uniforms[ 'speed' ], 3, {value: overallAvg/100 * -.25});
+				TweenMax.to(badTVPass.uniforms[ 'speed' ], 3, {value: overallAvg/150 * -.25});
 				TweenMax.to(badTVPass.uniforms[ 'distortion2' ], 2, {value: overallAvg/150});
 				//TweenMax.to(badTVPass.uniforms[ 'time' ], 4, {value: overallAvg});
 				btime += overallAvg/5000;
@@ -2115,8 +2118,8 @@ function draw() {
 				group7.position.z=0;
 				$plane2.material.uniforms.mouseX.value = ((mX - (wW/2))/wW)*.5;
 				$plane2.material.uniforms.mouseY.value = ((mY - (wH/2))/wH)*.5;
-				TweenMax.to($plane2.material.uniforms.amount, 2, {value: .4 - overallAvg/100});
-				TweenMax.to($plane2.material.uniforms.count, 4, {value: overallAvg/2});				
+				TweenMax.to($plane2.material.uniforms.amount, 2, {value: .4 - overallAvg/160});
+				TweenMax.to($plane2.material.uniforms.count, 4, {value: overallAvg/4});				
 				if(upperMaxFr !== oldMax && $switch){
 					switchBG = 0;
 					var randBG = loadedBackgrounds[Math.floor(Math.random() * loadedBackgrounds.length)];
@@ -2138,20 +2141,22 @@ function draw() {
 		if(showGroup === 'group8'){
 			if(holding){
 				//afterimagePass.uniforms.damp.value = 1;
-				group8.position.z = -800 - ((mY - (wH/2))/wH)*-800;
+				group8.position.z = -800 - ((mY - (wH/2))/wH)*-200;
 				//group8.position.z = -800 - overallAvg;
 				//TweenMax.to(group8.position, 1, {z:  (-800 - overallAvg)});
 	
 				//group8.position.z = 0;
-				group8.rotation.x = Math.PI * -.45 + ((mY - (wH/2))/wH)*5;
+				//group8.rotation.x = Math.PI * -.45 + ((mY - (wH/2))/wH)*5;
 				//group8.rotation.x +=overallAvg/1800;
 				//group8.rotation.x = Math.PI * .5;
 				//group8.rotation.z = Math.PI * -.25;
-				//group8.rotation.y = Math.PI * -.35;
-				group8.rotation.z =  ((mX - (wW/2))/wW)*5;
-				//group8.rotation.z +=overallAvg/2200;
+				//group8.rotation.x = Math.PI * 1;
+				//group8.rotation.z =  ((mX - (wW/2))/wW)*5;
+				group8.rotation.z += .001;
+				group8.rotation.y += .001;
+				group8.rotation.z += .001;
 				//group8.rotation.y = ((mY - (wH/2))/wH)*5;
-				TweenMax.to(shaderUniforms.amplitude, .8, {value:  (upperMax - overallAvg/2 - lowerAvg)});
+				TweenMax.to(shaderUniforms.amplitude, .8, {value:  (upperMax - overallAvg/1.2 - lowerAvg)});
 							
 				//animationTime += animationDelta;
 				colorify.uniforms['opacity'].value = 1;	
