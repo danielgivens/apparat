@@ -7,13 +7,13 @@ module.exports = function(grunt) {
 		    },
 		    scripts: {
 		        files: [
-		        	'docroot/assets/js/*.js',
-		        	'docroot/assets/js/*/*.js',
-		        	'docroot/assets/css/*.scss',
-		        	'docroot/assets/css/*/*.scss',
-		        	'docroot/*/*.php',
-		        	'docroot/*.php',
-		        	'docroot/*.html'
+		        	'assets/js/*.js',
+		        	'assets/js/*/*.js',
+		        	'assets/css/*.scss',
+		        	'assets/css/*/*.scss',
+		        	'*/*.php',
+		        	'*.php',
+		        	'*.html'
 		        ],
 		        tasks: ['sass'],
 		        options: {
@@ -28,50 +28,50 @@ module.exports = function(grunt) {
 			},			
 			dist: {
 				files: {
-					'docroot/assets/css/style.css': 'docroot/assets/css/style.scss',
+					'assets/css/style.css': 'assets/css/style.scss',
 				}
 			}
 		},
 		uglify: {
 		    tour: {
 		        src: [
-					'docroot/assets/js/tour.js'
+					'assets/js/tour.js'
 				],
-		        dest: 'docroot/assets/js/tour.min.js',
+		        dest: 'assets/js/tour.min.js',
 		    },
 		    libs: {
 		        src: [
-		            'docroot/assets/js/vendor/gsap.js', 
-		            'docroot/assets/js/vendor/smooth-scrollbar.js',
-		            'docroot/assets/js/vendor/jquery.js', 
-		            'docroot/assets/js/vendor/marquee3k.js', 
-					'docroot/assets/js/vendor/three-fix.js',
-					'docroot/assets/js/vendor/threex.windowresize.js',
-					'docroot/assets/js/vendor/simplex-noise.min.js',
-					'docroot/assets/js/vendor/EffectComposer.js',
-					'docroot/assets/js/vendor/RenderPass.js',
-					'docroot/assets/js/vendor/ShaderPass.js',
-					'docroot/assets/js/vendor/perlin.js',
-					'docroot/assets/js/vendor/Fire.js',
-					'docroot/assets/js/vendor/GlitchPass.js',
-					'docroot/assets/js/vendor/MaskPass.js',
-					'docroot/assets/js/vendor/HueSaturationShader.js',
-					'docroot/assets/js/vendor/AfterimagePass.js',
-					'docroot/assets/js/vendor/ShaderGodRays.js',
-					'docroot/assets/js/vendor/RGBShiftShader.js',
-					'docroot/assets/js/vendor/BadTVShader.js',
-					'docroot/assets/js/vendor/ColorifyShader.js',
-					'docroot/assets/js/vendor/custom.js',
-					'docroot/assets/js/vendor/shaders.js',
+		            'assets/js/vendor/gsap.js', 
+		            'assets/js/vendor/smooth-scrollbar.js',
+		            'assets/js/vendor/jquery.js', 
+		            'assets/js/vendor/marquee3k.js', 
+					'assets/js/vendor/three-fix.js',
+					'assets/js/vendor/threex.windowresize.js',
+					'assets/js/vendor/simplex-noise.min.js',
+					'assets/js/vendor/EffectComposer.js',
+					'assets/js/vendor/RenderPass.js',
+					'assets/js/vendor/ShaderPass.js',
+					'assets/js/vendor/perlin.js',
+					'assets/js/vendor/Fire.js',
+					'assets/js/vendor/GlitchPass.js',
+					'assets/js/vendor/MaskPass.js',
+					'assets/js/vendor/HueSaturationShader.js',
+					'assets/js/vendor/AfterimagePass.js',
+					'assets/js/vendor/ShaderGodRays.js',
+					'assets/js/vendor/RGBShiftShader.js',
+					'assets/js/vendor/BadTVShader.js',
+					'assets/js/vendor/ColorifyShader.js',
+					'assets/js/vendor/custom.js',
+					'assets/js/vendor/shaders.js',
 				],
-				dest: 'docroot/assets/js/libs.min.js',
+				dest: 'assets/js/libs.min.js',
 		    },
 		    countdown: {
 		        src: [
-					'docroot/assets/js/libs.min.js',
-					'docroot/assets/js/countdown.js'
+					'assets/js/libs.min.js',
+					'assets/js/countdown.js'
 				],
-				dest: 'docroot/assets/js/countdown.min.js',
+				dest: 'assets/js/countdown.min.js',
 		    }
 		}
     });
