@@ -402,18 +402,18 @@ Tunnel.prototype.render = function() {
 	window.requestAnimationFrame(this.render.bind(this));
 };
 backgrounds = [
-	'/assets/images/texture-tour-1.jpg',
-	'/assets/images/texture-tour-2.jpg',
-	'/assets/images/texture-tour-3.jpg',
-	'/assets/images/texture-tour-4.jpg',
-	'/assets/images/texture-tour-5.jpg',
-	'/assets/images/texture-tour-6.jpg',
-	'/assets/images/texture-tour-7.jpg',
-	'/assets/images/texture-tour-8.jpg',
-	'/assets/images/texture-tour-9.jpg',
-	'/assets/images/texture-tour-10.jpg',
-	'/assets/images/texture-tour-11.jpg',
-	'/assets/images/texture-tour-12.jpg'
+	'assets/images/texture-tour-1.jpg',
+	'assets/images/texture-tour-2.jpg',
+	'assets/images/texture-tour-3.jpg',
+	'assets/images/texture-tour-4.jpg',
+	'assets/images/texture-tour-5.jpg',
+	'assets/images/texture-tour-6.jpg',
+	'assets/images/texture-tour-7.jpg',
+	'assets/images/texture-tour-8.jpg',
+	'assets/images/texture-tour-9.jpg',
+	'assets/images/texture-tour-10.jpg',
+	'assets/images/texture-tour-11.jpg',
+	'assets/images/texture-tour-12.jpg'
 ]
 var randbg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
 
@@ -426,7 +426,7 @@ if(webglAvailable()){
 	texture.magFilter = THREE.LinearFilter;
 	texture.format = THREE.RGBFormat;*/
 	loader.load(randbg, function(texture){
-		var font = fontLoader.load( '/assets/fonts/Terminal%20Grotesque_Regular.json', function ( font ) {
+		var font = fontLoader.load( 'assets/fonts/Terminal%20Grotesque_Regular.json', function ( font ) {
 			window.tunnelTexture = texture;
 			ww = $(document).width();
 			wh = $(document).height();

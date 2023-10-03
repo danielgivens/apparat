@@ -21,47 +21,47 @@ function webAudioAvailable() {
   }
 }
 backgrounds = [
-	'/assets/images/test-4.jpg',
-	'/assets/images/app-textures-2.2.jpg',
-	'/assets/images/app-smudges-2.jpg',
-	'/assets/images/app-textures-2.5.jpg',
-	'/assets/images/app-textures-2.6.jpg',
-	'/assets/images/texture-tour-3.jpg',
-	'/assets/images/texture-tour-2.jpg',
-	'/assets/images/app-textures-2.10.jpg',
+	'assets/images/test-4.jpg',
+	'assets/images/app-textures-2.2.jpg',
+	'assets/images/app-smudges-2.jpg',
+	'assets/images/app-textures-2.5.jpg',
+	'assets/images/app-textures-2.6.jpg',
+	'assets/images/texture-tour-3.jpg',
+	'assets/images/texture-tour-2.jpg',
+	'assets/images/app-textures-2.10.jpg',
 ];
 textTextures = [
-	'/assets/images/app-poem.png',
-	'/assets/images/app.jpg',
-	'/assets/images/type-texture.png',
+	'assets/images/app-poem.png',
+	'assets/images/app.jpg',
+	'assets/images/type-texture.png',
 ];
 maskTextures = [
-	'/assets/images/appn.jpg',
-	'/assets/images/app-mask-8.jpg',
-	'/assets/images/app-mask-7.jpg',
-	'/assets/images/app-mask-6.jpg',
-	'/assets/images/app-mask-5.jpg',
-	'/assets/images/app-mask-4.jpg',
-	'/assets/images/app-mask-3.jpg',
-	'/assets/images/app-mask-2.jpg',
-	'/assets/images/app-mask-1.jpg',
-	'/assets/images/app-flower-mask.png',	
+	'assets/images/appn.jpg',
+	'assets/images/app-mask-8.jpg',
+	'assets/images/app-mask-7.jpg',
+	'assets/images/app-mask-6.jpg',
+	'assets/images/app-mask-5.jpg',
+	'assets/images/app-mask-4.jpg',
+	'assets/images/app-mask-3.jpg',
+	'assets/images/app-mask-2.jpg',
+	'assets/images/app-mask-1.jpg',
+	'assets/images/app-flower-mask.png',	
 ];
 
 snips = [
-	'/assets/audio/airo5.aac',
-	'/assets/audio/Branden.aac',
-	'/assets/audio/Cock_Intro.aac',
-	'/assets/audio/euca_chords.aac',
-	'/assets/audio/EQ_Break.aac',
-	'/assets/audio/Jam9.aac',
-	'/assets/audio/Heroist.aac',
-	'/assets/audio/Hokkaido.aac',
-	'/assets/audio/Laminar.aac',
-	'/assets/audio/Laminar2.aac',
-	'/assets/audio/LeierBird.aac',
-	'/assets/audio/MeansOf.aac',
-	'/assets/audio/Somechords.aac'
+	'assets/audio/airo5.aac',
+	'assets/audio/Branden.aac',
+	'assets/audio/Cock_Intro.aac',
+	'assets/audio/euca_chords.aac',
+	'assets/audio/EQ_Break.aac',
+	'assets/audio/Jam9.aac',
+	'assets/audio/Heroist.aac',
+	'assets/audio/Hokkaido.aac',
+	'assets/audio/Laminar.aac',
+	'assets/audio/Laminar2.aac',
+	'assets/audio/LeierBird.aac',
+	'assets/audio/MeansOf.aac',
+	'assets/audio/Somechords.aac'
 ];
 loadedSnips = [];
 function preloadAudio(url) {
@@ -519,7 +519,7 @@ function setupTicker(){
 	var countDown = 'LP_5';
 	deadline = "2019-03-22T00:00:00+00:00";
 	var fontLoader = new THREE.FontLoader();
-	var font = fontLoader.load( '/assets/fonts/Terminal Grotesque_Regular.json', function ( response ) {
+	var font = fontLoader.load( 'assets/fonts/Terminal Grotesque_Regular.json', function ( response ) {
 	    font2 = response;
 		updateClock();
 		var timeinterval = setInterval(updateClock, 1000);
